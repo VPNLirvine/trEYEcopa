@@ -1,0 +1,6 @@
+sub-01_task-tricopa_date-03-Apr-2023
+03-Apr-2023 10:21:45
+Run 	Trial 	StimType 	Time 	StimID 	StimName
+sub-01_task-tricopa_date-03-Apr-2023
+03-Apr-2023 10:22:54
+Run 	Trial 	StimType 	Time 	StimID 	StimName
