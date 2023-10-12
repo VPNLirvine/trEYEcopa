@@ -1,0 +1,11 @@
+# Ignore system files
+.DS_Store
+*.asv
+
+# Python optimization leftovers
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Left by RStudio
+.Rhistory
