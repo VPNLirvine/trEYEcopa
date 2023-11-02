@@ -1,50 +1,54 @@
-function frameGenerator(movieName)
-videoPath = '/Users/vpnl/Documents/MATLAB/Martin Weisberg stims'
-% videoPAth = '/Users/vpnl/Documents/MATLAB/TCconverted'
+function frameGenerator(movieName, varargin)
+% Breaks a video file down into a folder full of individual frames
+% Used by frame2movie to plot fixation data on top of the video file
+% Input movieName is just the filename of the video
+% By default, outputs to a folder called 'frames' in root directory
+% Optional second input specifies the output folder
 
+pths = specifyPaths;
+if nargin > 1
+    outdir = varargin{1};
+    assert(ischar(outdir), 'Second input must be a string/char');
+    assert(exist(outdir, 'folder'), 'Provided output path %s does not exist!', outdir);
+else
+    outdir = pths.frames;
+end
 
-% adding file extension if necessary 
-% if ~contains(movieName,'(Converted)')
-%     movieName= [movieName ' (Converted)'];
-% end
-
-% if (isempty(regexp(movieName, '.mov$','once')))
-%     movieName= [movieName '.mov'];
-% end
+if ~exist(movieName, 'file')
+    % If full path not specified, try looking here:
+    videoPath = pths.MW;
+    movieName = fullfile(videoPath, movieName);
+end
 
 % import the video file
-cd(videoPath)
 obj = VideoReader(movieName);
   
 % read the total number of frames
 frameNum = 0;
   
-% file format of the frames to be saved in
-format ='.jpg';
+format ='.jpg'; % output format
 
-% creat directory
-dest = strcat('/Users/vpnl/Documents/MATLAB/frames', '/', erase(movieName,[' (Converted).mov', '.mov', '.MOV']));
+% create directory
+[~, infname, inext] = fileparts(movieName); % assume movieName has a path
+dest = fullfile(outdir, erase([infname inext],[' (Converted).mov', '.mov', '.MOV']));
 mkdir(dest)
 
 % reading and writing the frames
-cd(dest)
 while hasFrame(obj) 
     % converting integer to string
     frameNum = frameNum + 1;
     %frameNumStr = num2str(frameNum);
 
-    % concatenating 2 strings
-    Strc = strcat(num2str(frameNum), format);
+    % Filename is just the frame number, e.g. 1.jpg
+    fname = strcat(num2str(frameNum), format);
 
     % reading in frame
     frame = readFrame(obj);
-
+    fpath = fullfile(dest, fname);
     % exporting the frames
-    imwrite(frame, Strc);   
+    imwrite(frame, fpath);   
 end
 
-fprintf("frames generated for %s and stored in %s\n",erase(movieName,' (Converted).mov'),pwd)
-cd /Users/vpnl/Documents/MATLAB/ExpAnalyze
-clear
+fprintf("%i frames generated for %s and stored in %s\n",frameNum, erase(movieName,' (Converted).mov'),dest)
 
 end
