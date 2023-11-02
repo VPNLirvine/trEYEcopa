@@ -12,6 +12,7 @@ __pycache__/
 *$py.class
 .Rhistory
 
-# Project-specific folders to ignore
+# Project-specific files and folders to ignore
 # e.g. because they include subject data
-/beh
+beh/
+*.edf
