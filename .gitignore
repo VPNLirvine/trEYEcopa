@@ -1,0 +1,17 @@
+# System files
+.DS_Store
+*.asv
+*.log
+
+# Temp files
+*~
+
+# Catch any leftovers from other languages
+__pycache__/
+*.py[cod]
+*$py.class
+.Rhistory
+
+# Project-specific folders to ignore
+# e.g. because they include subject data
+/beh
