@@ -1,9 +1,11 @@
-function frame2movie_3(Trials, trialNum)
+function frame2movie(Trials, trialNum)
+% Input Trials is the struct of imported EDF data
     frameFormat = '.jpg';
+    pths = specifyPaths(); % this exists up one folder... may not work
     movName = getStimName(Trials(trialNum));  % List of movie names
     movName = [movName '.MOV']; % heh
-%     imPath = strcat('/Users/vpnl/Documents/MATLAB/frames', '/', movLst{trialNum});
-    imPath = strcat('/Users/vpnl/Documents/MATLAB/frames', '/', movName);
+    fpath = pths.frames;
+    imPath = fullfile(fpath, movName);
     
     
     figure();
