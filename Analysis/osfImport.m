@@ -1,9 +1,8 @@
 function [Trials, Preamble] = osfImport(fileName)
 % Import edf file to matlab using OSF edfImport() and edfExtractInterestingEvents() 
 % Direct questions to A.E.
-
+pths = specifyPaths();
 try
-    basePath = pwd;
     
     if ~ischar(fileName)
         fileName = char(fileName);
@@ -12,29 +11,27 @@ try
     %% adding file extension if necessary
     if (isempty(regexp(fileName, '.edf$')))
         fileName= [fileName '.edf'];
-    end;
+    end
     
     %%
     if contains(fileName,'MW')
-        fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs/MWoutput';
+        fileLoc = pths.MWdat;
     elseif contains(fileName,'TC')
-        fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs/TCoutput';
+        fileLoc = pths.TCdat;
     elseif contains(fileName,'fix')
-        fileLoc = '/Users/vpnl/Documents/MATLAB/fixation_checks';
+        fileLoc = pths.fixdat;
     else
-        fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs';
+        fileLoc = pths.data;
     end
     
     
-    cd /Users/vpnl/Documents/MATLAB/edfImport
-    [Trials, Preamble] = edfImport([fileLoc '/' fileName], [1 1 1], '');
+    addpath(pths.edf);
+    [Trials, Preamble] = edfImport([fileLoc filesep fileName], [1 1 1], '');
     Trials = edfExtractInterestingEvents(Trials);
-    cd(basePath)
 
 catch ME
     disp(ME.identifier)
     disp(ME.message)
-    cd(basePath)
 end
 
 end
