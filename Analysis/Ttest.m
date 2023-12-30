@@ -1,15 +1,26 @@
+function Ttest(varargin)
 % Analyzes eyetracking data by reading in EDF files
+% Calculates a t-test, then generates plots
+% Optional input specifies a metric, e.g. mean fixation time
+% Hardcodes to analyze Martin & Weisberg social v mechanical data
 
 % Set variable
-metricName = 'meansacdist'; % what metric to analyze - see selectMetric
+if nargin > 0
+    metricName = varargin{1};
+else
+    % What metric to analyze - see selectMetric
+    % By default, use percent time spent fixating
+    metricName = 'scaledfixation';
+end
+fprintf(1, 'Using metric %s\n\n', metricName);
 
 % Declare constants
 T = readtable('condition list - Sheet1.csv');
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
 
-stimPath = '/Users/vpnl/Documents/MATLAB/Martin Weisberg stims';
-outputPath = '/Users/vpnl/Documents/MATLAB/ExpOutputs/MWoutput';
+stimPath = pths.MWstim;
+outputPath = pths.MWdat;
 
 stimList = dir(strcat(stimPath, '/*.mov'));
 % for idx = 1:length(fList)
@@ -142,4 +153,6 @@ for s = 1:numSubs
     end % for condition
 end % for sub
 
-end % function
+end % prepforanova
+
+end % main function
