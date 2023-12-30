@@ -1,6 +1,7 @@
 % Histograms of individual fixation durations per stimulus
-outputPath = '/Users/vpnl/Documents/MATLAB/ExpOutputs/MWoutput';
-edfList = dir(strcat(outputPath, '/*.edf'));
+pths = specifyPaths();
+outputPath = pths.MWdat;
+edfList = dir(fullfile(outputPath, '*.edf'));
 metricName = 'rawfix';
 axistxt = getGraphLabel(metricName);
 % Aggregate data
