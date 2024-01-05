@@ -1,4 +1,4 @@
-# Ignore system files
+# System files
 .DS_Store
 *.asv
 
@@ -9,3 +9,6 @@ __pycache__/
 
 # Left by RStudio
 .Rhistory
+
+# Subject data
+*.edf
