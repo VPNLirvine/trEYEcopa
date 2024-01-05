@@ -1,10 +1,22 @@
 function frame2movie_3(Trials, trialNum)
+    % Plays a stimulus video with eyetracking data overlaid
+    % Requires having run frameGenerator on the corresponding stimulus
+    % Input Trials is the output of edfImport -  a single subject's data
+    % trialNum is the trial number to view (e.g. 1, 2, etc)
+
+    pths = specifyPaths();
     frameFormat = '.jpg';
+
+    % Get location of the stimulus
     movName = getStimName(Trials(trialNum));  % List of movie names
     movName = [movName '.MOV']; % heh
-%     imPath = strcat('/Users/vpnl/Documents/MATLAB/frames', '/', movLst{trialNum});
-    imPath = strcat('/Users/vpnl/Documents/MATLAB/frames', '/', movName);
+    imPath = fullfile(pths.frames, movName);
     
+    % Verify the frames we want to draw actually exist
+    if ~exist(imPath, 'dir')
+        fprintf(1, 'Must extract video frames first...\n');
+        frameGenerator(movName);
+    end
     
     figure();
     ax = gca;  % Get the current axes
@@ -12,7 +24,7 @@ function frame2movie_3(Trials, trialNum)
     ax.Units = 'pixels';  % Set the units of the axes to pixels
     
     % Load the first frame and get its dimensions
-    imhndl = imread(strcat(imPath, '/', '1.jpg'));
+    imhndl = imread(fullfile(impath, '1.jpg'));
     [imh, imw, ~] = size(imhndl);
     scVec = get(0, 'ScreenSize');  % Get the screen size
     scw = scVec(3);
@@ -68,5 +80,4 @@ function frame2movie_3(Trials, trialNum)
     
     toc  % Display the elapsed time
     close all  % Close all figures
-    clear  % Clear variables
 end

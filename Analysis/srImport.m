@@ -5,20 +5,23 @@ function Trials = srImport(fileName)
 %% adding file extension if necessary 
 if (isempty(regexp(fileName, '.edf$')))
   fileName= [fileName '.edf'];
-end;
+end
 
-%%
+pths = specifyPaths();
+
+% Guess file location based on subject prefix
 if contains(fileName,'MW')
-    fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs/MWoutput';
+    fileLoc = pths.MWdat;
 elseif contains(fileName,'TC')
-    fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs/TCoutput';
+    fileLoc = pths.TCdat;
 else
-    fileLoc = '/Users/vpnl/Documents/MATLAB/ExpOutputs';
+    fileLoc = pths.data;
+end
 
-    
-
-cd /Users/vpnl/Documents/MATLAB/edf_alt
+% Extract data
+cd(pths.edfalt)
 Trials = edfmex([fileLoc '/' fileName]);
 % Trials = edfExtractInterestingEvents(Trials);
-cd /Users/vpnl/Documents/MATLAB/ExpAnalyze
+% cd /Users/vpnl/Documents/MATLAB/ExpAnalyze
+cd(pths.analysis)
 end
