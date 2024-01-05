@@ -1,10 +1,10 @@
 function plotCrossFixations(TrialsCellArray)
-
+pths = specifyPaths();
 if ~iscell(TrialsCellArray)
     TrialsCellArray = {TrialsCellArray};
 end
 
-imPath = strcat('/Users/vpnl/Documents/MATLAB/fixation_checks');
+imPath = pths.fixdat;
 imFormat = '.png';
 
 figure()
@@ -26,7 +26,7 @@ pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];
 image([pos(1), pos(2)], [pos(3), pos(4)], imhndl)
 hold on
 
-% Contorl color of the output
+% Control color of the output
 Color = ["k","m","g"];
 
 % Iterate over experiments
