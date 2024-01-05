@@ -1,3 +1,4 @@
+## Generic exclusions
 # System files
 .DS_Store
 *.asv
@@ -10,5 +11,9 @@ __pycache__/
 # Left by RStudio
 .Rhistory
 
+## Project-specific exclusions
 # Subject data
 *.edf
+
+# Stimuli
+*.mov
