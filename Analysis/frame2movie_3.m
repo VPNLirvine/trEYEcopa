@@ -4,7 +4,7 @@ function frame2movie_3(Trials, trialNum)
     % Input Trials is the output of edfImport -  a single subject's data
     % trialNum is the trial number to view (e.g. 1, 2, etc)
 
-    pths = specifyPaths();
+    pths = specifyPaths('..');
     frameFormat = '.jpg';
 
     % Get location of the stimulus
