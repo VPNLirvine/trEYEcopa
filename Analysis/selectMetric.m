@@ -30,10 +30,13 @@ switch metricName
         data = fixOutliers(data); 
         data = sum(data);
         duration = double(edfDat.Header.duration);
-        output = data / duration;
-        if output > 1
-            fprintf(1,'STOP!')
+        
+        if duration == 0
+            % This does actually happen for some reason
+            duration = double(edfDat.Header.endtime - edfDat.Header.starttime);
         end
+
+        output = data / duration;
     case 'meanfix'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i);
         data = fixOutliers(data);
