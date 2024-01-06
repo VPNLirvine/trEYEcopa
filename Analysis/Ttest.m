@@ -18,7 +18,7 @@ fprintf(1, 'Using metric %s\n\n', metricName);
 T = readtable('condition list - Sheet1.csv');
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
-pths = specifyPaths();
+pths = specifyPaths('..');
 stimPath = pths.MWstim;
 outputPath = pths.MWdat;
 
