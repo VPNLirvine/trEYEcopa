@@ -2,6 +2,7 @@
 # System files
 .DS_Store
 *.asv
+*~
 
 # Python optimization leftovers
 __pycache__/
