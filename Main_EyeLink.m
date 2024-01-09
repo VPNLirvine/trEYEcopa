@@ -1,4 +1,4 @@
-function EyeLink_SimpleVideo(screenNumber, debugmode)
+function Main_EyeLink(screenNumber, debugmode)
 % Simple video demo with EyeLink integration and animated calibration / drift-check/correction targets.
 % In each trial eye movements are recorded while a video stimulus is presented on the screen.
 % Each trial ends when the space bar is pressed or the video stops playing. A different drift-check/correction
@@ -7,7 +7,7 @@ function EyeLink_SimpleVideo(screenNumber, debugmode)
 % Illustrates how a video file can be added for trial play back in Data Viewer's "Trial Play Back Animation" view. 
 %
 % Usage:
-% Eyelink_SimpleVideo(screenNumber)
+% Main_EyeLink(screenNumber)
 % 
 % screenNumber is an optional parameter which can be used to pass a specific value to Screen('OpenWindow', ...)
 % If screenNumber is not specified, or if isempty(screenNumber) then the default:
@@ -49,12 +49,8 @@ try
 %     subID = num2str(input("What is subject ID? MW_"));
 %     [stimPath, outputPath, stimList, def] = SimpleVideo_List(subID);
 %     basePath = pwd;
-    stimPath = '/Users/vpnl/Documents/MATLAB/Martin Weisberg stims';
-    outputPath = '/Users/vpnl/Documents/MATLAB/ExpOutputs/MWoutput';
-    def = {'MW_##'};
-    subID = def;
-    
-    basePath = pwd;
+    pths = specifyPaths();
+    basePath = pths.base;
     
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
@@ -66,19 +62,23 @@ try
     if status < 1 % If EyeLink not connected
         dummymode = 1; 
     end
-    
-    % Open dialog box for EyeLink Data file name entry. File name up to 8 characters
-    prompt = {'Enter EDF file name (up to 8 characters)'};
+        % Open dialog box for EyeLink Data file name entry. File name up to 8 characters
+    prompt = {'Enter subject number', 'TriCOPA (1) or Martin & Weisberg (2)?'};
     dlg_title = 'Create EDF file';
-    % def = {'demo'}; % Create a default edf file name  AE: def is defined above so comment it out here
+    def = {'##', '1'};
     answer = inputdlg(prompt, dlg_title, 1, def); % Prompt for new EDF file name    
     % Print some text in Matlab's Command Window if a file name has not been entered
     if  isempty(answer)
         fprintf('Session cancelled by user\n')
         cleanup; % Abort experiment (see cleanup function below)
         return
-    end    
-    edfFile = answer{1}; % Save file name to a variable    
+    end
+    
+    % Parse input
+    [stimPath, outputPath, vidList, prefix] = stimFinder(answer{1}, answer{2});
+    subID = strcat(prefix, subNum);
+    
+    edfFile = subID; % Save file name to a variable
     % Print some text in Matlab's Command Window if file name is longer than 8 characters
     if length(edfFile) > 8
         fprintf('Filename needs to be no more than 8 characters long (letters, numbers and underscores only)\n');
@@ -211,7 +211,6 @@ try
     
     driftVidList = {'dotsGrey.mov' 'wheelGrey.mov'};% Provide drift-check video file list for 2 trials
     % vidList = {'expected.mov' 'disappear.mov'};% Provide trial video file list for 2 trials
-    vidList = RandomMS(edfFile);% Provide trial video file list
     
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
     for i = 1:length(vidList)
@@ -225,9 +224,11 @@ try
         
         % Open movie file:
         movieName = char(vidList(i));
-        % moviePath = [ 'C:\Users\Envy\Documents\MATLAB\TriCOPA_eyetracking\stims' '/' movieName ];
-        moviePath = [ stimPath '/' movieName '.MOV'];
-        
+        % Check if movieName has extension already
+        if ~strcmpi(movieName(end-3:end), '.MOV')
+            movieName = strcat(movieName, '.MOV');
+        end
+        moviePath = fullfile(stimPathmovieName);
         [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
         
         % STEP 5.1: START TRIAL; SHOW TRIAL INFO ON HOST PC; SHOW BACKDROP IMAGE AND/OR DRAW FEEDBACK GRAPHICS ON HOST PC; DRIFT-CHECK/CORRECTION

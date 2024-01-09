@@ -1,6 +1,7 @@
 % Main code for an eyetracking TriCOPA experiment
 % built by Sajjad on top of PhysSoc's main design
 % modified by Emily and others to be adapted to eye tracking
+% ...reviewed by Brandon, this has zero eyetracking guys come on
 
 
 %%%%%% Initialize %%%%%%%
@@ -193,7 +194,8 @@ for trial = 1:numTrials
     trialStart = GetSecs;
     Screen('PlayMovie', movie, 1);
     
-    while GetSecs - trialStart < movieDur
+%     while GetSecs - trialStart < movieDur
+    while 1
         % Wait for next movie frame, retrieve texture handle to it
         tex = Screen('GetMovieImage', w, movie);
 
