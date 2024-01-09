@@ -45,14 +45,14 @@ BkgdColor = 255;
 TextColor = 0;
 
 ITI = 1; % minimum seconds
-
-BasePath = pwd;
+pths = specifyPaths();
+BasePath = pths.base;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up movie files
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-TriCOPAPath = strcat(BasePath, '/stims');
+TriCOPAPath = strcat(pths.TCstim);
 fList = dir(strcat(TriCOPAPath, '/*.mov'));
 
 numTrials = size(fList, 1);
