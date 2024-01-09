@@ -15,7 +15,7 @@ if ~isempty(flist)
     fprintf(1, 'Analyzing %i videos:\n', length(flist));
     
     for i = 1:length(flist)
-        fname = flist(1).name;
+        fname = flist(i).name;
         floc = fullfile(inputDir, fname);
         
         fprintf(1, '\t%i of %i: %s... ', i, length(flist), fname);
