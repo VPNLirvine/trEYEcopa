@@ -15,7 +15,7 @@ function Main_EyeLink(screenNumber, debugmode)
 % will be used.
 
 % Bring the Command Window to the front if it is already open
-if ~IsOctave; commandwindow; end;
+if ~IsOctave; commandwindow; end
 
 % Use default screenNumber if none specified
 if (nargin < 1)
@@ -103,7 +103,7 @@ try
     [ver, versionstring] = Eyelink('GetTrackerVersion');
     if dummymode == 0 % If connected to EyeLink
         % Extract software version number. 
-        [r1 vnumcell] = regexp(versionstring,'.*?(\d)\.\d*?','Match','Tokens'); % Extract EL version before decimal point
+        [r1, vnumcell] = regexp(versionstring,'.*?(\d)\.\d*?','Match','Tokens'); % Extract EL version before decimal point
         ELsoftwareVersion = str2double(vnumcell{1}{1}); % Returns 1 for EyeLink I, 2 for EyeLink II, 3/4 for EyeLink 1K, 5 for EyeLink 1KPlus, 6 for Portable Duo           
         % Print some text in Matlab's Command Window
         fprintf('Running experiment on %s version %d\n', versionstring, ver );
@@ -181,7 +181,7 @@ try
     el.calTargetType = 'video';
     calMovieName = ('calibVid.mov');
     
-    el.calAnimationTargetFilename = [pwd '/' calMovieName];
+    el.calAnimationTargetFilename = fullfile(basePath, calMovieName);
     el.calAnimationResetOnTargetMove = true; % false by default, set to true to rewind/replay video from start every time target moves
     el.calAnimationAudioVolume = 0.0; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
     
@@ -218,7 +218,7 @@ try
         % Change animated calibration target path for drift-check/correction
         % calMovieName = char(driftVidList(i));
         calMovieName = char(driftVidList(1)); % changed by AE so that it can accomodate for more than 2 videos
-        el.calAnimationTargetFilename = [pwd '/' calMovieName];       
+        el.calAnimationTargetFilename = fullfile(basePath, calMovieName);       
         % You must call this function to apply the changes made to the el structure above
         EyelinkUpdateDefaults(el);
         
@@ -388,7 +388,7 @@ end
         Eyelink('Shutdown'); % Close EyeLink connection
         ListenChar(0); % Restore keyboard output to Matlab
         ShowCursor; % Restore mouse cursor
-        if ~IsOctave; commandwindow; end; % Bring Command Window to front
+        if ~IsOctave; commandwindow; end % Bring Command Window to front
     end
 
 % Function for transferring copy of EDF file to the experiment folder on Display PC.

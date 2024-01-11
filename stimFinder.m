@@ -9,7 +9,7 @@ switch in
         outputPath = pths.TCdat; 
         prefix = 'TC_';
         
-%         stimList = ???(subID); % need to write a new function
+        stimList = RandomTC(subID);
     case 2
         % Martin & Weisberg
         stimPath = pths.MWstim;

@@ -1,7 +1,8 @@
 function NewOrd = RandomMS(subID)
 rng('default')
-
-T = readtable('condition list - Sheet1.csv');
+pths = specifyPaths();
+csvPath = fullfile(pths.analysis, 'condition list - Sheet1.csv');
+T = readtable(csvPath);
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
 
@@ -9,10 +10,10 @@ mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
 % prefix = 'MW_';
 % newsubID = erase(subID, prefix);
 newsubID = strsplit(subID, '_'); % splits 'sub_01' to {sub} and {01}
-newsubID = str2num(newsubID{2});
-rng(newsubID); % Need input
+newsubID = str2num(newsubID{2}); % convert the number to numerical format
+rng(newsubID); % Seed RNG based on subject ID
 
-
+% Determine stimulus order
 Newsoc = socCellArr(randperm(length(socCellArr)));
 Newmec = mecCellArr(randperm(length(mecCellArr)));
 NewOrd = cell(1,length(Newsoc)+length(Newmec));
