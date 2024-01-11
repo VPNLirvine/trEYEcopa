@@ -228,7 +228,7 @@ try
         if ~strcmpi(movieName(end-3:end), '.MOV')
             movieName = strcat(movieName, '.MOV');
         end
-        moviePath = fullfile(stimPathmovieName);
+        moviePath = fullfile(stimPath, movieName);
         [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
         
         % STEP 5.1: START TRIAL; SHOW TRIAL INFO ON HOST PC; SHOW BACKDROP IMAGE AND/OR DRAW FEEDBACK GRAPHICS ON HOST PC; DRIFT-CHECK/CORRECTION
