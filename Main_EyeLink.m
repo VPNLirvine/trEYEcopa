@@ -149,7 +149,7 @@ try
     end
     
     
-    Screen('Preference', 'SkipSyncTests', 1);
+%     Screen('Preference', 'SkipSyncTests', 1); % come on we just switched
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
@@ -169,15 +169,15 @@ try
     
     % Set calibration beeps (0 = sound off, 1 = sound on)
     % Setting beeps to off (0) for video targets
-    el.targetbeep = 0;  % sound a beep when a target is presented
-    el.feedbackbeep = 1;  % sound a beep after calibration or drift check/correction
+    el.targetbeep = 1;  % sound a beep when a target is presented
+    el.feedbackbeep = 0;  % sound a beep after calibration or drift check/correction
     
     % Required for macOS Catalina users to disable audio
     % playback with animated calibration targets, otherwise causing
     % freezing during playback.
     el.calAnimationOpenSpecialFlags1 = spcf1;
 %     el.calAnimationResetOnTargetMove = true; % false by default, set to true to rewind/replay video from start every time target moves
-    el.calAnimationAudioVolume = 0.4; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
+    el.calAnimationAudioVolume = 0.1; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
     
     % You must call this function to apply the changes made to the el structure above
     EyelinkUpdateDefaults(el);
