@@ -204,7 +204,13 @@ try
     %% STEP 5: TRIAL LOOP.
     
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
-    for i = 1:length(vidList)
+    if debugmode
+        numTrials = 4;
+    else
+        numTrials = length(vidList);
+    end
+    
+    for i = 1:numTrials
 
         % Open movie file:
         movieName = char(vidList(i));
