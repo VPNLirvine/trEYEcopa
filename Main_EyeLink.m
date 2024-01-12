@@ -188,7 +188,7 @@ try
     % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Pre-trial Message Commands
     Eyelink('Message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, width-1, height-1);    
     % Set number of calibration/validation dots and spread: horizontal-only(H) or horizontal-vertical(HV) as H3, HV3, HV5, HV9 or HV13
-    Eyelink('Command', 'calibration_type = HV5'); % horizontal-vertical 5-points
+    Eyelink('Command', 'calibration_type = HV9'); % horizontal-vertical 9-points
     % Allow a supported EyeLink Host PC button box to accept calibration or drift-check/correction targets via button 5
     Eyelink('Command', 'button_function 5 "accept_target_fixation"');
    % Hide mouse cursor
