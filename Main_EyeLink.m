@@ -170,20 +170,14 @@ try
     % Set calibration beeps (0 = sound off, 1 = sound on)
     % Setting beeps to off (0) for video targets
     el.targetbeep = 0;  % sound a beep when a target is presented
-    el.feedbackbeep = 0;  % sound a beep after calibration or drift check/correction
+    el.feedbackbeep = 1;  % sound a beep after calibration or drift check/correction
     
     % Required for macOS Catalina users to disable audio
     % playback with animated calibration targets, otherwise causing
     % freezing during playback.
     el.calAnimationOpenSpecialFlags1 = spcf1;
-    
-    % Configure animated calibration target path and properties
-    el.calTargetType = 'video';
-    calMovieName = ('calibVid.mov');
-    
-    el.calAnimationTargetFilename = fullfile(basePath, calMovieName);
-    el.calAnimationResetOnTargetMove = true; % false by default, set to true to rewind/replay video from start every time target moves
-    el.calAnimationAudioVolume = 0.0; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
+%     el.calAnimationResetOnTargetMove = true; % false by default, set to true to rewind/replay video from start every time target moves
+    el.calAnimationAudioVolume = 0.4; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
     
     % You must call this function to apply the changes made to the el structure above
     EyelinkUpdateDefaults(el);
@@ -209,19 +203,9 @@ try
     
     %% STEP 5: TRIAL LOOP.
     
-    driftVidList = {'dotsGrey.mov' 'wheelGrey.mov'};% Provide drift-check video file list for 2 trials
-    % vidList = {'expected.mov' 'disappear.mov'};% Provide trial video file list for 2 trials
-    
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
     for i = 1:length(vidList)
-           
-        % Change animated calibration target path for drift-check/correction
-        % calMovieName = char(driftVidList(i));
-        calMovieName = char(driftVidList(1)); % changed by AE so that it can accomodate for more than 2 videos
-        el.calAnimationTargetFilename = fullfile(basePath, calMovieName);       
-        % You must call this function to apply the changes made to the el structure above
-        EyelinkUpdateDefaults(el);
-        
+
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
