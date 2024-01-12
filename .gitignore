@@ -2,6 +2,7 @@
 # System files
 .DS_Store
 *.asv
+*~
 
 # Python optimization leftovers
 __pycache__/
@@ -14,6 +15,7 @@ __pycache__/
 ## Project-specific exclusions
 # Subject data
 *.edf
+/beh/*.txt
 
 # Stimuli
 *.mov

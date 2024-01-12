@@ -1,6 +1,7 @@
 % Main code for an eyetracking TriCOPA experiment
 % built by Sajjad on top of PhysSoc's main design
 % modified by Emily and others to be adapted to eye tracking
+% ...reviewed by Brandon, this has zero eyetracking guys come on
 
 
 %%%%%% Initialize %%%%%%%
@@ -45,14 +46,14 @@ BkgdColor = 255;
 TextColor = 0;
 
 ITI = 1; % minimum seconds
-
-BasePath = pwd;
+pths = specifyPaths();
+BasePath = pths.base;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up movie files
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-TriCOPAPath = strcat(BasePath, '/stims');
+TriCOPAPath = strcat(pths.TCstim);
 fList = dir(strcat(TriCOPAPath, '/*.mov'));
 
 numTrials = size(fList, 1);
@@ -193,7 +194,8 @@ for trial = 1:numTrials
     trialStart = GetSecs;
     Screen('PlayMovie', movie, 1);
     
-    while GetSecs - trialStart < movieDur
+%     while GetSecs - trialStart < movieDur
+    while 1
         % Wait for next movie frame, retrieve texture handle to it
         tex = Screen('GetMovieImage', w, movie);
 
