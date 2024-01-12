@@ -76,7 +76,7 @@ try
     
     % Parse input
     [stimPath, outputPath, vidList, prefix] = stimFinder(answer{1}, answer{2});
-    subID = strcat(prefix, subNum);
+    subID = strcat(prefix, answer{1});
     
     edfFile = subID; % Save file name to a variable
     % Print some text in Matlab's Command Window if file name is longer than 8 characters

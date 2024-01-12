@@ -6,11 +6,7 @@ T = readtable(csvPath);
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
 
-% subID = 'MW_17'
-% prefix = 'MW_';
-% newsubID = erase(subID, prefix);
-newsubID = strsplit(subID, '_'); % splits 'sub_01' to {sub} and {01}
-newsubID = str2num(newsubID{2}); % convert the number to numerical format
+newsubID = str2double(subID); % convert the number to numerical format
 rng(newsubID); % Seed RNG based on subject ID
 
 % Determine stimulus order

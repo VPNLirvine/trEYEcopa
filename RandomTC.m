@@ -8,16 +8,15 @@ function NewOrd = RandomTC(subID)
 rng('default')
 
 pths = specifyPaths();
-csvPath = fullfile(pths.TCstim, 'stimData.csv');
+csvPath = fullfile(pths.TCstim, 'normal', 'stimData.csv');
 T = readtable(csvPath);
 
-stimNames = T.NAME(:);
+stimNames = T.movie(:);
 numStims = length(stimNames);
 numFlipped = floor(numStims / 2);
 
 
-newsubID = strsplit(subID, '_'); % splits 'sub_01' to {sub} and {01}
-newsubID = str2num(newsubID{2}); % convert the number to numerical format
+newsubID = str2num(subID); % convert the number to numerical format
 rng(newsubID); % Seed RNG based on subject ID
 
 % Shuffle the list, split 50/50, and label
@@ -29,7 +28,11 @@ for i = 1:numStims
     if i <= numFlipped
         NewOrd(i) = fullfile('normal', firstShuffle(i));
     else
-        NewOrd(i) = fullfile('flipped', ['f_' firstShuffle(i)]);
+        try
+            NewOrd{i} = fullfile('flipped', ['f_' firstShuffle{i}]);
+        catch ME
+            rethrow ME
+        end
     end
 end
 
