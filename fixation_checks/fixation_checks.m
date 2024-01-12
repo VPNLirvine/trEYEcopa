@@ -1,10 +1,10 @@
-function EyeLink_SimplePicture(screenNumber)
+function fixationTest(screenNumber)
 % A simple EyeLink integration demo that records eye movements passively 
 % while an image is presented on the screen. Each trial ends when the
 % space bar or a button is pressed.
 %
 % Usage:
-% Eyelink_SimplePicture(screenNumber)
+% fixationTest(screenNumber)
 %
 % screenNumber is an optional parameter which can be used to pass a specific value to Screen('OpenWindow', ...)
 % If screenNumber is not specified, or if isempty(screenNumber) then the default:

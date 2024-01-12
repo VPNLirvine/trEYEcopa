@@ -1,4 +1,4 @@
-function frame2movie_3(Trials, trialNum)
+function frame2movie(Trials, trialNum)
     % Plays a stimulus video with eyetracking data overlaid
     % Requires having run frameGenerator on the corresponding stimulus
     % Input Trials is the output of edfImport -  a single subject's data
