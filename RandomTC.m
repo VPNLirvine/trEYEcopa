@@ -27,9 +27,9 @@ NewOrd = cell(1,length(firstShuffle)); % initialize output
 % Write a path into the filename
 for i = 1:numStims
     if i <= numFlipped
-        NewOrd(i) = fullfile('original', firstShuffle(i));
+        NewOrd(i) = fullfile('normal', firstShuffle(i));
     else
-        NewOrd(i) = fullfile('flipped', firstShuffle(i));
+        NewOrd(i) = fullfile('flipped', ['f_' firstShuffle(i)]);
     end
 end
 
