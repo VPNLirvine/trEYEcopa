@@ -1,10 +1,7 @@
 function Main_EyeLink(screenNumber, debugmode)
-% Simple video demo with EyeLink integration and animated calibration / drift-check/correction targets.
+% Video playback with EyeLink integration and animated calibration / drift-check/correction targets.
 % In each trial eye movements are recorded while a video stimulus is presented on the screen.
-% Each trial ends when the space bar is pressed or the video stops playing. A different drift-check/correction
-% animated target is used in each of the 2 trials.
-%
-% Illustrates how a video file can be added for trial play back in Data Viewer's "Trial Play Back Animation" view. 
+% Each trial ends when the space bar is pressed or the video stops playing.
 %
 % Usage:
 % Main_EyeLink(screenNumber)
@@ -26,7 +23,7 @@ if (nargin < 2)
 else
     debugmode = logical(debugmode);
 end
-% Check if Psychtoolbox is conigured for video presentation:
+% Check if Psychtoolbox is configured for video presentation:
 AssertOpenGL;
 if IsWin && ~IsOctave && psychusejava('jvm')
     fprintf('Running on Matlab for Microsoft Windows, with JVM enabled!\n');
@@ -52,6 +49,9 @@ try
     pths = specifyPaths();
     basePath = pths.base;
     
+    % Set some defaults
+    panic = false; % used to terminate early
+    response = -1; % 0 causes panic, anything else is a button
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
     
@@ -204,6 +204,7 @@ try
     %% STEP 5: TRIAL LOOP.
     
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
+    deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
     if debugmode
         numTrials = 4;
     else
@@ -211,7 +212,7 @@ try
     end
     
     for i = 1:numTrials
-
+        response = -1; % reset on each trial
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
@@ -303,12 +304,17 @@ try
             Eyelink('Message', '%d !V VFRAME %d %d %d %s', 0, frameNum, round(width/2-Movx/2), round(height/2-Movy/2), movieName);
             % End trial if space bar is pressed
             [~, kbSecs, keyCode] = KbCheck;
-            if keyCode(spaceBar)
+            if keyCode(spaceBar) || keyCode(deleteKey)
                 % Write message to EDF file to mark the space bar press time
                 Eyelink('Message', 'KEY_PRESSED');
                 timeOut = 'no';
                 % Release texture:
                 Screen('Close', tex);
+                if keyCode(deleteKey)
+                    % Finish calculating things for this trial,
+                    % then terminate the whole experiment
+                    panic = true;
+                end
                 break;
             end
             Screen('Close', tex); % Release texture if no key is pressed
@@ -349,6 +355,15 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Defining the Start and End of a Trial
         Eyelink('Message', 'TRIAL_RESULT 0');
         WaitSecs(0.01); % Allow some time before ending the trial
+
+        if panic
+            % Exit trial loop, but still export files
+            break
+        else
+            % Code for response screen goes here?
+        end
+        
+
     end % End trial loop
     
     
@@ -415,4 +430,5 @@ end
             psychrethrow(psychlasterror);
         end
     end
+    
 end
