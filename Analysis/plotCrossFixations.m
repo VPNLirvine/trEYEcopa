@@ -4,7 +4,7 @@ if ~iscell(TrialsCellArray)
     TrialsCellArray = {TrialsCellArray};
 end
 
-imPath = pths.fixdat;
+imPath = pths.fixcheck;
 imFormat = '.png';
 
 figure()
