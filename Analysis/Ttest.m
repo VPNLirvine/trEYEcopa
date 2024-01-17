@@ -114,6 +114,8 @@ fprintf("h = %d\n",h)
 fprintf("p = %f\n",p)
 disp(stats)
 
+boxPlot2; % a script that generates figures
+
 function [dataMatrix, subList, condList, trialList] = prepforanova(inStruct)
 % Take a structure with fixation data for separate conditions, per subject
 % Export one long data matrix with columns for condition labels
