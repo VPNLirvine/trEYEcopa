@@ -244,9 +244,28 @@ try
         numTrials = length(vidList);
     end
     
+    
+    %% STEP 4C: Display instructions before experiment starts
+    
+    iText = sprintf(['You are about to watch a series of 100 short video clips,\n'...
+    'depicting some interacting shapes. After each video, \n' ...
+    'you will be asked how well you understood the interaction\n'...
+    'on a scale of 1 (low) to 5 (high).\n'...
+    'Press the corresponding button on the keyboard as fast as you can.\n\n\n' ...
+    'Please press the spacebar when you are ready to begin.']);
+    Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+    DrawFormattedText(window, iText, 'center', 'center', TextColor);
+    Screen('Flip', window);
+    begin = false;
+    FlushEvents('keyDown'); %get rid of any old keypresses
+    while ~begin
+        [~,ExptStart,buttonPress] = KbCheck();
+        if ismember(spaceBar, find(buttonPress))
+            begin = true;
+        end
+    end
     %% STEP 5: TRIAL LOOP.
 
-    ExptStart = GetSecs;
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
