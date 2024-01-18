@@ -42,16 +42,25 @@ if IsOSX
     end
 end
 try
-    %% STEP 0: This section tailors the code to work with MW videos
-%     subID = num2str(input("What is subject ID? MW_"));
-%     [stimPath, outputPath, stimList, def] = SimpleVideo_List(subID);
-%     basePath = pwd;
+    %% STEP 0: EXPERIMENT-SPECIFIC CUSTOMIZATIONS
     pths = specifyPaths();
     basePath = pths.base;
     
     % Set some defaults
     panic = false; % used to terminate early
     response = -1; % 0 causes panic, anything else is a button
+    lastPressed = -1;
+    maxWait = 4; % max duration to wait for a response
+%     escKey = KbName('ESCAPE');
+    keyList(1) = KbName('1!');
+    keyList(2) = KbName('2@');
+    keyList(3) = KbName('3#');
+    keyList(4) = KbName('4$');
+    keyList(5) = KbName('5%');
+
+    qText = 'Pick a number 1-5';
+    respChoices = {'1', '2', '3', '4', '5'}; % not used yet
+    numResps = length(respChoices);
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
     
@@ -148,8 +157,6 @@ try
         Screen('Preference', 'SkipSyncTests',0); % allow test for real run
     end
     
-    
-%     Screen('Preference', 'SkipSyncTests', 1); % come on we just switched
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
@@ -201,6 +208,18 @@ try
     EyelinkDoTrackerSetup(el);
     
     
+    %% STEP 4B: some final setup before main trial loop
+    
+    ScreenBkgd = el.backgroundcolour; % mid gray
+    TextColor = el.msgfontcolour; % black
+    ChoiceColor = [255 255 255]; % white
+    % Calculate a gap size: come in 10% on both ends (or 80% of total width),
+    % then if you have e.g. 3 items, you need the size of 2 gaps. So n-1. 
+    respOffset = round((.8 * width) / (numResps - 1));
+    qHeight = .25 * height;
+    wRect = [0 0 width height];
+    
+    Screen('TextSize', w, 0.05 * height); % set global font size
     %% STEP 5: TRIAL LOOP.
     
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -360,7 +379,11 @@ try
             % Exit trial loop, but still export files
             break
         else
-            % Code for response screen goes here?
+            % Code for response screen goes here
+            getResp;
+            if panic
+                break
+            end
         end
         
 
@@ -428,6 +451,65 @@ end
             fprintf('Problem receiving data file ''%s''\n', edfFile);
             cleanup;
             psychrethrow(psychlasterror);
+        end
+    end
+
+% Function for collecting responses after watching a video
+% Asks for a button response 1-5 and gives visual feedback.
+% Continuously updates the response until a set timer runs out.
+    function getResp
+        
+        Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+        DrawFormattedText(window, qText, 'center', qHeight, TextColor);
+        % Dynamically place a certain number of response options
+        for c = 1:numResps
+            % NOT PERFECT - debug
+            offset = (.1 * width) + (respOffset * (c-1)); % 
+            if c == response
+                DrawFormattedText(window, respChoices{c},  offset, 'center', ChoiceColor);
+            else
+                DrawFormattedText(window, respChoices{c}, offset, 'center', TextColor);
+            end
+        end
+
+        screenFlipR = Screen('Flip', window); 
+
+        % BEGIN
+        while GetSecs <= screenFlipR + maxWait
+            % poll for input
+            FlushEvents('keyDown'); %get rid of any old keypresses
+            [~, pressedSecs, keypressCode] = KbCheck();
+            pressedKeys = find(keypressCode);
+            % If the panic key is pressed, terminate
+            if ismember(deleteKey, pressedKeys)
+                panic = true;
+                break
+            end
+            
+            % See if any of our response buttons were pressed
+            if any(ismember(pressedKeys,keyList))
+                response = find(pressedKeys(1) == keyList); % in case of multiples
+            end
+            
+            % Compare current button to the last one pressed
+            % and only bother to update the screen if there's a change
+            if response ~= lastPressed
+                % update display
+                DrawFormattedText(window, qText, 'center', qHeight, TextColor);
+                for c = 1:numResps
+                    % NOT PERFECT - debug
+                    offset = (.1 * width) + (respOffset * (c-1));
+                    if c == response
+                        DrawFormattedText(window, respChoices{c}, offset, 'center', ChoiceColor);
+                    else
+                        DrawFormattedText(window, respChoices{c}, offset, 'center', TextColor);
+                    end
+                end
+                Screen('Flip', window);
+                lastPressed = response;
+                % restart - allow updating the response until the timeout
+            end
+
         end
     end
     
