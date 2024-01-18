@@ -22,9 +22,13 @@ Screen('Flip', w);
 
 
 %%%%%%%%% for debugging -- remove this for expt
+escKey = KbName('ESCAPE');
 FlushEvents('keyDown'); %get rid of any old keypresses
 [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
-while keyCode(34) == 0
+maxWait = 10;
+
+start = GetSecs;
+while keyCode(escKey) == 0 && GetSecs - start < maxWait
      [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
 end
 Screen('CloseAll')

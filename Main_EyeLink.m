@@ -1,10 +1,7 @@
 function Main_EyeLink(screenNumber, debugmode)
-% Simple video demo with EyeLink integration and animated calibration / drift-check/correction targets.
+% Video playback with EyeLink integration and animated calibration / drift-check/correction targets.
 % In each trial eye movements are recorded while a video stimulus is presented on the screen.
-% Each trial ends when the space bar is pressed or the video stops playing. A different drift-check/correction
-% animated target is used in each of the 2 trials.
-%
-% Illustrates how a video file can be added for trial play back in Data Viewer's "Trial Play Back Animation" view. 
+% Each trial ends when the space bar is pressed or the video stops playing.
 %
 % Usage:
 % Main_EyeLink(screenNumber)
@@ -26,7 +23,7 @@ if (nargin < 2)
 else
     debugmode = logical(debugmode);
 end
-% Check if Psychtoolbox is conigured for video presentation:
+% Check if Psychtoolbox is configured for video presentation:
 AssertOpenGL;
 if IsWin && ~IsOctave && psychusejava('jvm')
     fprintf('Running on Matlab for Microsoft Windows, with JVM enabled!\n');
@@ -45,13 +42,25 @@ if IsOSX
     end
 end
 try
-    %% STEP 0: This section tailors the code to work with MW videos
-%     subID = num2str(input("What is subject ID? MW_"));
-%     [stimPath, outputPath, stimList, def] = SimpleVideo_List(subID);
-%     basePath = pwd;
+    %% STEP 0: EXPERIMENT-SPECIFIC CUSTOMIZATIONS
     pths = specifyPaths();
     basePath = pths.base;
     
+    % Set some defaults
+    panic = false; % used to terminate early
+    response = -1; % 0 causes panic, anything else is a button
+    lastPressed = -1;
+    maxWait = 4; % max duration to wait for a response
+%     escKey = KbName('ESCAPE');
+    keyList(1) = KbName('1!');
+    keyList(2) = KbName('2@');
+    keyList(3) = KbName('3#');
+    keyList(4) = KbName('4$');
+    keyList(5) = KbName('5%');
+
+    qText = 'Pick a number 1-5';
+    respChoices = {'1', '2', '3', '4', '5'}; % not used yet
+    numResps = length(respChoices);
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
     
@@ -148,8 +157,6 @@ try
         Screen('Preference', 'SkipSyncTests',0); % allow test for real run
     end
     
-    
-%     Screen('Preference', 'SkipSyncTests', 1); % come on we just switched
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
@@ -201,17 +208,48 @@ try
     EyelinkDoTrackerSetup(el);
     
     
-    %% STEP 5: TRIAL LOOP.
+    %% STEP 4B: some final setup before main trial loop
     
+    % Screen settings for PTB
+    ScreenBkgd = el.backgroundcolour; % mid gray
+    TextColor = el.msgfontcolour; % black
+    ChoiceColor = [255 255 255]; % white
+    % Calculate a gap size: come in 10% on both ends (or 80% of total width),
+    % then if you have e.g. 3 items, you need the size of 2 gaps. So n-1. 
+    respOffset = round((.8 * width) / (numResps - 1));
+    qHeight = .25 * height;
+    wRect = [0 0 width height];
+    
+    Screen('TextSize', window, 0.05 * height); % set global font size
+    
+    % Set up behavioral output file
+    [~,taskID] = fileparts(stimPath);
+    fOutBase = strcat(subID, '_task-', taskID, '_date-', datestr(now, 1));
+    fNameOut = fullfile(pths.beh, strcat(fOutBase, '.txt'));
+    fid = fopen(fNameOut, 'a');
+    if fid == -1, fprintf(1, 'ALERT!!! Output file did not open properly.\n'); sysbeep; end
+
+    fprintf(fid, '%s\n', fOutBase);
+    fprintf(fid, '%s\n', datestr(now));
+    fprintf(fid, 'Trial \tResponse \tTime \tStimID \tStimName\n');
+    
+    % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
+    deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
+    
+    % Truncate the number of trials if debugging
     if debugmode
         numTrials = 4;
     else
         numTrials = length(vidList);
     end
     
-    for i = 1:numTrials
+    %% STEP 5: TRIAL LOOP.
 
+    ExptStart = GetSecs;
+    for i = 1:numTrials
+        trialStart = GetSecs;
+        response = -1; % reset on each trial
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
@@ -303,12 +341,17 @@ try
             Eyelink('Message', '%d !V VFRAME %d %d %d %s', 0, frameNum, round(width/2-Movx/2), round(height/2-Movy/2), movieName);
             % End trial if space bar is pressed
             [~, kbSecs, keyCode] = KbCheck;
-            if keyCode(spaceBar)
+            if keyCode(spaceBar) || keyCode(deleteKey)
                 % Write message to EDF file to mark the space bar press time
                 Eyelink('Message', 'KEY_PRESSED');
                 timeOut = 'no';
                 % Release texture:
                 Screen('Close', tex);
+                if keyCode(deleteKey)
+                    % Finish calculating things for this trial,
+                    % then terminate the whole experiment
+                    panic = true;
+                end
                 break;
             end
             Screen('Close', tex); % Release texture if no key is pressed
@@ -349,6 +392,22 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Defining the Start and End of a Trial
         Eyelink('Message', 'TRIAL_RESULT 0');
         WaitSecs(0.01); % Allow some time before ending the trial
+
+        if panic
+            % Exit trial loop, but still export files
+            break
+        else
+            % Code for response screen goes here
+            RT = getResp;
+            if panic
+                break
+            end
+            % Output trial data to file
+            % 'Trial \tResponse \RT \tTime \tStimName\n'
+            fprintf(fid, '%i\t %i\t %1.6f\t %4.3f\t %s\n', i, response, RT, trialStart - ExptStart, movieName);
+        end
+        
+
     end % End trial loop
     
     
@@ -364,6 +423,8 @@ try
     Eyelink('CloseFile'); % Close EDF file on Host PC       
     % Transfer a copy of the EDF file to Display PC
     transferFile; % See transferFile function below    
+    
+    fclose(fid); % close the behavioral output file
 catch % If syntax error is detected
     cleanup;
     % Print error message and line number in Matlab's Command Window
@@ -415,4 +476,65 @@ end
             psychrethrow(psychlasterror);
         end
     end
+
+% Function for collecting responses after watching a video
+% Asks for a button response 1-5 and gives visual feedback.
+% Continuously updates the response until a set timer runs out.
+    function RT = getResp
+        
+        Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+        DrawFormattedText(window, qText, 'center', qHeight, TextColor);
+        % Dynamically place a certain number of response options
+        for c = 1:numResps
+            % NOT PERFECT - debug
+            offset = (.1 * width) + (respOffset * (c-1)); % 
+            if c == response
+                DrawFormattedText(window, respChoices{c},  offset, 'center', ChoiceColor);
+            else
+                DrawFormattedText(window, respChoices{c}, offset, 'center', TextColor);
+            end
+        end
+
+        screenFlipR = Screen('Flip', window); 
+
+        % BEGIN
+        while GetSecs <= screenFlipR + maxWait
+            % poll for input
+            FlushEvents('keyDown'); %get rid of any old keypresses
+            [~, pressedSecs, keypressCode] = KbCheck();
+            pressedKeys = find(keypressCode);
+            % If the panic key is pressed, terminate
+            if ismember(deleteKey, pressedKeys)
+                panic = true;
+                break
+            end
+            
+            % See if any of our response buttons were pressed
+            if any(ismember(pressedKeys,keyList))
+                response = find(pressedKeys(1) == keyList); % in case of multiples
+            end
+            
+            % Compare current button to the last one pressed
+            % and only bother to update the screen if there's a change
+            if response ~= lastPressed
+                % update display
+                DrawFormattedText(window, qText, 'center', qHeight, TextColor);
+                for c = 1:numResps
+                    % NOT PERFECT - debug
+                    offset = (.1 * width) + (respOffset * (c-1));
+                    if c == response
+                        DrawFormattedText(window, respChoices{c}, offset, 'center', ChoiceColor);
+                    else
+                        DrawFormattedText(window, respChoices{c}, offset, 'center', TextColor);
+                    end
+                end
+                Screen('Flip', window);
+                lastPressed = response;
+                % restart - allow updating the response until the timeout
+            end
+
+        end
+        RT = pressedSecs - screenFlipR;
+    end
+    
 end
