@@ -58,7 +58,7 @@ try
     keyList(4) = KbName('4$');
     keyList(5) = KbName('5%');
 
-    qText = 'Pick a number 1-5';
+    qText = 'How understandable was the action in that video?';
     respChoices = {'1', '2', '3', '4', '5'}; % not used yet
     numResps = length(respChoices);
     
