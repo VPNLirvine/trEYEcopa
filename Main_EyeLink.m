@@ -231,7 +231,7 @@ try
 
     fprintf(fid, '%s\n', fOutBase);
     fprintf(fid, '%s\n', datestr(now));
-    fprintf(fid, 'Trial \tResponse \tTime \tStimID \tStimName\n');
+    fprintf(fid, 'Trial \tResponse \tRT \tTime \tStimName\n');
     
     % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -517,6 +517,7 @@ end
             % Compare current button to the last one pressed
             % and only bother to update the screen if there's a change
             if response ~= lastPressed
+                respTimestamp = pressedSecs; % which updates
                 % update display
                 DrawFormattedText(window, qText, 'center', qHeight, TextColor);
                 for c = 1:numResps
@@ -534,7 +535,7 @@ end
             end
 
         end
-        RT = pressedSecs - screenFlipR;
+        RT = respTimestamp - screenFlipR;
     end
     
 end
