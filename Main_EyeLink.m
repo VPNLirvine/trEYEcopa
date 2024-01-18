@@ -210,6 +210,7 @@ try
     
     %% STEP 4B: some final setup before main trial loop
     
+    % Screen settings for PTB
     ScreenBkgd = el.backgroundcolour; % mid gray
     TextColor = el.msgfontcolour; % black
     ChoiceColor = [255 255 255]; % white
@@ -220,17 +221,34 @@ try
     wRect = [0 0 width height];
     
     Screen('TextSize', w, 0.05 * height); % set global font size
-    %% STEP 5: TRIAL LOOP.
     
+    % Set up behavioral output file
+    [~,taskID] = fileparts(stimPath);
+    fOutBase = strcat(subID, '_task-', taskID, '_date-', datestr(now, 1));
+    fNameOut = fullfile(pths.beh, strcat(fOutBase, '.txt'));
+    fid = fopen(fNameOut, 'a');
+    if fid == -1, fprintf(1, 'ALERT!!! Output file did not open properly.\n'); sysbeep; end
+
+    fprintf(fid, '%s\n', fOutBase);
+    fprintf(fid, '%s\n', datestr(now));
+    fprintf(fid, 'Trial \tResponse \tTime \tStimID \tStimName\n');
+    
+    % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
     deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
+    
+    % Truncate the number of trials if debugging
     if debugmode
         numTrials = 4;
     else
         numTrials = length(vidList);
     end
     
+    %% STEP 5: TRIAL LOOP.
+
+    ExptStart = GetSecs;
     for i = 1:numTrials
+        trialStart = GetSecs;
         response = -1; % reset on each trial
         % Open movie file:
         movieName = char(vidList(i));
@@ -380,10 +398,13 @@ try
             break
         else
             % Code for response screen goes here
-            getResp;
+            RT = getResp;
             if panic
                 break
             end
+            % Output trial data to file
+            % 'Trial \tResponse \RT \tTime \tStimName\n'
+            fprintf(fid, '%i\t %i\t %1.6f\t %4.3f\t %s\n', i, response, RT, trialStart - ExptStart, movieName);
         end
         
 
@@ -402,6 +423,8 @@ try
     Eyelink('CloseFile'); % Close EDF file on Host PC       
     % Transfer a copy of the EDF file to Display PC
     transferFile; % See transferFile function below    
+    
+    fclose(fid); % close the behavioral output file
 catch % If syntax error is detected
     cleanup;
     % Print error message and line number in Matlab's Command Window
@@ -457,7 +480,7 @@ end
 % Function for collecting responses after watching a video
 % Asks for a button response 1-5 and gives visual feedback.
 % Continuously updates the response until a set timer runs out.
-    function getResp
+    function RT = getResp
         
         Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
         DrawFormattedText(window, qText, 'center', qHeight, TextColor);
@@ -511,6 +534,7 @@ end
             end
 
         end
+        RT = pressedSecs - screenFlipR;
     end
     
 end
