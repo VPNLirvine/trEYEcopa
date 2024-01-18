@@ -220,7 +220,7 @@ try
     qHeight = .25 * height;
     wRect = [0 0 width height];
     
-    Screen('TextSize', w, 0.05 * height); % set global font size
+    Screen('TextSize', window, 0.05 * height); % set global font size
     
     % Set up behavioral output file
     [~,taskID] = fileparts(stimPath);
