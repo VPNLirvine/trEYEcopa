@@ -235,11 +235,11 @@ try
 
     % Set up a trial-level output file, for debugging timing info
     fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
-    fOut2 = fullfile(pths.beh, [fOut2 '.txt']);
+    fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
     fid2 = fopen(fOut2, 'a');
     fprintf(fid2, '%s\n', fOut2);
     fprintf(fid2, '%s\n', datestr(now));
-    fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
+    fprintf(fid2, 'Trial \tStimName \tFrame \tDuration\n');
     
     % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -352,7 +352,7 @@ try
             % Draw the new texture immediately to screen:
             Screen('DrawTexture', window, tex);            
             % Update display:
-            frameTime = Screen('Flip', window);
+            frameOn = Screen('Flip', window);
             frameNum = frameNum + 1;
             if frameNum == 1
                 % Write message to EDF file to mark the start time of stimulus presentation.
@@ -366,10 +366,6 @@ try
             Eyelink('Message', 'Frame to be displayed %d', frameNum);
             % Write a !V VFRAME message to the data file specifying the frame number, location and file name so DataViewer can play back the video
             Eyelink('Message', '%d !V VFRAME %d %d %d %s', 0, frameNum, round(width/2-Movx/2), round(height/2-Movy/2), movieName);
-            
-            % Output debug data
-            % 'Trial \tStimName \tFrame \tOnset\n'
-            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameTime - ExptStart);
 
             % End trial if space bar is pressed
             [~, kbSecs, keyCode] = KbCheck;
@@ -387,6 +383,12 @@ try
                 break;
             end
             Screen('Close', tex); % Release texture if no key is pressed
+            
+            % Output debug data
+            % 'Trial \tStimName \tFrame \tOnset\n'
+            frameOff = GetSecs; % because Screen('Close') doesn't have an output
+            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOff - frameOn);
+
         end  % End while loop
         Screen('PlayMovie', movie, 0); % Stop playback
         Screen('CloseMovie', movie); % Close movie
