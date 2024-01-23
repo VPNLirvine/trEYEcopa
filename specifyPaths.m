@@ -8,7 +8,7 @@ if nargin == 0
 else
     base = varargin{1};
     assert(ischar(base), 'Input to specifyPaths must be a string!')
-    assert(exist(base, 'dir'), 'Provided path %s does not exist!', base);
+    assert(exist(base, 'dir') > 0, 'Provided path %s does not exist!', base);
 
     % In case input is e.g. '..', convert to an actual path
     [~, info] = fileattrib(base);
