@@ -1,8 +1,8 @@
 % trial number
 % stimulus ID
 % timestamp of frame onset
-% pths = specifyPaths('..');
-pths.beh = pwd;
+pths = specifyPaths('..');
+% pths.beh = pwd;
 flist = dir(fullfile(pths.beh, '*_task-debug_date-*.tsv'));
 numFiles = length(flist);
 for i = 1:numFiles
