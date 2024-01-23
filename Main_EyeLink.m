@@ -157,7 +157,7 @@ try
         Screen('Preference', 'SkipSyncTests',0); % allow test for real run
     end
     
-%     Screen('Preference', 'SkipSyncTests', 1); 
+    Screen('Preference', 'SkipSyncTests', 1); 
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
@@ -233,6 +233,14 @@ try
     fprintf(fid, '%s\n', fOutBase);
     fprintf(fid, '%s\n', datestr(now));
     fprintf(fid, 'Trial \tResponse \tRT \tTime \tStimName\n');
+
+    % Set up a trial-level output file, for debugging timing info
+    fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
+    fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
+    fid2 = fopen(fOut2, 'a');
+    fprintf(fid2, '%s\n', fOut2);
+    fprintf(fid2, '%s\n', datestr(now));
+    fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
     % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -345,7 +353,7 @@ try
             % Draw the new texture immediately to screen:
             Screen('DrawTexture', window, tex);            
             % Update display:
-            Screen('Flip', window);
+            frameOn = Screen('Flip', window);
             frameNum = frameNum + 1;
             if frameNum == 1
                 % Write message to EDF file to mark the start time of stimulus presentation.
@@ -359,6 +367,7 @@ try
             Eyelink('Message', 'Frame to be displayed %d', frameNum);
             % Write a !V VFRAME message to the data file specifying the frame number, location and file name so DataViewer can play back the video
             Eyelink('Message', '%d !V VFRAME %d %d %d %s', 0, frameNum, round(width/2-Movx/2), round(height/2-Movy/2), movieName);
+
             % End trial if space bar is pressed
             [~, kbSecs, keyCode] = KbCheck;
             if keyCode(spaceBar) || keyCode(deleteKey)
@@ -375,6 +384,11 @@ try
                 break;
             end
             Screen('Close', tex); % Release texture if no key is pressed
+            
+            % Output debug data
+            % 'Trial \tStimName \tFrame \tOnset\n'
+            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOn - vidStart);
+
         end  % End while loop
         Screen('PlayMovie', movie, 0); % Stop playback
         Screen('CloseMovie', movie); % Close movie
@@ -445,6 +459,7 @@ try
     transferFile; % See transferFile function below    
     
     fclose(fid); % close the behavioral output file
+    fclose(fid2); % close the debug file
 catch % If syntax error is detected
     cleanup;
     % Print error message and line number in Matlab's Command Window

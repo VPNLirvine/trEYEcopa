@@ -3,6 +3,7 @@
 .DS_Store
 *.asv
 *~
+*.tmp
 
 # Python optimization leftovers
 __pycache__/
@@ -16,6 +17,7 @@ __pycache__/
 # Subject data
 *.edf
 /beh/*.txt
+/beh/*.tsv
 
 # Stimuli
 *.mov
