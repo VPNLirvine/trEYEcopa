@@ -20,7 +20,11 @@ for i = 1:numFiles
     figure();
     for o = 1:numStims
         output(i).stim(o).name = stimList(i);
-        output(i).stim(o).data = input.Duration(strcmp(input.StimName,stimList(i)));
+        % We're dealing with onset times, but we care about durations
+        % So use diff to get the differences b/w onset times, 
+        % which is essentially the same thing as duration
+        % Produces n-1 results since we don't get an offset for the final
+        output(i).stim(o).data = diff(input.Onset(strcmp(input.StimName,stimList(i))));
 
         % Subplot histograms for every movie
         subplot(1,numStims,o);
