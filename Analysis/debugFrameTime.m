@@ -1,6 +1,10 @@
-% trial number
-% stimulus ID
-% timestamp of frame onset
+% It looks like the videos are shooting for a frame rate of 60 fps
+% So the expected duration is 0.0167 sec or 16.7 msec
+% But the measured duration of each 'frame' is closer to 0.669 msec,
+% Which means PTB is trying to refresh at a rate closer to 1000 fps
+% So this analysis is a bust.
+% I have no idea whether timing is significantly degraded or not.
+
 pths = specifyPaths('..');
 % pths.beh = pwd;
 flist = dir(fullfile(pths.beh, '*_task-debug_date-*.tsv'));
@@ -20,22 +24,22 @@ for i = 1:numFiles
 
         % Subplot histograms for every movie
         subplot(1,numStims,o);
-            histogram(output(i).stim(o).data);
+            histogram(output(i).stim(o).data * 1000);
             title(stimList(i));
-            xlabel('Frame duration (sec)');
+            xlabel('Frame duration (msec)');
             ylabel('Num instances');
-            % xlim([20,40]); % fine-tune
+            xlim([.5,1]); % fine-tune
             % ylim([0,100]); % fine-tune
     end
     % Separate by movie
     % data = pivot(input, Columns='StimName', Method="mean", DataVariable='Duration')
     % Plot histogram of frame durations
     figure()
-        histogram(input.Duration);
+        histogram(input.Duration * 1000);
         title(sprintf('Considering %i movies', numStims));
-        xlabel('Frame duration (sec)');
+        xlabel('Frame duration (msec)');
         ylabel('Num instances');
-
+        xlim([.5,1]); % fine-tune
     
     % t-test for differences by movie?
 end
