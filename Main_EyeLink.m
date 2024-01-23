@@ -157,7 +157,7 @@ try
         Screen('Preference', 'SkipSyncTests',0); % allow test for real run
     end
     
-%     Screen('Preference', 'SkipSyncTests', 1); 
+    Screen('Preference', 'SkipSyncTests', 1); 
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
