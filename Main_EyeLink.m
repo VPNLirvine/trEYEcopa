@@ -1,4 +1,4 @@
-function Main_EyeLink(screenNumber, debugmode)
+ function Main_EyeLink(screenNumber, debugmode)
 % Video playback with EyeLink integration and animated calibration / drift-check/correction targets.
 % In each trial eye movements are recorded while a video stimulus is presented on the screen.
 % Each trial ends when the space bar is pressed or the video stops playing.
@@ -157,6 +157,7 @@ try
         Screen('Preference', 'SkipSyncTests',0); % allow test for real run
     end
     
+%     Screen('Preference', 'SkipSyncTests', 1); 
     window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
