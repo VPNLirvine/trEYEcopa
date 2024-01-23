@@ -240,7 +240,7 @@ try
     fid2 = fopen(fOut2, 'a');
     fprintf(fid2, '%s\n', fOut2);
     fprintf(fid2, '%s\n', datestr(now));
-    fprintf(fid2, 'Trial \tStimName \tFrame \tDuration\n');
+    fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
     % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -387,8 +387,7 @@ try
             
             % Output debug data
             % 'Trial \tStimName \tFrame \tOnset\n'
-            frameOff = GetSecs; % because Screen('Close') doesn't have an output
-            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOff - frameOn);
+            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOn - vidStart);
 
         end  % End while loop
         Screen('PlayMovie', movie, 0); % Stop playback
