@@ -162,7 +162,7 @@ try
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
     [width, height] = Screen('WindowSize', window);
-    
+    HideCursor(window); 
     
     %% STEP 4: SET CALIBRATION SCREEN COLOURS/SOUNDS; PROVIDE WINDOW SIZE TO EYELINK HOST & DATAVIEWER; SET CALIBRATION PARAMETERS; CALIBRATE
     
