@@ -162,7 +162,7 @@ try
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
     [width, height] = Screen('WindowSize', window);
-    
+
     
     %% STEP 4: SET CALIBRATION SCREEN COLOURS/SOUNDS; PROVIDE WINDOW SIZE TO EYELINK HOST & DATAVIEWER; SET CALIBRATION PARAMETERS; CALIBRATE
     
@@ -200,7 +200,9 @@ try
     % Allow a supported EyeLink Host PC button box to accept calibration or drift-check/correction targets via button 5
     Eyelink('Command', 'button_function 5 "accept_target_fixation"');
    % Hide mouse cursor
-    %HideCursor(screenNumber); % AE: not hiding cursor for debug purposes
+   if ~debugmode
+        HideCursor(screenNumber);
+   end
     % Start listening for keyboard input. Suppress keypresses to Matlab windows.
     ListenChar(-1);
     % Clear Host PC display from any previus drawing
