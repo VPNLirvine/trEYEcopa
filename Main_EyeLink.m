@@ -280,6 +280,10 @@ try
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
+        
+        % Before running trial, see if it's time for a break:
+        takeABreak(i,numTrials);
+
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
@@ -428,6 +432,8 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Defining the Start and End of a Trial
         Eyelink('Message', 'TRIAL_RESULT 0');
         WaitSecs(0.01); % Allow some time before ending the trial
+        
+        Eyelink('SetOfflineMode');% Put tracker in idle/offline mode
 
         if panic
             % Exit trial loop, but still export files
@@ -573,6 +579,35 @@ end
 
         end
         RT = respTimestamp - screenFlipR;
-    end
+    end % function getResp
+
+    function takeABreak(trial, maxTrials)
+        % Set a ratio of trials to take a break on
+        ratio = 1/3;
+        maxBreak = 60; % seconds
+
+        % Determine whether this trial qualifies
+        if trial == floor(maxTrials * ratio) + 1
+            % Interrupt the experiment for up to a minute
+            bText = sprintf(['You have completed %i of %i trials!\n...' ...
+                'Take a minute to relax your eyes.\n\n...' ...
+                'Press the spacebar when you''re ready to continue'], ...
+                trial, maxTrials);
+            Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+            DrawFormattedText(window, bText, 'center', 'center', TextColor);
+            
+            timeOn = Screen('Flip', window);
+            
+            while GetSecs < timeOn + maxBreak
+                % Poll for keyboard to exit early
+                FlushEvents('keyDown'); %get rid of any old keypresses
+                [~, ~, keypressCode] = KbCheck();
+                pressedKeys = find(keypressCode);
+                if ismember(spaceBar, pressedKeys)
+                    break
+                end
+            end
+        end % otherwise skip
+    end % function takeABreak
     
 end
