@@ -229,7 +229,7 @@ try
     [~,taskID] = fileparts(stimPath);
     fOutBase = strcat(subID, '_task-', taskID, '_date-', datestr(now, 1));
     fNameOut = fullfile(pths.beh, strcat(fOutBase, '.txt'));
-    fid = fopen(fNameOut, 'a');
+    fid = fopen(fNameOut, 'w+');
     if fid == -1, fprintf(1, 'ALERT!!! Output file did not open properly.\n'); sysbeep; end
 
     fprintf(fid, '%s\n', fOutBase);
@@ -239,7 +239,7 @@ try
     % Set up a trial-level output file, for debugging timing info
     fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
     fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
-    fid2 = fopen(fOut2, 'a');
+    fid2 = fopen(fOut2, 'w+');
     fprintf(fid2, '%s\n', fOut2);
     fprintf(fid2, '%s\n', datestr(now));
     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
