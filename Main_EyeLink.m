@@ -187,6 +187,11 @@ try
 %     el.calAnimationResetOnTargetMove = true; % false by default, set to true to rewind/replay video from start every time target moves
     el.calAnimationAudioVolume = 0.1; % default volume is 1.0, but too loud on some systems. Setting volume lower to 0.4 (minimum is 0.0)
     
+    % Specify the appearance of the calibration target
+    % Default values are size = 2.5, width = 1, which is too big
+    el.calibrationtargetsize = 2;
+    el.calibrationtargetwidth = 0.3;
+    
     % You must call this function to apply the changes made to the el structure above
     EyelinkUpdateDefaults(el);
     
