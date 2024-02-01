@@ -229,7 +229,7 @@ try
     [~,taskID] = fileparts(stimPath);
     fOutBase = strcat(subID, '_task-', taskID, '_date-', datestr(now, 1));
     fNameOut = fullfile(pths.beh, strcat(fOutBase, '.txt'));
-    fid = fopen(fNameOut, 'a');
+    fid = fopen(fNameOut, 'w+');
     if fid == -1, fprintf(1, 'ALERT!!! Output file did not open properly.\n'); sysbeep; end
 
     fprintf(fid, '%s\n', fOutBase);
@@ -239,7 +239,7 @@ try
     % Set up a trial-level output file, for debugging timing info
     fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
     fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
-    fid2 = fopen(fOut2, 'a');
+    fid2 = fopen(fOut2, 'w+');
     fprintf(fid2, '%s\n', fOut2);
     fprintf(fid2, '%s\n', datestr(now));
     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
@@ -280,6 +280,10 @@ try
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
+        
+        % Before running trial, see if it's time for a break:
+        takeABreak(i,numTrials);
+
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
@@ -428,6 +432,8 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Defining the Start and End of a Trial
         Eyelink('Message', 'TRIAL_RESULT 0');
         WaitSecs(0.01); % Allow some time before ending the trial
+        
+        Eyelink('SetOfflineMode');% Put tracker in idle/offline mode
 
         if panic
             % Exit trial loop, but still export files
@@ -573,6 +579,35 @@ end
 
         end
         RT = respTimestamp - screenFlipR;
-    end
+    end % function getResp
+
+    function takeABreak(trial, maxTrials)
+        % Set a ratio of trials to take a break on
+        ratio = 1/3;
+        maxBreak = 60; % seconds
+        
+        % Determine whether this trial qualifies
+        if ~rem(trial, floor(maxTrials * ratio) + 1)
+            % Interrupt the experiment for up to a minute
+            bText = sprintf(['You have completed %i of %i trials!\n' ...
+                'Take a minute to relax your eyes.\n\n' ...
+                'Press the spacebar when you are ready to continue'], ...
+                trial-1, maxTrials);
+            Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+            DrawFormattedText(window, bText, 'center', 'center', TextColor);
+            
+            timeOn = Screen('Flip', window);
+            
+            while GetSecs < timeOn + maxBreak
+                % Poll for keyboard to exit early
+                FlushEvents('keyDown'); %get rid of any old keypresses
+                [~, ~, keypressCode] = KbCheck();
+                pressedKeys = find(keypressCode);
+                if ismember(spaceBar, pressedKeys)
+                    break
+                end
+            end
+        end % otherwise skip
+    end % function takeABreak
     
 end
