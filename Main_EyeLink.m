@@ -585,14 +585,14 @@ end
         % Set a ratio of trials to take a break on
         ratio = 1/3;
         maxBreak = 60; % seconds
-
+        
         % Determine whether this trial qualifies
-        if trial == floor(maxTrials * ratio) + 1
+        if ~rem(trial, floor(maxTrials * ratio) + 1)
             % Interrupt the experiment for up to a minute
-            bText = sprintf(['You have completed %i of %i trials!\n...' ...
-                'Take a minute to relax your eyes.\n\n...' ...
-                'Press the spacebar when you''re ready to continue'], ...
-                trial, maxTrials);
+            bText = sprintf(['You have completed %i of %i trials!\n' ...
+                'Take a minute to relax your eyes.\n\n' ...
+                'Press the spacebar when you are ready to continue'], ...
+                trial-1, maxTrials);
             Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
             DrawFormattedText(window, bText, 'center', 'center', TextColor);
             
