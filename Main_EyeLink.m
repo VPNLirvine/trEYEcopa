@@ -587,7 +587,11 @@ end
             end
 
         end
-        RT = respTimestamp - screenFlipR;
+        if panic
+            RT = -1;
+        else
+            RT = respTimestamp - screenFlipR;
+        end
     end % function getResp
 
     function takeABreak(trial, maxTrials)
