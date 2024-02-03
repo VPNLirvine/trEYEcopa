@@ -361,8 +361,10 @@ try
             if tex<=0 % Valid texture returned? A negative value means end of movie reached
                 break;
             end
+            % Calculate new size for video
+            newRect = resizeVideo(movY, movX, wRect);
             % Draw the new texture immediately to screen:
-            Screen('DrawTexture', window, tex);            
+            Screen('DrawTexture', window, tex, [], newRect);            
             % Update display:
             frameOn = Screen('Flip', window);
             frameNum = frameNum + 1;
