@@ -298,6 +298,9 @@ try
         moviePath = fullfile(stimPath, movieName);
         [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
         
+        % Calculate new size for video
+        newRect = resizeVideo(Movy, Movx, wRect);
+            
         % STEP 5.1: START TRIAL; SHOW TRIAL INFO ON HOST PC; SHOW BACKDROP IMAGE AND/OR DRAW FEEDBACK GRAPHICS ON HOST PC; DRIFT-CHECK/CORRECTION
         
         % Write TRIALID message to EDF file: marks the start of a trial for DataViewer
@@ -361,8 +364,6 @@ try
             if tex<=0 % Valid texture returned? A negative value means end of movie reached
                 break;
             end
-            % Calculate new size for video
-            newRect = resizeVideo(Movy, Movx, wRect);
             % Draw the new texture immediately to screen:
             Screen('DrawTexture', window, tex, [], newRect);            
             % Update display:
