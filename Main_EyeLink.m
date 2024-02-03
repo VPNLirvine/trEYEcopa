@@ -298,6 +298,10 @@ try
         moviePath = fullfile(stimPath, movieName);
         [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
         
+        % Calculate new size for video
+        newRect = resizeVideo(Movx, Movy, wRect);
+        Movx = newRect(3); Movy = newRect(4); % Send to Eyelink
+            
         % STEP 5.1: START TRIAL; SHOW TRIAL INFO ON HOST PC; SHOW BACKDROP IMAGE AND/OR DRAW FEEDBACK GRAPHICS ON HOST PC; DRIFT-CHECK/CORRECTION
         
         % Write TRIALID message to EDF file: marks the start of a trial for DataViewer
@@ -362,7 +366,7 @@ try
                 break;
             end
             % Draw the new texture immediately to screen:
-            Screen('DrawTexture', window, tex);            
+            Screen('DrawTexture', window, tex, [], newRect);            
             % Update display:
             frameOn = Screen('Flip', window);
             frameNum = frameNum + 1;
@@ -583,7 +587,11 @@ end
             end
 
         end
-        RT = respTimestamp - screenFlipR;
+        if panic
+            RT = -1;
+        else
+            RT = respTimestamp - screenFlipR;
+        end
     end % function getResp
 
     function takeABreak(trial, maxTrials)
