@@ -362,7 +362,7 @@ try
                 break;
             end
             % Calculate new size for video
-            newRect = resizeVideo(movY, movX, wRect);
+            newRect = resizeVideo(Movy, Movx, wRect);
             % Draw the new texture immediately to screen:
             Screen('DrawTexture', window, tex, [], newRect);            
             % Update display:
