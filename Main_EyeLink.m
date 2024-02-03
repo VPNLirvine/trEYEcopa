@@ -299,7 +299,7 @@ try
         [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
         
         % Calculate new size for video
-        newRect = resizeVideo(Movy, Movx, wRect);
+        newRect = resizeVideo(Movx, Movy, wRect);
         Movx = newRect(3); Movy = newRect(4); % Send to Eyelink
             
         % STEP 5.1: START TRIAL; SHOW TRIAL INFO ON HOST PC; SHOW BACKDROP IMAGE AND/OR DRAW FEEDBACK GRAPHICS ON HOST PC; DRIFT-CHECK/CORRECTION

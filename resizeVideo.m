@@ -1,4 +1,4 @@
-function newRect = resizeVideo(vidH, vidW, screenRect)
+function newRect = resizeVideo(vidW, vidH, screenRect)
 % Inputs 1 and 2 are the height and width of the video
 % Input 3 is a 4-element vector, the 2nd output of Screen('OpenWindow')
 % Determine how best to expand the video to fill the screen
