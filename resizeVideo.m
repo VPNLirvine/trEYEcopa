@@ -10,20 +10,12 @@ function newRect = resizeVideo(vidH, vidW, screenRect)
 scnH = screenRect(4);
 scnW = screenRect(3);
 
-% Get the ratios the image has to rescale to fit
-hScale = vidH/scnH;
-wScale = vidW/scnW;
+% Get the ratios the image must change by to fit the screen
+hGrow = scnH/vidH;
+wGrow = scnW/vidW;
 
-% The above could be either >1 or <1
-% If they're both < 1, image is smaller than window. Grow by the min val
-% If either val is > 1, image is larger than window. Shrink by the max val
-if hScale > 1 || wScale > 1
-    % Shrink by inverting the max value
-    rescale = 1 / max([hScale, wScale]);
-else
-    % Grow by the min value
-    rescale = min([hScale wScale]);
-end
+% No matter shrink or expand, this picks the right amount:
+rescale = min([hGrow wGrow]);
 
 % Calculate the coordinates of the drawing area
 imgRect = [0 0 rescale*vidW rescale*vidH]; % box of final size
