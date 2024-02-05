@@ -587,7 +587,7 @@ end
             end
 
         end
-        if panic
+        if panic || ~exist('respTimestamp', 'var')
             RT = -1;
         else
             RT = respTimestamp - screenFlipR;
