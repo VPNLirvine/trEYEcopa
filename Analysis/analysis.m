@@ -85,8 +85,9 @@ if choice == 1
     figure();
     mdl = fitlm(data, 'Eyetrack ~ Response');
     plot(mdl);
-%         xlabel('Intentionality score');
-%         ylabel(getGraphLabel(metricName));
+        xlabel('Intentionality score');
+        ylabel(getGraphLabel(metricName));
+        title(sprintf('Linear model based on %i subjects', numSubs));
     disp(mdl);
     % Run some stats here
     
