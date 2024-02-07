@@ -1,5 +1,7 @@
 function [Trials, Preamble] = osfImport(fileName)
 % Import edf file to matlab using OSF edfImport() and edfExtractInterestingEvents() 
+% Input 1 is expected to be JUST the filename, i.e. no path attached
+% This function dynamically find a path to the file based on its prefix
 % Direct questions to A.E.
 addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
