@@ -3,7 +3,8 @@ function frame2movie(Trials, trialNum)
     % Requires having run frameGenerator on the corresponding stimulus
     % Input Trials is the output of edfImport -  a single subject's data
     % trialNum is the trial number to view (e.g. 1, 2, etc)
-
+    
+    addpath('..'); % to allow specifyPaths to run
     pths = specifyPaths('..');
     frameFormat = '.jpg';
 

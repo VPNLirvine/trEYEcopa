@@ -1,4 +1,5 @@
 function plotCrossFixations(TrialsCellArray)
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 if ~iscell(TrialsCellArray)
     TrialsCellArray = {TrialsCellArray};

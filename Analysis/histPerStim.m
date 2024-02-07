@@ -1,4 +1,5 @@
 % Histograms of individual fixation durations per stimulus
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 outputPath = pths.MWdat;
 edfList = dir(fullfile(outputPath, '*.edf'));

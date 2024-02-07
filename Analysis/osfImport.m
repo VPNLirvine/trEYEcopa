@@ -1,6 +1,7 @@
 function [Trials, Preamble] = osfImport(fileName)
 % Import edf file to matlab using OSF edfImport() and edfExtractInterestingEvents() 
 % Direct questions to A.E.
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 try
     
