@@ -7,15 +7,15 @@ normCheck = ['normal' filesep];
 
 numRows = size(dat, 1);
 for i = 1:numRows
-    txt = dat(i).StimName;
+    txt = dat.StimName(i);
     
     % Check whether it's flipped or not
     if contains(txt, flipCheck)
-        dat(i).StimName = erase(txt, flipCheck);
-        dat(i).Flipped = true;
+        dat.StimName(i) = erase(txt, flipCheck);
+        dat.Flipped(i) = true;
     elseif contains(txt, normCheck)
-        dat(i).StimName = erase(txt, normCheck);
-        dat(i).Flipped = false;
+        dat.StimName(i) = erase(txt, normCheck);
+        dat.Flipped(i) = false;
     else
         error('Cannot determine whether data in row %i was a flipped video or not!', i)
     end
