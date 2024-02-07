@@ -18,6 +18,7 @@ __pycache__/
 *.edf
 /beh/*.txt
 /beh/*.tsv
+/beh/pilot/
 
 # Stimuli
 *.mov
