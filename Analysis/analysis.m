@@ -60,11 +60,22 @@ if choice == 1
         fprintf(1, '%s: ', subID);
         edf = osfImport(edfName);
         eyetrack = []; % init per sub
-        
+        badList = [];
         for t = 1:numTrials
-            eyetrack(t) = selectMetric(edf(t), metricName);
+            if isempty(edf(t).Saccades)
+                % Something fishy happened
+                % Don't attempt to extract data that isn't there
+                % Remember to drop this trial from the behavioral data
+                badList = [badList, t];
+            else
+                eyetrack(t) = selectMetric(edf(t), metricName);
+            end
         end
         
+        % Drop trials on the bad list
+        behav(badList, :) = [];
+        numTrials = height(behav);
+        eyetrack(badList) = [];
         
         % Now Trials is a huge struct of eyetracking data,
         % And behav is a big table of response data.
