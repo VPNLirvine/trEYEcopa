@@ -4,6 +4,7 @@ function frameGenerator(movieName)
 % e.g. input is simply 'movie.mov' and we check the stimulus folder
 
 % Define paths
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 mwPath = fullfile(pths.stimuli, 'Martin Weisberg stims');
 tcPath = fullfile(pths.stimuli, 'TCconverted');

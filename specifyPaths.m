@@ -31,4 +31,6 @@ pths.edf = fullfile(pths.base, 'edfImport');
 pths.edfalt = fullfile(pths.base, 'edf_alt');
 
 pths.beh = fullfile(pths.base, 'beh'); % behavioral data e.g. RTs
+
+pths.fixcheck = fullfile(pths.base, 'fixation_checks'); % calibration
 end

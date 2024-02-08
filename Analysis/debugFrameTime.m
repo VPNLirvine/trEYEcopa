@@ -4,7 +4,7 @@
 % then generates a histogram 
 
 % 
-
+addpath('..');
 pths = specifyPaths('..');
 % pths.beh = pwd;
 flist = dir(fullfile(pths.beh, '*_task-debug_date-*.tsv'));

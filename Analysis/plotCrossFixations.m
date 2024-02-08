@@ -1,10 +1,11 @@
 function plotCrossFixations(TrialsCellArray)
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 if ~iscell(TrialsCellArray)
     TrialsCellArray = {TrialsCellArray};
 end
 
-imPath = pths.fixdat;
+imPath = pths.fixcheck;
 imFormat = '.png';
 
 figure()

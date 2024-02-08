@@ -18,6 +18,7 @@ fprintf(1, 'Using metric %s\n\n', metricName);
 T = readtable('condition list - Sheet1.csv');
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 stimPath = pths.MWstim;
 outputPath = pths.MWdat;
@@ -113,6 +114,8 @@ fprintf("%d subjects were considered.\n", subject)
 fprintf("h = %d\n",h)
 fprintf("p = %f\n",p)
 disp(stats)
+
+boxPlot2; % a script that generates figures
 
 function [dataMatrix, subList, condList, trialList] = prepforanova(inStruct)
 % Take a structure with fixation data for separate conditions, per subject

@@ -7,6 +7,7 @@ if (isempty(regexp(fileName, '.edf$')))
   fileName= [fileName '.edf'];
 end
 
+addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 
 % Guess file location based on subject prefix
