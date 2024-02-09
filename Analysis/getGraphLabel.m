@@ -32,6 +32,10 @@ switch metricName
         txt = 'Average saccade distance in degrees';
         hy = [0 45];
         yl = [0 9];
+    case 'ISC'
+        txt = 'Intersubject correlation with group mean';
+        hy = [0 1];
+        % no idea what yl is...
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end % switch

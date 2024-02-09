@@ -9,7 +9,7 @@ function data = getTCData(metricName)
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    if strcmp(metricName, 'ISC')
+    if strcmp(metricName, 'heatmap')
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'double', 'double', 'logical'};
     else
@@ -50,15 +50,16 @@ function data = getTCData(metricName)
         eyetrack = []; % init per sub
         badList = [];
         for t = 1:numTrials
-            if isempty(edf(t).Saccades)
-                % Something fishy happened
+            if isempty(edf(t).Saccades) || behav.Response(t) == -1
+                % Either eyetracking data is missing, or no response
                 % Don't attempt to extract data that isn't there
                 % Remember to drop this trial from the behavioral data
                 badList = [badList, t];
             else
-                if strcmp(metricName, 'ISC')
+                if strcmp(metricName, 'heatmap')
                     opts = behav.Flipped(t);
                     eyetrack{t} = selectMetric(edf(t), 'heatmap', opts);
+                    % Note above is cell, not double like below
                 else
                     eyetrack(t) = selectMetric(edf(t), metricName);
                 end

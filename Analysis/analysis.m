@@ -16,8 +16,13 @@ choice = menu('Which data do you want to analyze?','TriCOPA','Martin & Weisberg'
 if choice == 1
     % TriCOPA
     fprintf(1, 'Using metric %s\n\n', metricName);
-    data = getTCData(metricName);
-    numSubs = height(data);
+    if strcmp(metricName, 'ISC')
+        data = sortISC;
+    else
+        data = getTCData(metricName);
+    end
+    numSubs = height(unique(data.Subject));
+
     %
     % Compare the eyetracking data to the behavioral data
     %

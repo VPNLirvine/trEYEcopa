@@ -1,6 +1,6 @@
 function ISC = doISC()
 % get intersubject correlations of scan paths
-data = getTCData('ISC');
+data = getTCData('heatmap');
 
 subList = unique(data.Subject);
 stimList = unique(data.StimName);
