@@ -1,4 +1,4 @@
-function output = selectMetric(edfDat, metricName)
+function output = selectMetric(edfDat, metricName, varargin)
 % Takes in a single row of an edf file (ie already indexed by trial number)
 % e.g. input should be edfFile(trialNum), not edfFile itself
 % Given a metric name like 'totfixation', calculate and return that metric
@@ -10,6 +10,7 @@ function output = selectMetric(edfDat, metricName)
 %   'maxfixOnset' - Onset time of the longest fixation
 %   'minfixOnset' - Onset time of the shortest fixation
 %   'meansacdist' - Average distance of all saccades within a trial
+%   'heatmap' - a 2D heatmap summarizing the scanpath
 
 % Determine how many eyes were used
 % If more than one, pick one at random and discard the other
@@ -62,6 +63,7 @@ switch metricName
         % ampl = amplitude of saccade (ie distance)
         % there is also phi, which is direction in degrees (ie not rads)
     case 'positionMax'
+        % This is probably useless
         A = edfDat.Fixations.time(edfDat.Fixations.eye == i);
         B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i);
         C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i);
@@ -70,6 +72,7 @@ switch metricName
         valueInC = C(colIdx);
         output = [valueInB; valueInC];
     case 'positionMin'
+        % This also seems useless
         A = edfDat.Fixations.time(edfDat.Fixations.eye == i);
         B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i);
         C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i);
@@ -77,6 +80,34 @@ switch metricName
         valueInB = B(colIdx);
         valueInC = C(colIdx);
         output = [valueInB; valueInC];
+    case 'heatmap'
+        % This is a 2D matrix, not a single value! Be careful.
+
+        % Extract x and y timeseries
+        xdat = pickCoordData(edfDat.Samples.gx);
+        ydat = pickCoordData(edfDat.Samples.gy);
+
+        % See if the optional screen dimensions were included
+        if nargin > 3
+            % Expecting screen dimensions: [xsize ysize]
+            % e.g. a typical HD screen is [1920 1080]
+            scDim = varargin{2};
+            assert(length(scDim) == 2, '4th input must be a 2-element array of screen dimensions: [xwidth yheight]');
+        else
+            % Use defaults
+            scDim = [1920 1200];
+        end
+        
+        % See if the data needs to be flipped or not
+        if nargin > 2
+            flipFlag = varargin{1};
+            assert(islogical(flipFlag), '3rd input must be a boolean indicating whether the stimulus was flipped or not');
+            if flipFlag
+                xdat = mirrorX(xdat, scDim(1));
+            end
+        end
+
+        output = getHeatmap(xdat, ydat, scDim);
         
     otherwise
         error('Unknown metric name %s! aborting', metricName);
