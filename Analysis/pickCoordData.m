@@ -6,6 +6,8 @@ function output = pickCoordData(data)
 % So this function finds the junk data and skips it
 
 assert(size(data,1) == 2, 'Input data is the wrong size! Expected a matrix with 2 rows.')
+assert(size(data,2) > 0, 'Input data is empty!')
+
 if data(1,1) == -32768
     output = data(2,:);
 elseif data(2,1) == -32768
