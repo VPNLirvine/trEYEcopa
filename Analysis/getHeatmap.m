@@ -30,7 +30,7 @@ assert(iscolumn(xdat) && iscolumn(ydat), 'Inputs 1 and 2 must be column vectors'
 timeSeries = [xdat, ydat];
 
 % Define the bin centers (as opposed to the edges)
-binRes = 10; % number of pixels to average over.
+binRes = 1; % number of pixels to average over.
 xctr = 1:binRes:xMax;
 yctr = 1:binRes:yMax; 
 
