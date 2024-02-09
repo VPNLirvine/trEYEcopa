@@ -15,7 +15,15 @@ else
     xMax = 1920; yMax = 1200;
 end
 
-% Validate input
+% Validate input is the right shape
+% First, try just transposing
+% If that doesn't work, you've got bigger problems.
+if ~iscolumn(xdat)
+    xdat = xdat';
+end
+if ~iscolumn(ydat)
+    ydat = ydat';
+end
 assert(iscolumn(xdat) && iscolumn(ydat), 'Inputs 1 and 2 must be column vectors');
 
 % Horizontally concatenate the two column vectors
