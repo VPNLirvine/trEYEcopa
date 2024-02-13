@@ -22,6 +22,7 @@ if choice == 1
         data = getTCData(metricName);
     end
     numSubs = height(unique(data.Subject));
+    numTrials = height(data);
 
     %
     % Compare the eyetracking data to the behavioral data
@@ -31,11 +32,16 @@ if choice == 1
     plot(mdl);
         xlabel('Intentionality score');
         ylabel(getGraphLabel(metricName));
-        title(sprintf('Linear model based on %i subjects', numSubs));
+        title(sprintf('Linear model based on %i trials across %i subjects', numTrials, numSubs));
     disp(mdl);
     % Run some stats here
-    
-    
+    figure();
+    subplot(1,2,1);
+        histogram(data.Eyetrack);
+        xlabel(getGraphLabel(metricName));
+    subplot(1,2,2)
+        histogram(data.Response);
+        xlabel('Intentionality score');
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:

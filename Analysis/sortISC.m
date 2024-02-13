@@ -22,5 +22,14 @@ for i = 1:numSubs
         data.Eyetrack(outInd) = isc{inRow, inCol};
     end
 end
-
+% And drop any trials where only one person contributed,
+% because then you have an artificially perfect correlation w/ the 'group',
+% because the 'group' is really just that one person
+trialList = unique(data.StimName);
+for t = 1:length(trialList)
+    trial = trialList{t};
+    if sum(strcmp(trial, data.StimName)) == 1
+        data(strcmp(trial, data.StimName), :) = [];
+    end
+end
 end
