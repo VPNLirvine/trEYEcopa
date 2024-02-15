@@ -130,25 +130,25 @@ dataMatrix = zeros(numRows, 1);
     subList = dataMatrix;
     condList = cell(numRows, 1);
     trialList = condList;
-for s = 1:numSubs
+for i = 1:numSubs
     for c = 1:2 % condition social or mechanical
         if c == 1
-            thisDat = inStruct(s).socFixations;
+            thisDat = inStruct(i).socFixations;
         else
-            thisDat = inStruct(s).mecFixations;
+            thisDat = inStruct(i).mecFixations;
         end
         for t = 1:numSoc % trial number - assume equal number per cond
-            idx = t + ((s-1)*(numSoc*2)) + ((c-1)*numSoc); % nested position
+            idx = t + ((i-1)*(numSoc*2)) + ((c-1)*numSoc); % nested position
             % Export data
             dataMatrix(idx) = thisDat(t); % fixation time
-            subList(idx) = s; % subject number
+            subList(idx) = i; % subject number
             % Condition ID
             if c == 1
                 condList{idx} = 'Social';
-                stimName = inStruct(s).socMovies{t};
+                stimName = inStruct(i).socMovies{t};
             else
                 condList{idx} = 'Mechanical';
-                stimName = inStruct(s).mecMovies{t};
+                stimName = inStruct(i).mecMovies{t};
             end
             % Stimulus name
             trialList{idx} = stimName;
