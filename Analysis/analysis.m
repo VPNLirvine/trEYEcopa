@@ -45,5 +45,5 @@ if choice == 1
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:
-    Ttest();
+    Ttest(metricName);
 end
