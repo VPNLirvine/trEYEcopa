@@ -106,8 +106,12 @@ switch metricName
                 xdat = mirrorX(xdat, scDim(1));
             end
         end
+        % A number >= 1 of pixels to average over
+        % 1 = full-resolution, 10 is what Isik used.
+        binRes = 1;
 
-        output = getHeatmap(xdat, ydat, scDim);
+        % Get the data
+        output = getHeatmap(xdat, ydat, scDim, binRes);
         
     otherwise
         error('Unknown metric name %s! aborting', metricName);

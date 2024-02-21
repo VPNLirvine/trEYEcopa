@@ -15,6 +15,14 @@ else
     xMax = 1920; yMax = 1200;
 end
 
+if nargin > 3
+    binRes = varargin{2};
+    assert(isnumeric(binRes), 'Input 4 (bin resolution) must be a number!');
+    assert(binRes >= 1, 'Input 4 (bin resolution) must be a positive number!');
+else
+    binRes = 1; % full resolution
+end
+
 % Validate input is the right shape
 % First, try just transposing
 % If that doesn't work, you've got bigger problems.
@@ -30,7 +38,6 @@ assert(iscolumn(xdat) && iscolumn(ydat), 'Inputs 1 and 2 must be column vectors'
 timeSeries = [xdat, ydat];
 
 % Define the bin centers (as opposed to the edges)
-binRes = 1; % number of pixels to average over.
 xctr = 1:binRes:xMax;
 yctr = 1:binRes:yMax; 
 
