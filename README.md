@@ -14,3 +14,5 @@ Please make sure both of those are installed and configured before running this 
 The experiment is intended to be run with an [SR Research Eyelink II eye tracker](https://www.sr-research.com/eyelink-ii/), which outputs data in .EDF format. (Though theoretically, any SR Research eye tracker would work).
 We use [Alexander Pastukhov's edfImport](https://github.com/alexander-pastukhov/edfImport) to pull this data into MATLAB for analysis.
 edfImport further requires you to install [SR Research's EDF API](https://www.sr-research.com/support/thread-13.html).
+
+Some analyses make use of functions from Matlab's `Image Processing Toolbox`.

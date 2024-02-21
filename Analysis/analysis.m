@@ -21,7 +21,7 @@ if choice == 1
     else
         data = getTCData(metricName);
     end
-    numSubs = height(unique(data.Subject));
+    numSubs = size(unique(data.Subject), 1);
     numTrials = height(data);
 
     %

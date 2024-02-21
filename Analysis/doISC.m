@@ -20,7 +20,7 @@ for v = 1:numStims
     thisData = data.Eyetrack(strcmp(thisStim,data.StimName));
     % Stack all the heatmaps into a 3D matrix
     imStack = [];
-    for e = 1:height(thisData)
+    for e = 1:size(thisData, 1)
         imStack(:,:,e) = thisData{e};
     end
     % Now average across the 3rd dimension
