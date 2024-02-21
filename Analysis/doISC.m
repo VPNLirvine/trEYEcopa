@@ -11,7 +11,7 @@ function ISC = doISC()
     % Init the output variable
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
     dtypes = {'string', 'double', 'double', 'double', 'logical'};
-    ISC = table('Size', [0, 6], 'VariableNames', dheader, 'VariableTypes', dtypes);
+    ISC = table('Size', [0, length(dheader)], 'VariableNames', dheader, 'VariableTypes', dtypes);
 
     % Suppress a warning about the way I fill the table
     warning('off', 'MATLAB:table:RowsAddedExistingVars');
@@ -43,7 +43,7 @@ function ISC = doISC()
             
             % Add all the other bits in too
             ISC.Subject{r} = subID;
-            ISC.Response{r} = data.Response(r);
+            ISC.Response(r) = data.Response(r);
             ISC.RT(r) = data.RT(r);
             ISC.Flipped(r) = data.Flipped(r);
             ISC.StimName{r} = stimName;
