@@ -17,7 +17,7 @@ if choice == 1
     % TriCOPA
     fprintf(1, 'Using metric %s\n\n', metricName);
     if strcmp(metricName, 'ISC')
-        data = sortISC;
+        data = doISC;
     else
         data = getTCData(metricName);
     end

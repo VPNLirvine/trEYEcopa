@@ -1,55 +1,56 @@
 function ISC = doISC()
-% get intersubject correlations of scan paths
-data = getTCData('heatmap');
+    % Calculate intersubject correlations of scan paths
+    % Generates a heatmap of every trial's scanpath,
+    % then correlates each subject's scanpath with the n-1 group average
+    % for a particular stimulus.
 
-subList = unique(data.Subject);
-stimList = unique(data.StimName);
+    % First, get the heatmaps for each video
+    data = getTCData('heatmap');
+    numRows = size(data,1);
 
-numSub = length(subList);
-numStims = length(stimList);
+    % Init the output variable
+    dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
+    dtypes = {'string', 'double', 'double', 'double', 'logical'};
+    ISC = table('Size', [0, length(dheader)], 'VariableNames', dheader, 'VariableTypes', dtypes);
 
-% Init the output variable
-ISC = table('Size', [numStims, numSub+2], 'VariableNames', [{'StimName'}; {'GroupAverage'}; cellstr(subList)], 'VariableTypes', [{'string'}; {'cell'}; cellstr(repmat('double', [numSub, 1]))]);
-numExtra = width(ISC) - numSub;
-
-% First, get a group-average heatmap for each stimulus
-groupAverage = struct;
-for v = 1:numStims
-    thisStim = stimList{v};
-    ISC.StimName(v) = thisStim;
-    thisData = data.Eyetrack(strcmp(thisStim,data.StimName));
-    % Stack all the heatmaps into a 3D matrix
-    imStack = [];
-    for e = 1:size(thisData, 1)
-        imStack(:,:,e) = thisData{e};
-    end
-    % Now average across the 3rd dimension
-    ISC.GroupAverage{v} = mean(imStack, 3);
-end
-
-% isc = nan([numSub, 1]);
-% for s = 1:numSub
-%     % Do stuff per trial
-%     numTrials = height(data(s).beh);
-%     for t = 1:numTrials
-%         % See if this trial exists for subject 2
-
-
-for s = 1:numSub
-    % Analyze correlations of each subject to the group average
-    subDat = data(strcmp(data.Subject, subList{s}), :);
-    numTrials = height(subDat);
-    for t = 1:numTrials
-        tname = subDat.StimName{t};
-        % Figure which trial you need from the group stack
-        ind = find(strcmp(tname, ISC.StimName));
-        % Compare this subject to the group average
-        heatmap1 = subDat.Eyetrack{t};
-        heatmap2 = ISC.GroupAverage{ind};
+    % Suppress a warning about the way I fill the table
+    warning('off', 'MATLAB:table:RowsAddedExistingVars');
+    
+    % For each movie, compare each subject to all others
+    fprintf(1, 'Calculating intersubject correlations...');
+    for r = 1:numRows
+        % Which video is this?
+        stimName = data.StimName{r};
+        % Which subject is this?
+        subID = data.Subject{r};
+        % Get this subject's heatmap
+        heatmap1 = data.Eyetrack{r};
         
-        % Now correlate the heatmaps
-        ISC(ind, s+numExtra) = {corr2(heatmap1, heatmap2)};
+        % Calculate the n-1 group average heatmap
+        % First, see what n-1 is for this video
+        hitList = strcmp(stimName, data.StimName) & ~strcmp(subID, data.Subject);
+        if sum(hitList) == 0
+            % If there's no other results for this one, skip it
+            % Can't look at n-1 other people when n = 1
+            continue
+        else
+            % Stack all the other heatmaps into a 3D matrix
+            imStack = cat(3,data.Eyetrack{hitList});
+            % Now average across the 3rd dimension
+            heatmap2 = mean(imStack, 3);
+            % Compare and export
+            ISC.Eyetrack(r) = corr2(heatmap1, heatmap2);
+            
+            % Add all the other bits in too
+            ISC.Subject{r} = subID;
+            ISC.Response(r) = data.Response(r);
+            ISC.RT(r) = data.RT(r);
+            ISC.Flipped(r) = data.Flipped(r);
+            ISC.StimName{r} = stimName;
+        end
     end
-end
-% So now what?
+    ISC = rmmissing(ISC); % Drop any skipped rows
+    % Clean up before exit
+    warning('on', 'MATLAB:table:RowsAddedExistingVars');
+    fprintf(1, 'Done.\n');
 end
