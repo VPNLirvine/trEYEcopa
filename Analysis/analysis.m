@@ -35,13 +35,16 @@ if choice == 1
     % mdl = fitlm(data, 'Eyetrack ~ Response');
     
     % Histograms of the input variables
+    var1 = getGraphLabel(metricName);
+    var2 = 'Intentionality score';
+
     figure();
     subplot(1,2,1);
         histogram(data.Eyetrack);
-        xlabel(getGraphLabel(metricName));
+        xlabel(var1);
     subplot(1,2,2)
         histogram(data.Response);
-        xlabel('Intentionality score');
+        xlabel(var2);
 
     % Calculate correlations and generate some visualizations
     subList = unique(data.Subject);
@@ -56,16 +59,16 @@ if choice == 1
         % Use boxplots instead of a scatterplot because Response is ordinal
         % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
             boxplot(data.Eyetrack(subset), data.Response(subset));
-            xlabel('Intentionality Score');
-            ylabel(getGraphLabel(metricName));
+            xlabel(var2);
+            ylabel(var1);
             title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
             ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
         subplot(2,numSubs, s+numSubs)
         % But also add some scatterplots so you can see ALL your data
         % Helps give a better sense of where numbers are coming from
             scatter(data.Response(subset), data.Eyetrack(subset));
-            xlabel('Intentionality Score');
-            ylabel(getGraphLabel(metricName));
+            xlabel(var2);
+            ylabel(var1);
             title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
             ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
             xlim([0 6]);
@@ -77,8 +80,13 @@ if choice == 1
     mu = mean(output(:,2));
     sigma = std(output(:,2));
 
-    fprintf(1, '\n\nRESULTS:\n\n');
-    fprintf(1, 'Average correlation between %s and ')
+    fprintf(1, '\n\nRESULTS:\n');
+    fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
+    fprintf(1, '\t%0.2f (SD = %0.2f)\n', mu, sigma);
+    fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
+    fprintf(1, '\t%0.2f%%\n', 100*mean(output(:,2) .^2));
+    fprintf(1, '\n');
+
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:
