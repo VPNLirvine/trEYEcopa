@@ -42,9 +42,11 @@ if choice == 1
     subplot(1,2,1);
         histogram(data.Eyetrack);
         xlabel(var1);
+        title('Expect an RT-like distribution');
     subplot(1,2,2)
         histogram(data.Response);
         xlabel(var2);
+        title('Uniform distribution is ideal');
 
     % Calculate correlations and generate some visualizations
     subList = unique(data.Subject);
