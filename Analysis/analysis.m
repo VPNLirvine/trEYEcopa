@@ -88,6 +88,33 @@ if choice == 1
     fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
     fprintf(1, '\t%0.2f%%\n', 100*mean(output(:,2) .^2));
     fprintf(1, '\n');
+    
+    %
+    % Now correlate those correlations with the AQ scores
+    %
+    
+    % First get the AQ scores from the Qualtrics output
+    aqTable = getAQ(specifyPaths('..'));
+    % Ensure they're sorted the same as the other data
+    for s = 1:numSubs
+        subID = subList{s};
+        aq(s) = aqTable.AQ(strcmp(subID, aqTable.SubID));
+    end
+    aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
+    
+    % Now Fischer z-transform your previous data
+    zCorr = zscore(output(:,2));
+
+    % Plot and analyze
+    figure();
+        scatter(aq, zCorr);
+        xlabel('Autism Quotient');
+        ylabel(sprintf('Correlation between %s and %s:\n', var1, var2));
+        title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
+    secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+
+    fprintf(1, 'Correlation between AQ and above correlation:\n')
+    fprintf(1, '\t%0.2f\n', secondCorr);
 
 elseif choice == 2
     % Martin & Weisberg
