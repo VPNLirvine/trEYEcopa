@@ -257,7 +257,15 @@ try
     if debugmode
         numTrials = 4;
     else
-        numTrials = length(vidList);
+        switch taskID
+            case 'MartinWeisberg'
+                % Use all 16 videos
+                numTrials = length(vidList);
+            case 'TriCOPA'
+                % Use a subset
+                % This lets us run both experiments within an hour
+                numTrials = 70;
+        end
     end
     
     
