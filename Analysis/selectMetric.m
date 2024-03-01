@@ -108,7 +108,10 @@ switch metricName
         end
         % A number >= 1 of pixels to average over
         % 1 = full-resolution, 10 is what Isik used.
-        binRes = 1;
+        % Another Isik paper averaged 900x900 videos into 20 bins per side,
+        % Which is about 2 deg of visual angle.
+        binRes = round(deg2pix(2)); % calculate bin size using trig
+        % binRes = 80;
 
         % Get the data
         output = getHeatmap(xdat, ydat, scDim, binRes);

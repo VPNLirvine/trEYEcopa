@@ -1,6 +1,5 @@
 function analysis(varargin)
 % Perform statistical analysis on eyetracking data
-
 % Optional input 1 should be a metric name listed in selectMetric()
 if nargin > 0
     metricName = varargin{1};
@@ -27,21 +26,95 @@ if choice == 1
     %
     % Compare the eyetracking data to the behavioral data
     %
-    figure();
-    mdl = fitlm(data, 'Eyetrack ~ Response');
-    plot(mdl);
-        xlabel('Intentionality score');
-        ylabel(getGraphLabel(metricName));
-        title(sprintf('Linear model based on %i trials across %i subjects', numTrials, numSubs));
-    disp(mdl);
-    % Run some stats here
+
+    % Do not run a linear regression for predicting gaze from response
+    % because the response measure is technically a DV, not an IV.
+    % Do a correlation instead.
+    % Calculate individually per subject to make it RFX.
+    % mdl = fitlm(data, 'Eyetrack ~ Response');
+    
+    % Histograms of the input variables
+    var1 = getGraphLabel(metricName);
+    var2 = 'Intentionality score';
+
     figure();
     subplot(1,2,1);
         histogram(data.Eyetrack);
-        xlabel(getGraphLabel(metricName));
+        xlabel(var1);
+        title('Expect an RT-like distribution');
     subplot(1,2,2)
         histogram(data.Response);
-        xlabel('Intentionality score');
+        xlabel(var2);
+        title('Uniform distribution is ideal');
+
+    % Calculate correlations and generate some visualizations
+    subList = unique(data.Subject);
+    figure();
+    for s = 1:numSubs
+        subID = subList{s};
+        subset = strcmp(subID, data.Subject);
+        output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
+        output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
+        subplot(2, numSubs, s)
+        % Plot the eyetracking data against the understanding score
+        % Use boxplots instead of a scatterplot because Response is ordinal
+        % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
+            boxplot(data.Eyetrack(subset), data.Response(subset));
+            xlabel(var2);
+            ylabel(var1);
+            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+            ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+        subplot(2,numSubs, s+numSubs)
+        % But also add some scatterplots so you can see ALL your data
+        % Helps give a better sense of where numbers are coming from
+            scatter(data.Response(subset), data.Eyetrack(subset));
+            xlabel(var2);
+            ylabel(var1);
+            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+            ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+            xlim([0 6]);
+            xticks([1 2 3 4 5])
+            % lsline
+    end
+    
+    % Analyze the distribution of correlation scores
+    mu = mean(output(:,2));
+    sigma = std(output(:,2));
+
+    fprintf(1, '\n\nRESULTS:\n');
+    fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
+    fprintf(1, '\t%0.2f (SD = %0.2f)\n', mu, sigma);
+    fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
+    fprintf(1, '\t%0.2f%%\n', 100*mean(output(:,2) .^2));
+    fprintf(1, '\n');
+    
+    %
+    % Now correlate those correlations with the AQ scores
+    %
+    
+    % First get the AQ scores from the Qualtrics output
+    aqTable = getAQ(specifyPaths('..'));
+    % Ensure they're sorted the same as the other data
+    for s = 1:numSubs
+        subID = subList{s};
+        aq(s) = aqTable.AQ(strcmp(subID, aqTable.SubID));
+    end
+    aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
+    
+    % Now Fischer z-transform your previous data
+    zCorr = zscore(output(:,2));
+
+    % Plot and analyze
+    figure();
+        scatter(aq, zCorr, 'filled');
+        xlabel('Autism Quotient');
+        ylabel('Z-Transformed Spearman correlation');
+        title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
+    secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+
+    fprintf(1, 'Correlation between AQ and above correlation:\n')
+    fprintf(1, '\t%0.2f\n', secondCorr);
+
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:

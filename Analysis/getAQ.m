@@ -13,7 +13,7 @@ data = readtable(fname, "FileType", "delimitedtext", "Delimiter", "\t");
 
 % Set up export variable
 output = table();
-output.SubID = data.Q58;
+output.SubID = data.SubID;
 output.AQ = data.SC0;
 
 % Score the subscales:
