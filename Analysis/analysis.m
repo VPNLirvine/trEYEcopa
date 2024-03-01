@@ -1,6 +1,5 @@
 function analysis(varargin)
 % Perform statistical analysis on eyetracking data
-
 % Optional input 1 should be a metric name listed in selectMetric()
 if nargin > 0
     metricName = varargin{1};
@@ -107,9 +106,9 @@ if choice == 1
 
     % Plot and analyze
     figure();
-        scatter(aq, zCorr);
+        scatter(aq, zCorr, 'filled');
         xlabel('Autism Quotient');
-        ylabel(sprintf('Correlation between %s and %s:\n', var1, var2));
+        ylabel('Z-Transformed Spearman correlation');
         title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
     secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
 
