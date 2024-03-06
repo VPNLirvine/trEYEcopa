@@ -501,7 +501,7 @@ end
             if dummymode ==0 % If connected to EyeLink
                 % Show 'Receiving data file...' text until file transfer is complete
                 Screen('FillRect', window, el.backgroundcolour); % Prepare background on backbuffer
-                Screen('DrawText', window, 'Receiving data file...', 5, height-35, 0); % Prepare text
+                Screen('DrawText', window, 'Receiving data file...', 5, height-(0.2 * height), 0); % Prepare text
                 Screen('Flip', window); % Present text
                 fprintf('Receiving data file ''%s.edf''\n', edfFile); % Print some text in Matlab's Command Window
                 
