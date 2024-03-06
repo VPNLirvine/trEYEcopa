@@ -242,12 +242,12 @@ try
     fprintf(fid, 'Trial \tResponse \tRT \tTime \tStimName\n');
 
     % Set up a trial-level output file, for debugging timing info
-    fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
-    fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
-    fid2 = fopen(fOut2, 'w+');
-    fprintf(fid2, '%s\n', fOut2);
-    fprintf(fid2, '%s\n', datestr(now));
-    fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
+%     fOut2 = strcat(subID, '_task-debug_date-', datestr(now, 1));
+%     fOut2 = fullfile(pths.beh, [fOut2 '.tsv']);
+%     fid2 = fopen(fOut2, 'w+');
+%     fprintf(fid2, '%s\n', fOut2);
+%     fprintf(fid2, '%s\n', datestr(now));
+%     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
     % Some response keys
     spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -402,7 +402,7 @@ try
             
             % Output debug data
             % 'Trial \tStimName \tFrame \tOnset\n'
-            fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOn - vidStart);
+%             fprintf(fid2, '%i\t%s\t%i\t%4.6f\n', i, movieName, frameNum, frameOn - vidStart);
 
         end  % End while loop
         Screen('PlayMovie', movie, 0); % Stop playback
@@ -476,7 +476,7 @@ try
     transferFile; % See transferFile function below    
     
     fclose(fid); % close the behavioral output file
-    fclose(fid2); % close the debug file
+%     fclose(fid2); % close the debug file
 catch % If syntax error is detected
     cleanup;
     % Print error message and line number in Matlab's Command Window
