@@ -51,12 +51,25 @@ try
     response = -1; % 0 causes panic, anything else is a button
     lastPressed = -1;
     maxWait = 4; % max duration to wait for a response
-%     escKey = KbName('ESCAPE');
-    keyList(1) = KbName('1!');
-    keyList(2) = KbName('2@');
-    keyList(3) = KbName('3#');
-    keyList(4) = KbName('4$');
-    keyList(5) = KbName('5%');
+    
+    clear PsychHID; % re-scan for devices
+    devices = PsychHID('Devices');
+    mfg = {devices(:).manufacturer}; % i hate structs
+    if sum(contains(mfg, 'Empirisoft Research Software')) > 0
+        % use other
+        keyList(1) = KbName('3#');
+        keyList(2) = KbName('4$');
+        keyList(3) = KbName('5%');
+        keyList(4) = KbName('6^');
+        keyList(5) = KbName('7&');
+    else
+        keyList(1) = KbName('1!');
+        keyList(2) = KbName('2@');
+        keyList(3) = KbName('3#');
+        keyList(4) = KbName('4$');
+        keyList(5) = KbName('5%');
+    end
+    %     escKey = KbName('ESCAPE');
 
     qText = 'How understandable was the action in that video?';
     respChoices = {'1', '2', '3', '4', '5'}; % not used yet
