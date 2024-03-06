@@ -456,8 +456,20 @@ try
             % Exit trial loop, but still export files
             break
         else
-            % Code for response screen goes here
-            RT = getResp;
+            switch taskName
+                case 'MartinWeisberg'
+                % Don't bother collecting a rating of "understandability"
+                % The videos are so simple, they'll all be 4 or 5
+                % Ideally you'd avoid opening a response file at all,
+                % but I don't want to retool all the code. Just do this.
+                    RT = -1; response = -1;
+                case 'TriCOPA'
+                % Invoke subroutine for collecting response.
+                % Keep in mind that this happens AFTER the video,
+                % so the RT is kind of useless at the moment.
+                % But it also sets a global 'response' variable we need.
+                    RT = getResp;
+            end
             if panic
                 break
             end
