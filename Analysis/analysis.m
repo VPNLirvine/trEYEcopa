@@ -35,7 +35,7 @@ if choice == 1
     
     % Histograms of the input variables
     var1 = getGraphLabel(metricName);
-    var2 = 'Intentionality score';
+    var2 = 'Understandability rating';
 
     figure();
     subplot(1,2,1);
