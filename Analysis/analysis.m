@@ -59,7 +59,20 @@ if choice == 1
         % Plot the eyetracking data against the understanding score
         % Use boxplots instead of a scatterplot because Response is ordinal
         % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
-            boxplot(data.Eyetrack(subset), data.Response(subset));
+            % Handle cases where subjects don't use all the buttons:
+            % init an empty, oversize matrix
+            x = nan([length(data.Eyetrack), 5]);
+            dat = []; % tmp
+            for i = 1:5
+                % Get the values for each response choice
+                dat = data.Eyetrack(data.Response(subset) == i);
+                datl = length(dat);
+                if ~isempty(dat)
+                    % If no responses with this button, leave nans
+                    x(1:datl,i) = dat;
+                end
+            end
+            boxplot(x, 1:5); % which ignores nans thankfully
             xlabel(var2);
             ylabel(var1);
             title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
