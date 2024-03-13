@@ -96,9 +96,9 @@ if choice == 1
 
     fprintf(1, '\n\nRESULTS:\n');
     fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
-    fprintf(1, '\t%0.2f (SD = %0.2f)\n', mu, sigma);
+    fprintf(1, '\t\x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
     fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
-    fprintf(1, '\t%0.2f%%\n', 100*mean(output(:,2) .^2));
+    fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
     fprintf(1, '\n');
     
     %
@@ -126,7 +126,7 @@ if choice == 1
     secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
 
     fprintf(1, 'Correlation between AQ and above correlation:\n')
-    fprintf(1, '\t%0.2f\n', secondCorr);
+    fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
 
 elseif choice == 2
     % Martin & Weisberg
