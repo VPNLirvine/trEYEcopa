@@ -47,65 +47,80 @@ if choice == 1
         xlabel(var2);
         title('Uniform distribution is ideal');
 
-    % Calculate correlations and generate some visualizations
     subList = unique(data.Subject);
-    figure();
-    for s = 1:numSubs
-        subID = subList{s};
-        subset = strcmp(subID, data.Subject);
-        output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
-        output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
-        subplot(3, numSubs, s)
-        % Plot the eyetracking data against the understanding score
-        % Use boxplots instead of a scatterplot because Response is ordinal
-        % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
-            % Handle cases where subjects don't use all the buttons:
-            % init an empty, oversize matrix
-            x = nan([length(data.Eyetrack), 5]);
-            dat = []; % tmp
-            for i = 1:5
-                % Get the values for each response choice
-                dat = data.Eyetrack(data.Response(subset) == i);
-                datl = length(dat);
-                if ~isempty(dat)
-                    % If no responses with this button, leave nans
-                    x(1:datl,i) = dat;
-                end
-            end
-            boxplot(x, 1:5); % which ignores nans thankfully
-            xlabel(var2);
-            ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
-            ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
-        subplot(3,numSubs, s+numSubs)
-        % But also add some scatterplots so you can see ALL your data
-        % Helps give a better sense of where numbers are coming from
-            scatter(data.Response(subset), data.Eyetrack(subset));
-            xlabel(var2);
-            ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
-            ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
-            xlim([0 6]);
-            xticks([1 2 3 4 5])
-            % lsline
-        subplot(3,numSubs,s+(2*numSubs))
-        % Let's also look at response distributions per subject
-            histogram(data.Response(subset));
-            xlabel(var2);
-            title('Uniform distribution is ideal');
-    end
-    
-    % Analyze the distribution of correlation scores
-    mu = mean(output(:,2));
-    sigma = std(output(:,2));
 
-    fprintf(1, '\n\nRESULTS:\n');
-    fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
-    fprintf(1, '\tSpearman''s \x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
-    fprintf(1, '\tPearson''s r = %0.2f (SF = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
-    fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
-    fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
-    fprintf(1, '\n');
+    if strcmp(metricName, 'ISC')
+        % Correlations with the behavioral ratings are low and not too variable,
+        % so we're going to skip that portion of the analysis.
+        % Here, just get an average ISC to feed into the AQ correlation.
+        output = zeros([numSubs,2]); % 2 columns to match size of main analysis
+        for i = 1:numSubs
+            % Subset to one subject's data
+            % Take average 'Eyetrack' value, which is ISC per video
+            output(i,:) = mean(data.Eyetrack(strcmp(data.Subject, subList{i})));
+        end
+        % Now have one ISC per subject, averaged across all videos
+        % Move to final step to correlate this with AQ
+    else
+        % Calculate correlations and generate some visualizations
+        figure();
+        for s = 1:numSubs
+            subID = subList{s};
+            subset = strcmp(subID, data.Subject);
+            output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
+            output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
+            subplot(3, numSubs, s)
+            % Plot the eyetracking data against the understanding score
+            % Use boxplots instead of a scatterplot because Response is ordinal
+            % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
+                % Handle cases where subjects don't use all the buttons:
+                % init an empty, oversize matrix
+                x = nan([length(data.Eyetrack), 5]);
+                dat = []; % tmp
+                for i = 1:5
+                    % Get the values for each response choice
+                    dat = data.Eyetrack(data.Response(subset) == i);
+                    datl = length(dat);
+                    if ~isempty(dat)
+                        % If no responses with this button, leave nans
+                        x(1:datl,i) = dat;
+                    end
+                end
+                boxplot(x, 1:5); % which ignores nans thankfully
+                xlabel(var2);
+                ylabel(var1);
+                title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+                ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+            subplot(3,numSubs, s+numSubs)
+            % But also add some scatterplots so you can see ALL your data
+            % Helps give a better sense of where numbers are coming from
+                scatter(data.Response(subset), data.Eyetrack(subset));
+                xlabel(var2);
+                ylabel(var1);
+                title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+                ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+                xlim([0 6]);
+                xticks([1 2 3 4 5])
+                % lsline
+            subplot(3,numSubs,s+(2*numSubs))
+            % Let's also look at response distributions per subject
+                histogram(data.Response(subset));
+                xlabel(var2);
+                title('Uniform distribution is ideal');
+        end % getting data per subject
+    
+        % Analyze the distribution of correlation scores
+        mu = mean(output(:,2));
+        sigma = std(output(:,2));
+    
+        fprintf(1, '\n\nRESULTS:\n');
+        fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
+        fprintf(1, '\tSpearman''s \x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
+        fprintf(1, '\tPearson''s r = %0.2f (SF = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
+        fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
+        fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
+        fprintf(1, '\n');
+    end % switch on metricname
     
     %
     % Now correlate those correlations with the AQ scores
