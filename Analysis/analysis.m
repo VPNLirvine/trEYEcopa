@@ -54,13 +54,25 @@ if choice == 1
         % so we're going to skip that portion of the analysis.
         % Here, just get an average ISC to feed into the AQ correlation.
         output = zeros([numSubs,2]); % 2 columns to match size of main analysis
+        figure();
         for i = 1:numSubs
             % Subset to one subject's data
+            subID = subList{i};
+            subset = strcmp(subID, data.Subject);
             % Take average 'Eyetrack' value, which is ISC per video
-            output(i,:) = mean(data.Eyetrack(strcmp(data.Subject, subList{i})));
+            output(i,:) = mean(data.Eyetrack(subset));
+            
+            % Plot each subject's ISC distribution
+            subplot(1,numSubs,i);
+                histogram(data.Eyetrack(subset));
+                xlabel(var1);
+                title([strrep(subID, '_', '\_'), sprintf(' - mean = %0.2f', output(i,2))]);
         end
         % Now have one ISC per subject, averaged across all videos
         % Move to final step to correlate this with AQ
+        level2 = 'Mean ISC within subject';
+        var2 = [];
+        fprintf(1, '\n\n');
     else
         % Calculate correlations and generate some visualizations
         figure();
@@ -120,6 +132,8 @@ if choice == 1
         fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
         fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
         fprintf(1, '\n');
+
+        level2 = 'above correlation';
     end % switch on metricname
     
     %
@@ -139,15 +153,21 @@ if choice == 1
     zCorr = zscore(output(:,2));
 
     % Plot and analyze
+    l2 = ['Z-Transform of ', level2];
     figure();
         scatter(aq, zCorr, 'filled');
         xlabel('Autism Quotient');
-        ylabel('Z-Transformed Spearman correlation');
-        title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
+        ylabel(l2);
+        if isempty(var2)
+            title(sprintf('Impact of AQ on %s', var1));
+        else
+            title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
+        end
+
     secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
 
-    fprintf(1, 'Correlation between AQ and above correlation:\n')
-    fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+    fprintf(1, 'Correlation between AQ and %s:\n', l2);
+    fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', secondCorr);
 
 elseif choice == 2
     % Martin & Weisberg
