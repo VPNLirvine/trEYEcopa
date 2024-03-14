@@ -22,7 +22,7 @@ if choice == 1
     end
     numSubs = size(unique(data.Subject), 1);
     numTrials = height(data);
-
+    
     %
     % Compare the eyetracking data to the behavioral data
     %
@@ -55,7 +55,7 @@ if choice == 1
         subset = strcmp(subID, data.Subject);
         output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
         output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
-        subplot(2, numSubs, s)
+        subplot(3, numSubs, s)
         % Plot the eyetracking data against the understanding score
         % Use boxplots instead of a scatterplot because Response is ordinal
         % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
@@ -77,7 +77,7 @@ if choice == 1
             ylabel(var1);
             title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
             ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
-        subplot(2,numSubs, s+numSubs)
+        subplot(3,numSubs, s+numSubs)
         % But also add some scatterplots so you can see ALL your data
         % Helps give a better sense of where numbers are coming from
             scatter(data.Response(subset), data.Eyetrack(subset));
@@ -88,6 +88,11 @@ if choice == 1
             xlim([0 6]);
             xticks([1 2 3 4 5])
             % lsline
+        subplot(3,numSubs,s+(2*numSubs))
+        % Let's also look at response distributions per subject
+            histogram(data.Response(subset));
+            xlabel(var2);
+            title('Uniform distribution is ideal');
     end
     
     % Analyze the distribution of correlation scores
