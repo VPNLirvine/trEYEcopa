@@ -149,11 +149,16 @@ if choice == 1
     end
     aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
     
-    % Now Fischer z-transform your previous data
-    zCorr = zscore(output(:,2));
-
+    if strcmp(metricName, 'ISC')
+        % Analyze raw ISC, not z-transform?
+        zCorr = output(:,2);
+        l2 = level2;
+    else
+        % Fischer z-transform your previous data
+        zCorr = zscore(output(:,2));
+        l2 = ['Z-Transform of ', level2];
+    end
     % Plot and analyze
-    l2 = ['Z-Transform of ', level2];
     figure();
         scatter(aq, zCorr, 'filled');
         xlabel('Autism Quotient');
