@@ -12,8 +12,10 @@ iscBins = 0:0.1:1;
 for v = 1:numVids
     vidName = stimList{v};
     subset = strcmp(vidName, data.StimName);
-    output(v,1) = mean(data.Eyetrack(subset));
-    output(v,2) = mean(data.Response(subset));
+    output.meanISC(v) = mean(data.Eyetrack(subset));
+    output.stdISC(v) = std(data.Eyetrack(subset));
+    output.meanResp(v) = mean(data.Response(subset));
+    output.stdResp(v) = std(data.Response(subset));
     if rem(v,10) == 1
         figure();
         x = 0;
@@ -37,8 +39,16 @@ end
 
 % Overall scatterplot shows no relation
 figure();
-    scatter(output(:,2), output(:,1));
+    scatter(output.meanResp, output.meanISC);
     xlabel('Rating');
     ylabel('ISC');
+    title('Each dot = one video, averaged across subjects')
+    xlim([0,6]);
+    ylim([0,1]);
+
+% Try looking for outliers?
+zISC = zscore(output.meanISC);
+tally = zISC >= 3 | zISC <= -3;
+fprintf(1, '%i stims with an outlier average ISC\n', sum(tally));
 
 end
