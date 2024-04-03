@@ -51,12 +51,36 @@ try
     response = -1; % 0 causes panic, anything else is a button
     lastPressed = -1;
     maxWait = 4; % max duration to wait for a response
-%     escKey = KbName('ESCAPE');
-    keyList(1) = KbName('1!');
-    keyList(2) = KbName('2@');
-    keyList(3) = KbName('3#');
-    keyList(4) = KbName('4$');
-    keyList(5) = KbName('5%');
+    
+    clear PsychHID; % re-scan for devices
+    devices = PsychHID('Devices');
+    mfg = {devices(:).manufacturer}; % i hate structs
+    indicator = [];
+    if sum(contains(mfg, 'Empirisoft Research Software')) > 0
+        % use other
+        keyList(1) = KbName('3#');
+        keyList(2) = KbName('4$');
+        keyList(3) = KbName('5%');
+        keyList(4) = KbName('6^');
+        keyList(5) = KbName('7&');
+        
+        % Response keys
+        spaceBar = KbName('9(');
+        deleteKey = KbName('1!');
+        indicator = 'rightmost button';
+    else
+        keyList(1) = KbName('1!');
+        keyList(2) = KbName('2@');
+        keyList(3) = KbName('3#');
+        keyList(4) = KbName('4$');
+        keyList(5) = KbName('5%');
+        
+        % Some response keys
+        spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
+        deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
+        indicator = 'spacebar';
+    end
+%         escKey = KbName('ESCAPE');
 
     qText = 'How understandable was the action in that video?';
     respChoices = {'1', '2', '3', '4', '5'}; % not used yet
@@ -249,9 +273,6 @@ try
 %     fprintf(fid2, '%s\n', datestr(now));
 %     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
-    % Some response keys
-    spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
-    deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
     
     % Truncate the number of trials if debugging
     if debugmode
@@ -268,7 +289,7 @@ try
     'you will be asked how well you understood the interaction\n'...
     'on a scale of 1 (low) to 5 (high).\n'...
     'Press the corresponding button on the keyboard as fast as you can.\n\n\n' ...
-    'Please press the spacebar when you are ready to begin.']);
+    'Please press the %s when you are ready to begin.'], indicator);
     Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
     DrawFormattedText(window, iText, 'center', 'center', TextColor);
     Screen('Flip', window);
