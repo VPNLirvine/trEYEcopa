@@ -477,7 +477,7 @@ try
             % Exit trial loop, but still export files
             break
         else
-            switch taskName
+            switch taskID
                 case 'MartinWeisberg'
                 % Don't bother collecting a rating of "understandability"
                 % The videos are so simple, they'll all be 4 or 5
