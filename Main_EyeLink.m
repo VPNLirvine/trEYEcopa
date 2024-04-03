@@ -55,6 +55,7 @@ try
     clear PsychHID; % re-scan for devices
     devices = PsychHID('Devices');
     mfg = {devices(:).manufacturer}; % i hate structs
+    indicator = [];
     if sum(contains(mfg, 'Empirisoft Research Software')) > 0
         % use other
         keyList(1) = KbName('3#');
@@ -66,6 +67,7 @@ try
         % Response keys
         spaceBar = KbName('9(');
         deleteKey = KbName('1!');
+        indicator = 'rightmost button';
     else
         keyList(1) = KbName('1!');
         keyList(2) = KbName('2@');
@@ -76,6 +78,7 @@ try
         % Some response keys
         spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
         deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
+        indicator = 'spacebar';
     end
 %         escKey = KbName('ESCAPE');
 
@@ -286,7 +289,7 @@ try
     'you will be asked how well you understood the interaction\n'...
     'on a scale of 1 (low) to 5 (high).\n'...
     'Press the corresponding button on the keyboard as fast as you can.\n\n\n' ...
-    'Please press the spacebar when you are ready to begin.']);
+    'Please press the %s when you are ready to begin.'], indicator);
     Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
     DrawFormattedText(window, iText, 'center', 'center', TextColor);
     Screen('Flip', window);
