@@ -62,14 +62,22 @@ try
         keyList(3) = KbName('5%');
         keyList(4) = KbName('6^');
         keyList(5) = KbName('7&');
+        
+        % Response keys
+        spaceBar = KbName('9(');
+        deleteKey = KbName('1!');
     else
         keyList(1) = KbName('1!');
         keyList(2) = KbName('2@');
         keyList(3) = KbName('3#');
         keyList(4) = KbName('4$');
         keyList(5) = KbName('5%');
+        
+        % Some response keys
+        spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
+        deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
     end
-    %     escKey = KbName('ESCAPE');
+%         escKey = KbName('ESCAPE');
 
     qText = 'How understandable was the action in that video?';
     respChoices = {'1', '2', '3', '4', '5'}; % not used yet
@@ -262,9 +270,6 @@ try
     fprintf(fid2, '%s\n', datestr(now));
     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
-    % Some response keys
-    spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
-    deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
     
     % Truncate the number of trials if debugging
     if debugmode
