@@ -68,6 +68,8 @@ try
         spaceBar = KbName('9(');
         deleteKey = KbName('1!');
         indicator = 'rightmost button';
+        
+        rText = '\nNo responses needed this time - simply watch and enjoy.\n\n\n';
     else
         keyList(1) = KbName('1!');
         keyList(2) = KbName('2@');
@@ -79,11 +81,16 @@ try
         spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
         deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
         indicator = 'spacebar';
+        
+        rText = ['After each video, \n' ...
+    'you will be asked how well you understood the interaction\n'...
+    'on a scale of 1 (low) to 5 (high).\n'...
+    'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
     end
 %         escKey = KbName('ESCAPE');
 
     qText = 'How understandable was the action in that video?';
-    respChoices = {'1', '2', '3', '4', '5'}; % not used yet
+    respChoices = {'1', '2', '3', '4', '5'}; % used by getResp
     numResps = length(respChoices);
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
@@ -293,11 +300,8 @@ try
     %% STEP 4C: Display instructions before experiment starts
     
     iText = sprintf(['You are about to watch a series of %i short video clips,\n'...
-    'depicting some interacting shapes. After each video, \n' ...
-    'you will be asked how well you understood the interaction\n'...
-    'on a scale of 1 (low) to 5 (high).\n'...
-    'Press the corresponding button on the keyboard as fast as you can.\n\n\n' ...
-    'Please press the %s when you are ready to begin.'], numTrials, indicator);
+    'depicting some interacting shapes. %s' ...
+    'Please press the %s when you are ready to begin.'], numTrials, rText, indicator);
     Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
     DrawFormattedText(window, iText, 'center', 'center', TextColor);
     Screen('Flip', window);
