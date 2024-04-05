@@ -128,7 +128,7 @@ if choice == 1
         fprintf(1, '\n\nRESULTS:\n');
         fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
         fprintf(1, '\tSpearman''s \x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
-        fprintf(1, '\tPearson''s r = %0.2f (SF = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
+        fprintf(1, '\tPearson''s r = %0.2f (SD = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
         fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
         fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
         fprintf(1, '\n');
