@@ -37,6 +37,7 @@ switch metricName
         txt = 'Intersubject correlation with group mean';
         hy = [0 1];
         % no idea what yl is...
+        yl = 'tight'; % temp until I determine proper limits
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end % switch
