@@ -15,7 +15,8 @@ switch metricName
     case 'meanfix'
         txt = 'Average fixation time in ms';
         hy = [0 60];
-        yl = [220 1000];
+        % yl = [220 1000];
+        yl = [0 1000];
     case 'medianfix'
         txt = 'Median fixation time in ms';
         hy = [0 60];

@@ -34,7 +34,7 @@ if choice == 1
     % mdl = fitlm(data, 'Eyetrack ~ Response');
     
     % Histograms of the input variables
-    var1 = getGraphLabel(metricName);
+    [var1,~,yl] = getGraphLabel(metricName);
     var2 = 'Understandability rating';
 
     figure();
@@ -102,7 +102,7 @@ if choice == 1
                 xlabel(var2);
                 ylabel(var1);
                 title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
-                ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+                ylim(yl); % varies based on metric
             subplot(3,numSubs, s+numSubs)
             % But also add some scatterplots so you can see ALL your data
             % Helps give a better sense of where numbers are coming from
@@ -110,7 +110,7 @@ if choice == 1
                 xlabel(var2);
                 ylabel(var1);
                 title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
-                ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
+                ylim(yl); % varies based on metric
                 xlim([0 6]);
                 xticks([1 2 3 4 5])
                 % lsline
