@@ -17,6 +17,7 @@ if choice == 1
     fprintf(1, 'Using metric %s\n\n', metricName);
     if strcmp(metricName, 'ISC')
         data = doISC;
+        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
     else
         data = getTCData(metricName);
     end
