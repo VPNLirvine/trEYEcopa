@@ -68,8 +68,7 @@ try
         spaceBar = KbName('9(');
         deleteKey = KbName('1!');
         indicator = 'rightmost button';
-        
-        rText = '\nNo responses needed this time - simply watch and enjoy.\n\n\n';
+
     else
         keyList(1) = KbName('1!');
         keyList(2) = KbName('2@');
@@ -81,11 +80,7 @@ try
         spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
         deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
         indicator = 'spacebar';
-        
-        rText = ['After each video, \n' ...
-    'you will be asked how well you understood the interaction\n'...
-    'on a scale of 1 (low) to 5 (high).\n'...
-    'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
+
     end
 %         escKey = KbName('ESCAPE');
 
@@ -117,6 +112,19 @@ try
     % Parse input
     [stimPath, outputPath, vidList, prefix] = stimFinder(answer{1}, answer{2});
     subID = strcat(prefix, answer{1});
+    
+    % Ask for response?
+    switch answer{2}
+        case 1
+            % TriCOPA
+            rText = ['After each video, \n' ...
+            'you will be asked how well you understood the interaction\n'...
+            'on a scale of 1 (low) to 5 (high).\n'...
+            'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
+        case 2
+            % Martin & Weisberg     
+            rText = '\nNo responses needed this time - simply watch and enjoy.\n\n\n';
+    end
     
     edfFile = subID; % Save file name to a variable
     % Print some text in Matlab's Command Window if file name is longer than 8 characters
