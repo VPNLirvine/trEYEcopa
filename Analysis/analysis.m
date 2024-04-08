@@ -17,6 +17,7 @@ if choice == 1
     fprintf(1, 'Using metric %s\n\n', metricName);
     if strcmp(metricName, 'ISC')
         data = doISC;
+        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
     else
         data = getTCData(metricName);
     end
@@ -107,6 +108,16 @@ if choice == 1
     
     % First get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));
+            % validate
+        numAQ = height(aqTable);
+        if numSubs > numAQ
+            txt = sprintf(['There are %i EDF files, '...
+                'but Qualtrics data had only %i subjects. '...
+                'Please resolve and try again.\n'...
+                'You likely just need to re-download the Qualtrics data.'] ...
+                , numSubs, numAQ);
+            error(txt)
+        end
     % Ensure they're sorted the same as the other data
     for s = 1:numSubs
         subID = subList{s};
