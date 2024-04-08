@@ -115,13 +115,13 @@ try
     
     % Ask for response?
     switch answer{2}
-        case 1
+        case '1'
             % TriCOPA
             rText = ['After each video, \n' ...
             'you will be asked how well you understood the interaction\n'...
             'on a scale of 1 (low) to 5 (high).\n'...
             'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
-        case 2
+        case '2'
             % Martin & Weisberg     
             rText = '\nNo responses needed this time - simply watch and enjoy.\n\n\n';
     end
