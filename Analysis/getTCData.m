@@ -26,6 +26,10 @@ function data = getTCData(metricName)
         % Get subject ID
         edfName = edfList(subject).name;
         subID = erase(edfName, '.edf');
+        if contains(subID, '.EDF')
+            % Catch uppercase ext while preserving everything else's case
+            subID = erase(subID, '.EDF');
+        end
         
         % Get behavioral data
         blist = dir(fullfile(pths.beh, [subID, '_task-TriCOPA_', '*.txt']));

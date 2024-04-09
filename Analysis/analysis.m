@@ -66,7 +66,7 @@ if choice == 1
             dat = []; % tmp
             for i = 1:5
                 % Get the values for each response choice
-                dat = data.Eyetrack(data.Response(subset) == i);
+                dat = data.Eyetrack(data.Response == i & subset);
                 datl = length(dat);
                 if ~isempty(dat)
                     % If no responses with this button, leave nans
@@ -76,7 +76,7 @@ if choice == 1
             boxplot(x, 1:5); % which ignores nans thankfully
             xlabel(var2);
             ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+            title([strrep(subID, '_', '\_'), sprintf(', rho = %0.2f', output(s,2))]);
             ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
         subplot(2,numSubs, s+numSubs)
         % But also add some scatterplots so you can see ALL your data
@@ -84,7 +84,7 @@ if choice == 1
             scatter(data.Response(subset), data.Eyetrack(subset));
             xlabel(var2);
             ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', Spearman''s rho = %0.2f', output(s,2))]);
+            title([strrep(subID, '_', '\_'), sprintf(', rho = %0.2f', output(s,2))]);
             ylim([0, 1]); % fixation proportions are bounded from 0 to 100%
             xlim([0 6]);
             xticks([1 2 3 4 5])
