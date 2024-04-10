@@ -10,6 +10,7 @@ function output = selectMetric(edfDat, metricName, varargin)
 %   'maxfixOnset' - Onset time of the longest fixation
 %   'minfixOnset' - Onset time of the shortest fixation
 %   'meansacdist' - Average distance of all saccades within a trial
+%   'pupil' - Raw pupil size over time
 %   'heatmap' - a 2D heatmap summarizing the scanpath
 
 % Determine how many eyes were used
@@ -80,6 +81,14 @@ switch metricName
         valueInB = B(colIdx);
         valueInC = C(colIdx);
         output = [valueInB; valueInC];
+    case 'pupil'
+        % Uncalibrated size of pupil, given as diameter OR area
+        % Size varies over time, and that variation could be informative
+        
+        % This is the raw signal, which will screw up the regular analysis
+        % Either need to write a custom timeseries analysis,
+        % or else average this down to a single number
+        output = pickCoordData(edfDat.Samples.pa);
     case 'heatmap'
         % This is a 2D matrix, not a single value! Be careful.
 
