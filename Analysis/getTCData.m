@@ -9,7 +9,7 @@ function data = getTCData(metricName)
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    if strcmp(metricName, 'heatmap')
+    if any(strcmp(metricName, {'heatmap', 'pupil'}))
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'double', 'double', 'logical'};
     else
@@ -64,7 +64,11 @@ function data = getTCData(metricName)
                     opts = behav.Flipped(t);
                     eyetrack{t} = selectMetric(edf(t), 'heatmap', opts);
                     % Note above is cell, not double like below
+                elseif strcmp(metricName, 'pupil')
+                    % Use a cell to contain a vector
+                    eyetrack{t} = selectMetric(edf(t), metricName);
                 else
+                    % Use a double bc it's just one number
                     eyetrack(t) = selectMetric(edf(t), metricName);
                 end
             end
