@@ -13,7 +13,9 @@ function output = selectMetric(edfDat, metricName, varargin)
 %   'heatmap' - a 2D heatmap summarizing the scanpath
 
 % Determine how many eyes were used
-% If more than one, pick one at random and discard the other
+% values of n: 0 = left, 1 = right.
+% Length of n should be the number of eyes tracked.
+% If more than one, pick one eye at random and ignore the other
 n = unique(edfDat.Saccades.eye);
 if length(n) == 2
     i = round(rand());
