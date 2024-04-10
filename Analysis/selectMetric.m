@@ -32,12 +32,11 @@ switch metricName
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i);
         data = fixOutliers(data); 
         data = sum(data);
-        duration = double(edfDat.Header.duration);
-        
-        if duration == 0
-            % This does actually happen for some reason
-            duration = double(edfDat.Header.endtime - edfDat.Header.starttime);
-        end
+        % duration = double(edfDat.Header.duration);
+        duration = double(edfDat.Header.endtime - edfDat.Header.starttime);
+        % The provided duration value is unreliable:
+        % sometimes it's 0, sometimes it's far less than sum(fixations)
+        % so just calculate it from start and end time instead.
 
         output = data / duration;
     case 'meanfix'
