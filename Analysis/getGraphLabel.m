@@ -1,6 +1,10 @@
 function [txt, varargout] = getGraphLabel(metricName)
 % Define the axis labels used by boxPlot2
 % Also export the xlim and ylim vectors
+% hy = "histogram y", i.e. the max expected count
+% yl = y limit, i.e. the max expected value
+% yl is typically the x axis of a histogram
+% hy is really only definable once you have all your data
 switch metricName
     case 'rawfix'
         txt = 'Fixation durations in ms';
@@ -34,8 +38,8 @@ switch metricName
         yl = [0 9];
     case 'ISC'
         txt = 'Intersubject correlation with group mean';
-        hy = [0 1];
-        % no idea what yl is...
+        hy = [0 45];
+        yl = [0 1];
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end % switch
