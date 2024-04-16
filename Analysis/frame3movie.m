@@ -23,31 +23,63 @@ function frame3movie(movName)
     ax.Units = 'pixels';  % Set the units of the axes to pixels
     
     % Load the first frame and get its dimensions
-    imhndl = imread(fullfile(impath, '1.jpg'));
+    imhndl = imread(fullfile(imPath, '1.jpg'));
     [imh, imw, ~] = size(imhndl);
-    scVec = get(0, 'ScreenSize');  % Get the screen size
+%     scVec = get(0, 'ScreenSize');  % Get the screen size
+    scVec = [1,1,1920,1200]; % size of stimulus monitor
     scw = scVec(3);
     sch = scVec(4);
     
     % Load up all the frames before drawing anything
     frameList = dir([imPath filesep '*' frameFormat]);
     numFrames = length(frameList);
+    fprintf(1, 'Loading frames...');
     for f = numFrames:-1:1 % backward!
         frames(f).dat = imread([imPath filesep num2str(f) frameFormat]);
     end
-
-    pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
+    fprintf(1, 'Done.\n');
     
+%     pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
+    pos = [0 imw 0 imh];
     posData = getPosition;
     m = strcmp(posData.StimName, movName);
-    posDat(1).X = posData.X1_Values(m);
-    posDat(1).Y = posData.Y1_Values(m);
-    posDat(2).X = posData.X2_Values(m);
-    posDat(2).Y = posData.Y2_Values(m);
-    posDat(3).X = posData.X3_Values(m);
-    posDat(3).Y = posData.Y3_Values(m);
-    posDat(4).X = posData.X4_Values(m);
-    posDat(4).Y = posData.Y4_Values(m);
+    % Rescaling factors (since data is 4000x3000 instead of 678x508)
+    xrs = pos(2)/4000;
+    yrs = pos(4)/3000;
+    % Now do some temporal rescaling of the position data:
+    % It exists at some unknown framerate that doesn't match the video.
+    % Assume the video is at 60 fps and rescale the position data to match.
+    numCoords = length(posData.X1_Values{m});
+    tdiff = numFrames - numCoords; % Assume this is positive.
+    tlead = 1+floor(tdiff/2);
+    tlag = tlead + numCoords -1;
+    % Fill the 'leading' frames with the first position value
+    posDat(1).X(1:tlead) = posData.X1_Values{m}(1) .* xrs;
+    posDat(1).Y(1:tlead) = posData.Y1_Values{m}(1) .* yrs;
+    posDat(2).X(1:tlead) = posData.X2_Values{m}(1) .* xrs;
+    posDat(2).Y(1:tlead) = posData.Y2_Values{m}(1) .* yrs;
+    posDat(3).X(1:tlead) = posData.X3_Values{m}(1) .* xrs;
+    posDat(3).Y(1:tlead) = posData.Y3_Values{m}(1) .* yrs;
+    posDat(4).X(1:tlead) = posData.X4_Values{m}(1) .* xrs;
+    posDat(4).Y(1:tlead) = posData.Y4_Values{m}(1) .* yrs;
+    % Fill the 'middle' frames with the actual data
+    posDat(1).X(tlead:tlag) = posData.X1_Values{m} .* xrs;
+    posDat(1).Y(tlead:tlag) = posData.Y1_Values{m} .* yrs;
+    posDat(2).X(tlead:tlag) = posData.X2_Values{m} .* xrs;
+    posDat(2).Y(tlead:tlag) = posData.Y2_Values{m} .* yrs;
+    posDat(3).X(tlead:tlag) = posData.X3_Values{m} .* xrs;
+    posDat(3).Y(tlead:tlag) = posData.Y3_Values{m} .* yrs;
+    posDat(4).X(tlead:tlag) = posData.X4_Values{m} .* xrs;
+    posDat(4).Y(tlead:tlag) = posData.Y4_Values{m} .* yrs;
+    % Fill the 'lagging' frames with the final position value
+    posDat(1).X(tlag:numFrames) = posData.X1_Values{m}(end) .* xrs;
+    posDat(1).Y(tlag:numFrames) = posData.Y1_Values{m}(end) .* yrs;
+    posDat(2).X(tlag:numFrames) = posData.X2_Values{m}(end) .* xrs;
+    posDat(2).Y(tlag:numFrames) = posData.Y2_Values{m}(end) .* yrs;
+    posDat(3).X(tlag:numFrames) = posData.X3_Values{m}(end) .* xrs;
+    posDat(3).Y(tlag:numFrames) = posData.Y3_Values{m}(end) .* yrs;
+    posDat(4).X(tlag:numFrames) = posData.X4_Values{m}(end) .* xrs;
+    posDat(4).Y(tlag:numFrames) = posData.Y4_Values{m}(end) .* yrs;
     
     % Set up image
         i = 1;
@@ -73,7 +105,8 @@ function frame3movie(movName)
         h4.XData = posDat(4).X(i);
         h4.YData = posDat(4).Y(i);
         drawnow;
-        pause(1/15); % compensate for frame rate
+%         pause(1/15); % compensate for frame rate
+        pause(1/60);
     end
     
     toc  % Display the elapsed time

@@ -13,6 +13,7 @@ data = table();
 for i = 1:numTrials
     % Recreate filename
     t = erase(tmp.Performance_Label_ID{i}, 'COPA ');
+    t = replace(t, ' ', '_');
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
 
     % Sort characters
