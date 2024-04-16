@@ -6,14 +6,14 @@ function frameGenerator(movieName)
 % Define paths
 addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
-mwPath = fullfile(pths.stimuli, 'Martin Weisberg stims');
-tcPath = fullfile(pths.stimuli, 'TCconverted');
+mwPath = fullfile(pths.MWstim);
+tcPath = fullfile(pths.TCstim);
 
 % Determine where the file exists, if at all
 if exist(fullfile(mwPath, movieName), 'file')
     videoPath = mwPath;
-elseif exist(fullfile(tcPath, movieName), 'file')
-    videoPath = tcPath;
+elseif exist(fullfile(tcPath, 'normal', movieName), 'file')
+    videoPath = fullfile(tcPath, 'normal');
 else
     error('No such video file found! Check frameGenerator() for paths searched');
 end
