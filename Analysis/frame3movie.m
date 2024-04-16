@@ -2,9 +2,6 @@ function frame3movie(movName)
     % Plays a stimulus video with position data overlaid
     % Requires having run frameGenerator on the corresponding stimulus
     % Input is the name of a video
-    
-    Trials = [];
-    trialNum = [];
 
     addpath('..'); % to allow specifyPaths to run
     pths = specifyPaths('..');
@@ -38,12 +35,9 @@ function frame3movie(movName)
     for f = numFrames:-1:1 % backward!
         frames(f).dat = imread([imPath filesep num2str(f) frameFormat]);
     end
-    
-    frameNum = 0;  % Initialize frame number
-    fixNum = 0;  % Initialize fixation number
+
     pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
     
-
     posData = getPosition;
     m = strcmp(posData.StimName, movName);
     posDat(1).X = posData.X1_Values(m);
@@ -54,24 +48,6 @@ function frame3movie(movName)
     posDat(3).Y = posData.Y3_Values(m);
     posDat(4).X = posData.X4_Values(m);
     posDat(4).Y = posData.Y4_Values(m);
-    fixdat = struct('X',[],'Y',[]); % init
-    % Loop through each event in the trial
-    for event = 1:length(Trials(trialNum).Events.message)
-        % Check if the event message contains 'displayed' or if the event type is 7
-        if contains(Trials(trialNum).Events.message{event},'displayed') || Trials(trialNum).Events.type(event) == 7
-            frameNum = frameNum + contains(Trials(trialNum).Events.message{event},'displayed');  % Increment frame number if 'displayed' is found
-            fixNum = fixNum + (Trials(trialNum).Events.type(event) == 7);  % Increment fixation number if event type is 7
-            if frameNum == 0
-                % Overwrite until you get a fixation
-                fixdat(1).X = Trials(trialNum).Fixations.gavx(fixNum);
-                fixdat(1).Y = Trials(trialNum).Fixations.gavy(fixNum);
-            else
-                % Get actual data
-                fixdat(frameNum).X = Trials(trialNum).Fixations.gavx(fixNum);
-                fixdat(frameNum).Y = Trials(trialNum).Fixations.gavy(fixNum);
-            end
-        end 
-    end
     
     % Set up image
         i = 1;
