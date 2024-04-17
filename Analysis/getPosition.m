@@ -14,8 +14,17 @@ for i = 1:numTrials
     % Recreate filename
     t = erase(tmp.Performance_Label_ID{i}, 'COPA ');
     t = replace(t, ' ', '_');
+    if strcmp(t(end), '_')
+        % Drop any trailing underscore
+        % Results from the poorly-made CSV having a space in the filename
+        t = t(1:end-1);
+    end
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
-
+    % Catch special cases:
+    if contains(t, 'Q31')
+        data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
+    end
+    
     % Sort characters
     c = tmp{i,3}; c = c{:}; % from table to cell to string
     ch = strsplit(c, ' ');
