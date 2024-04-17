@@ -40,7 +40,7 @@ function frame3movie(movName)
     fprintf(1, 'Done.\n');
     
 %     pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
-    pos = [0 imw 0 imh];
+    pos = [1 imw 1 imh];
     posData = getPosition;
     m = strcmp(posData.StimName, movName);
     % Rescaling factors (since data is 4000x3000 instead of 678x508)
@@ -50,46 +50,28 @@ function frame3movie(movName)
     % It exists at some unknown framerate that doesn't match the video.
     % Assume the video is at 60 fps and rescale the position data to match.
     numCoords = length(posData.X1_Values{m});
-    tdiff = numFrames - numCoords; % Assume this is positive.
-    tlead = 1+floor(tdiff/2);
-    tlag = tlead + numCoords -1;
-    % Fill the 'leading' frames with the first position value
-    posDat(1).X(1:tlead) = posData.X1_Values{m}(1) .* xrs;
-    posDat(1).Y(1:tlead) = posData.Y1_Values{m}(1) .* yrs;
-    posDat(2).X(1:tlead) = posData.X2_Values{m}(1) .* xrs;
-    posDat(2).Y(1:tlead) = posData.Y2_Values{m}(1) .* yrs;
-    posDat(3).X(1:tlead) = posData.X3_Values{m}(1) .* xrs;
-    posDat(3).Y(1:tlead) = posData.Y3_Values{m}(1) .* yrs;
-    posDat(4).X(1:tlead) = posData.X4_Values{m}(1) .* xrs;
-    posDat(4).Y(1:tlead) = posData.Y4_Values{m}(1) .* yrs;
-    % Fill the 'middle' frames with the actual data
-    posDat(1).X(tlead:tlag) = posData.X1_Values{m} .* xrs;
-    posDat(1).Y(tlead:tlag) = posData.Y1_Values{m} .* yrs;
-    posDat(2).X(tlead:tlag) = posData.X2_Values{m} .* xrs;
-    posDat(2).Y(tlead:tlag) = posData.Y2_Values{m} .* yrs;
-    posDat(3).X(tlead:tlag) = posData.X3_Values{m} .* xrs;
-    posDat(3).Y(tlead:tlag) = posData.Y3_Values{m} .* yrs;
-    posDat(4).X(tlead:tlag) = posData.X4_Values{m} .* xrs;
-    posDat(4).Y(tlead:tlag) = posData.Y4_Values{m} .* yrs;
-    % Fill the 'lagging' frames with the final position value
-    posDat(1).X(tlag:numFrames) = posData.X1_Values{m}(end) .* xrs;
-    posDat(1).Y(tlag:numFrames) = posData.Y1_Values{m}(end) .* yrs;
-    posDat(2).X(tlag:numFrames) = posData.X2_Values{m}(end) .* xrs;
-    posDat(2).Y(tlag:numFrames) = posData.Y2_Values{m}(end) .* yrs;
-    posDat(3).X(tlag:numFrames) = posData.X3_Values{m}(end) .* xrs;
-    posDat(3).Y(tlag:numFrames) = posData.Y3_Values{m}(end) .* yrs;
-    posDat(4).X(tlag:numFrames) = posData.X4_Values{m}(end) .* xrs;
-    posDat(4).Y(tlag:numFrames) = posData.Y4_Values{m}(end) .* yrs;
+    oldspacing = 1:numCoords;
+    newspacing = linspace(1,numCoords, numFrames);
+    
+    % interpolate values to fit the length, then rescale to fit size
+    posDat(1).X = interp1(oldspacing, posData.X1_Values{m}, newspacing) .* xrs;
+    posDat(1).Y = interp1(oldspacing, posData.Y1_Values{m}, newspacing) .* yrs;
+    posDat(2).X = interp1(oldspacing, posData.X2_Values{m}, newspacing) .* xrs;
+    posDat(2).Y = interp1(oldspacing, posData.Y2_Values{m}, newspacing) .* yrs;
+    posDat(3).X = interp1(oldspacing, posData.X3_Values{m}, newspacing) .* xrs;
+    posDat(3).Y = interp1(oldspacing, posData.Y3_Values{m}, newspacing) .* yrs;
+    posDat(4).X = interp1(oldspacing, posData.X4_Values{m}, newspacing) .* xrs;
+    posDat(4).Y = interp1(oldspacing, posData.Y4_Values{m}, newspacing) .* yrs;
     
     % Set up image
         i = 1;
         title(movName);
         h0 = image([pos(1), pos(2)], [pos(3), pos(4)], frames(i).dat);
         hold on;
-        h1 = plot(posDat(1).X(i), posDat(1).Y(i), 'mo', 'MarkerFaceColor', 'r', 'MarkerSize', 10);
-        h2 = plot(posDat(2).X(i), posDat(2).Y(i), 'mo', 'MarkerFaceColor', 'g', 'MarkerSize', 10);
-        h3 = plot(posDat(3).X(i), posDat(3).Y(i), 'mo', 'MarkerFaceColor', 'b', 'MarkerSize', 10);
-        h4 = plot(posDat(4).X(i), posDat(4).Y(i), 'mo', 'MarkerFaceColor', 'c', 'MarkerSize', 10);
+        h1 = plot(posDat(1).X(i), posDat(1).Y(i), '^', 'MarkerFaceColor', 'r', 'MarkerSize', 40);
+        h2 = plot(posDat(2).X(i), posDat(2).Y(i), 'o', 'MarkerFaceColor', 'b', 'MarkerSize', 30);
+        h3 = plot(posDat(3).X(i), posDat(3).Y(i), '+', 'MarkerFaceColor', 'g', 'MarkerSize', 30);
+        h4 = plot(posDat(4).X(i), posDat(4).Y(i), '^', 'MarkerFaceColor', 'c', 'MarkerSize', 30);
         hold off;
     
     % Now animate in a new loop
