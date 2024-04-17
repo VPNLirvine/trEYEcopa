@@ -19,11 +19,12 @@ if choice == 1
     if strcmp(metricName, 'ISC')
         data = doISC;
         fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
     else
         data = getTCData(metricName);
     end
-    numSubs = size(unique(data.Subject), 1);
-    numTrials = height(data);
+    subList = unique(data.Subject);
+    numSubs = size(subList, 1);
 
     %
     % Compare the eyetracking data to the behavioral data
@@ -39,7 +40,6 @@ if choice == 1
     [var1, ~, yl] = getGraphLabel(metricName);
     var2 = 'Understandability rating';
     
-    warning('off','stats:boxplot:BadObjectType'); % it's fine
     figure();
     subplot(1,2,1);
         histogram(data.Eyetrack);
@@ -49,75 +49,10 @@ if choice == 1
         histogram(data.Response);
         xlabel(var2);
         title('Uniform distribution is ideal');
-
-    % Calculate correlations and generate some visualizations
-    subList = unique(data.Subject);
-    fig1 = figure();
-    tiledlayout('horizontal')
-    fig2 = figure();
-    tiledlayout('horizontal');
-    for s = 1:numSubs
-        subID = subList{s};
-        subset = strcmp(subID, data.Subject);
-        output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
-        output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
-        % subplot(2, numSubs, s)
-        set(0,'CurrentFigure',fig1);
-        nexttile;
-        % Plot the eyetracking data against the understanding score
-        % Use boxplots instead of a scatterplot because Response is ordinal
-        % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
-            % Handle cases where subjects don't use all the buttons:
-            % init an empty, oversize matrix
-            x = nan([length(data.Eyetrack), 5]);
-            dat = []; % tmp
-            for i = 1:5
-                % Get the values for each response choice
-                dat = data.Eyetrack(data.Response == i & subset);
-                datl = length(dat);
-                if ~isempty(dat)
-                    % If no responses with this button, leave nans
-                    x(1:datl,i) = dat;
-                end
-            end
-            boxplot(x, 1:5); % which ignores nans thankfully
-            xlabel(var2);
-            ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', rho = %0.2f', output(s,2))]);
-            ylim(yl); % ylimit varies by metric
-        % subplot(2,numSubs, s+numSubs)
-        set(0,'CurrentFigure',fig2);
-        nexttile;
-        % But also add some scatterplots so you can see ALL your data
-        % Helps give a better sense of where numbers are coming from
-            scatter(data.Response(subset), data.Eyetrack(subset));
-            xlabel(var2);
-            ylabel(var1);
-            title([strrep(subID, '_', '\_'), sprintf(', rho = %0.2f', output(s,2))]);
-            ylim(yl); % varies by metric
-            xlim([0 6]); % fixed bc it's response 1-5
-            xticks([1 2 3 4 5])
-            % lsline
-    end
     
-    % Analyze the distribution of correlation scores
-    mu = mean(output(:,2));
-    sigma = std(output(:,2));
-
-    fprintf(1, '\n\nRESULTS:\n');
-    fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
-    fprintf(1, '\t\x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
-    fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
-    fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
-    fprintf(1, '\n');
-    
-    %
-    % Now correlate those correlations with the AQ scores
-    %
-    
-    % First get the AQ scores from the Qualtrics output
+    % Get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));
-            % validate
+        % validate
         numAQ = height(aqTable);
         if numSubs > numAQ
             txt = sprintf(['There are %i EDF files, '...
@@ -134,21 +69,50 @@ if choice == 1
     end
     aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
     
-    % Now Fischer z-transform your previous data
-    zCorr = zscore(output(:,2));
 
-    % Plot and analyze
-    figure();
-        scatter(aq, zCorr, 'filled');
-        xlabel('Autism Quotient');
-        ylabel('Z-Transformed Spearman correlation');
-        title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
-    secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
-
-    fprintf(1, 'Correlation between AQ and above correlation:\n')
-    fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+    if strcmp(metricName, 'ISC')
+        % Directly correlate ISC with AQ
+        % Compress to average ISC per subject since there's only 1 AQ
+        metric = zeros([numSubs,1]);
+        for s = 1:numSubs
+            subID = subList{s};
+            subset = strcmp(subID, data.Subject);
+            metric(s) = mean(data.Eyetrack(subset));
+        end
+        output(1,1) = corr(aq, metric, 'Type', 'Pearson');
+        output(1,2) = corr(aq, metric, 'Type', 'Spearman');
+        
+        % Plot
+        figure();
+        scatter(aq, metric);
+            title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
+            xlabel('Autism Quotient');
+            ylabel(var1);
+            ylim(yl);
+            
+        % Report the correlation score
+        fprintf(1, 'Correlation between AQ and %s:\n', var1)
+        fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
+    else
+        % Calculate correlations and generate some visualizations
+        output = getCorrelations(data);
+        plotCorrelation(data,output,metricName);
     
-    warning('on','stats:boxplot:BadObjectType'); % toggle
+        % Now Fischer z-transform your correlation coefficients
+        zCorr = zscore(output(:,2));
+    
+        % Plot and analyze relationship between AQ and current metric
+        figure();
+            scatter(aq, zCorr, 'filled');
+            xlabel('Autism Quotient');
+            ylabel('Z-Transformed Spearman correlation');
+            title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
+        secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+    
+        fprintf(1, 'Correlation between AQ and above correlation:\n')
+        fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+    end
+    
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:
