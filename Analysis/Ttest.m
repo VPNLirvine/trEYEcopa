@@ -109,11 +109,13 @@ anovan(y, {condList, subList}, 'varnames', {'Condition', 'SubID'}, 'random', [2]
 
 
 [h,p,~,stats] = ttest2(aggregateSocFix,aggregateMecFix);
+hlist = {'Fail to reject', 'Reject'};
 fprintf("\n\n\n")
 fprintf("%d subjects were considered.\n", subject)
-fprintf("h = %d\n",h)
-fprintf("p = %f\n",p)
+fprintf("%s the null hypothesis\n",hlist{h+1})
+
 disp(stats)
+fprintf("\tp = %f\n",p) % stats are indented
 
 boxPlot2(metricName, y, s, condList, edfList); % Generates figures
 
