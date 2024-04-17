@@ -46,18 +46,27 @@ for subject = 1:numSubs
     
     subID = erase(edfList(subject).name, '.edf');
     Trials = osfImport(edfList(subject).name);
-
+    
+    eyetrack = []; % init per sub
+    badList = [];
     for trial = 1:length(Trials)
         if isempty(Trials(trial).Saccades)
             % Eyetracking data is missing for some reason
             % Don't attempt to extract data that isn't there
-            continue
+            badList = [badList, trial];
         end
         i = i + 1;
         stimName = getStimName(Trials(trial));
+
+        if strcmp(metricName, 'heatmap')
+            eyetrack{1} = selectMetric(Trials(trial), 'heatmap');
+            % Note above is cell, not double like below
+        else
+            eyetrack(1) = selectMetric(Trials(trial), metricName);
+        end
         % Output data
         data.Subject{i} = subID;
-        data.Eyetrack(i) = selectMetric(Trials(trial), metricName);
+        data.Eyetrack(i) = eyetrack;
         data.Category(i) = condList.CONDITION(strcmp(stimName, condList.NAME));
         data.StimName{i} = stimName;
     end
