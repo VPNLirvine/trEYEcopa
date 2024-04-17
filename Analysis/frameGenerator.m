@@ -15,7 +15,7 @@ if exist(fullfile(mwPath, movieName), 'file')
 elseif exist(fullfile(tcPath, 'normal', movieName), 'file')
     videoPath = fullfile(tcPath, 'normal');
 else
-    error('No such video file found! Check frameGenerator() for paths searched');
+    error('No such video file found: %s\nCheck frameGenerator() for paths searched', movieName);
 end
 
 % adding file extension if necessary 
