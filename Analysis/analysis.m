@@ -1,6 +1,7 @@
 function analysis(varargin)
 % Perform statistical analysis on eyetracking data
 % Optional input 1 should be a metric name listed in selectMetric()
+close all;
 if nargin > 0
     metricName = varargin{1};
 else
@@ -37,7 +38,8 @@ if choice == 1
     % Histograms of the input variables
     [var1, ~, yl] = getGraphLabel(metricName);
     var2 = 'Understandability rating';
-
+    
+    warning('off','stats:boxplot:BadObjectType'); % it's fine
     figure();
     subplot(1,2,1);
         histogram(data.Eyetrack);
@@ -50,13 +52,18 @@ if choice == 1
 
     % Calculate correlations and generate some visualizations
     subList = unique(data.Subject);
-    figure();
+    fig1 = figure();
+    tiledlayout('horizontal')
+    fig2 = figure();
+    tiledlayout('horizontal');
     for s = 1:numSubs
         subID = subList{s};
         subset = strcmp(subID, data.Subject);
         output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
         output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
-        subplot(2, numSubs, s)
+        % subplot(2, numSubs, s)
+        set(0,'CurrentFigure',fig1);
+        nexttile;
         % Plot the eyetracking data against the understanding score
         % Use boxplots instead of a scatterplot because Response is ordinal
         % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
@@ -78,7 +85,9 @@ if choice == 1
             ylabel(var1);
             title([strrep(subID, '_', '\_'), sprintf(', rho = %0.2f', output(s,2))]);
             ylim(yl); % ylimit varies by metric
-        subplot(2,numSubs, s+numSubs)
+        % subplot(2,numSubs, s+numSubs)
+        set(0,'CurrentFigure',fig2);
+        nexttile;
         % But also add some scatterplots so you can see ALL your data
         % Helps give a better sense of where numbers are coming from
             scatter(data.Response(subset), data.Eyetrack(subset));
@@ -138,7 +147,8 @@ if choice == 1
 
     fprintf(1, 'Correlation between AQ and above correlation:\n')
     fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
-
+    
+    warning('on','stats:boxplot:BadObjectType'); % toggle
 elseif choice == 2
     % Martin & Weisberg
     % Pipeline was already built, just call here:
