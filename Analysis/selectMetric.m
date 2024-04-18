@@ -59,10 +59,15 @@ switch metricName
         output = edfDat.Fixations.sttime(:,position);
     case 'meansacdist'
         data = edfDat.Saccades.ampl(edfDat.Saccades.eye == i);
-        data = fixOutliers(data);
-        output = mean(data);
         % ampl = amplitude of saccade (ie distance)
         % there is also phi, which is direction in degrees (ie not rads)
+        data = fixOutliers(data);
+        % This metric has a theoretical limit.
+        % fixOutliers is sometimes too conservative to catch it,
+        % so enforce the hard limit post-hoc.
+        % Examples of distance > 360 deg would be blinks (may go to inf)
+        data(data > 360) = [];
+        output = mean(data);
     case 'positionMax'
         % This is probably useless
         A = edfDat.Fixations.time(edfDat.Fixations.eye == i);

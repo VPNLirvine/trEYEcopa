@@ -17,12 +17,28 @@ if choice == 1
     % TriCOPA
     fprintf(1, 'Using metric %s\n\n', metricName);
     if strcmp(metricName, 'ISC')
-        data = doISC;
+        data = doISC(getTCData('heatmap'));
         fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
         fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
     else
         data = getTCData(metricName);
     end
+    mwflag = 0;
+elseif choice == 2
+    % Martin & Weisberg
+    if strcmp(metricName, 'ISC')
+        data = doISC(getMWData('heatmap'));
+        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+    else
+        data = getMWData(metricName);
+    end
+    mwflag = 1;
+    choice = menu('Which analysis method do you want for this Martin & Weisberg data?','correlation', 't-test');
+end
+
+if choice == 1
+    % Correlation analysis
     subList = unique(data.Subject);
     numSubs = size(subList, 1);
 
@@ -36,19 +52,9 @@ if choice == 1
     % Calculate individually per subject to make it RFX.
     % mdl = fitlm(data, 'Eyetrack ~ Response');
     
-    % Histograms of the input variables
+    % Get axis labels for later
     [var1, ~, yl] = getGraphLabel(metricName);
     var2 = 'Understandability rating';
-    
-    figure();
-    subplot(1,2,1);
-        histogram(data.Eyetrack);
-        xlabel(var1);
-        title('Expect an RT-like distribution');
-    subplot(1,2,2)
-        histogram(data.Response);
-        xlabel(var2);
-        title('Uniform distribution is ideal');
     
     % Get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));
@@ -62,6 +68,12 @@ if choice == 1
                 , numSubs, numAQ);
             error(txt)
         end
+    if mwflag
+        % SubIDs indicate which experiment was run,
+        % But the AQ table only says 'TC'.
+        % TC_01 == MW_01. Compensate.
+        aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
+    end
     % Ensure they're sorted the same as the other data
     for s = 1:numSubs
         subID = subList{s};
@@ -70,33 +82,51 @@ if choice == 1
     aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
     
 
-    if strcmp(metricName, 'ISC')
-        % Directly correlate ISC with AQ
-        % Compress to average ISC per subject since there's only 1 AQ
-        metric = zeros([numSubs,1]);
-        for s = 1:numSubs
-            subID = subList{s};
-            subset = strcmp(subID, data.Subject);
-            metric(s) = mean(data.Eyetrack(subset));
-        end
-        output(1,1) = corr(aq, metric, 'Type', 'Pearson');
-        output(1,2) = corr(aq, metric, 'Type', 'Spearman');
+    % First, directly correlate the metric with AQ
+    % i.e. do not correlate with the clarity rating
+    % Reduce data to an average value per subject,
+    % since there's only 1 AQ value per person
+    var3 = 'Autism Quotient';
+
+    aqCol = [];
+    for s = 1:numSubs
+        subID = subList{s};
+        subset = strcmp(subID, data.Subject);
+        nrows = sum(subset);
+        aqCol = [aqCol; aq(s) * ones(nrows,1)];
+    end
+    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson');
+    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman');
         
         % Plot
         figure();
-        scatter(aq, metric);
+        scatter(aqCol, data.Eyetrack);
             title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
-            xlabel('Autism Quotient');
+            xlabel(var3);
             ylabel(var1);
             ylim(yl);
+            xlim([0 50]);
             
         % Report the correlation score
-        fprintf(1, 'Correlation between AQ and %s:\n', var1)
+        fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
         fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
-    else
+
+        % Histograms
+        figure();
+        subplot(1,2,1);
+            histogram(data.Eyetrack);
+            xlabel(var1);
+            title('Expect an RT-like distribution');
+            xlim(yl);
+        subplot(1,2,2)
+            histogram(aq);
+            xlabel(var3);
+            title('Expect a bimodal distribution');
+            xlim([0 50]);
+    if ~mwflag
         % Calculate correlations and generate some visualizations
-        output = getCorrelations(data);
-        plotCorrelation(data,output,metricName);
+        output = getCorrelations(data, metricName);
+        plotCorrelation(data, output, metricName);
     
         % Now Fischer z-transform your correlation coefficients
         zCorr = zscore(output(:,2));
@@ -111,10 +141,51 @@ if choice == 1
     
         fprintf(1, 'Correlation between AQ and above correlation:\n')
         fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+        
+        % Histograms of the variables at play
+        figure();
+        subplot(1,2,1);
+            histogram(data.Eyetrack);
+            xlabel(var1);
+            title('Expect an RT-like distribution');
+            xlim(yl);
+        subplot(1,2,2)
+            histogram(data.Response);
+            xlabel(var2);
+            title('Uniform distribution is ideal');
     end
     
 elseif choice == 2
-    % Martin & Weisberg
-    % Pipeline was already built, just call here:
-    Ttest(metricName);
+    % Do a mean comparison across groups
+    subList = unique(data.Subject);
+    numSubs = size(subList, 1);
+
+    % RFX ANOVA accounting for subject-level variance
+    % Generates a figure window with statistical table
+    ivs = {data.Category, data.Subject};
+    rfx = [2]; % which IV(s) is a random effect? (e.g. subject ID)
+    ci = 1; % condition of interest
+    [p1, tbl, stats1] = anovan(data.Eyetrack, ivs, 'varnames', {'Condition', 'SubID'}, 'random', rfx);
+    
+    h = p1(ci) <= .05;
+    % Generate figures
+    BoxplotMW(data, metricName);
+    
+    % % Plain t-test ignoring subject-level variance
+    % socDat = data.Eyetrack(strcmp(data.Category,'social'));
+    % mecDat = data.Eyetrack(strcmp(data.Category, 'mechanical'));
+    % [h,p,~,stats] = ttest2(socDat,mecDat);
+
+    % Print results to screen
+        hlist = {'Fail to reject', 'Reject'};
+        fprintf("\n\n\n")
+        fprintf("%d subjects were considered.\n", numSubs)
+        fprintf("%s the null hypothesis.\n",hlist{h+1})
+        F = tbl{ci+1,strcmp(tbl(1,:),'F')};
+        df = tbl{ci+1,strcmp(tbl(1,:),'d.f.')};
+        sse = tbl{ci+1,strcmp(tbl(1,:),'Sum Sq.')};
+        fprintf('\tF(%i) = %0.2f\n', df, F)
+        fprintf("\tp = %f\n",p1(ci))
+        fprintf('\tSSE = %0.2f\n', sse)
+        fprintf('\n')
 end
