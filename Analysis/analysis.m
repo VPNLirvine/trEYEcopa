@@ -82,32 +82,31 @@ if choice == 1
     aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
     
 
-    if strcmp(metricName, 'ISC') || mwflag
-        % Directly correlate the metric with AQ
-        % i.e. do not correlate with the clarity rating first
-        % Reduce data to an average value per subject,
-        % since there's only 1 AQ value per person
-        var2 = 'Autism Quotient';
+    % First, directly correlate the metric with AQ
+    % i.e. do not correlate with the clarity rating
+    % Reduce data to an average value per subject,
+    % since there's only 1 AQ value per person
+    var3 = 'Autism Quotient';
 
-        metric = zeros([numSubs,1]);
-        for s = 1:numSubs
-            subID = subList{s};
-            subset = strcmp(subID, data.Subject);
-            metric(s) = mean(data.Eyetrack(subset));
-        end
-        output(1,1) = corr(aq, metric, 'Type', 'Pearson');
-        output(1,2) = corr(aq, metric, 'Type', 'Spearman');
+    metric = zeros([numSubs,1]);
+    for s = 1:numSubs
+        subID = subList{s};
+        subset = strcmp(subID, data.Subject);
+        metric(s) = mean(data.Eyetrack(subset));
+    end
+    output(1,1) = corr(aq, metric, 'Type', 'Pearson');
+    output(1,2) = corr(aq, metric, 'Type', 'Spearman');
         
         % Plot
         figure();
         scatter(aq, metric);
             title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
-            xlabel(var2);
+            xlabel(var3);
             ylabel(var1);
             ylim(yl);
             
         % Report the correlation score
-        fprintf(1, '\nCorrelation between AQ and %s:\n', var1)
+        fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
         fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
 
         % Histograms
@@ -119,10 +118,10 @@ if choice == 1
             xlim(yl);
         subplot(1,2,2)
             histogram(aq);
-            xlabel(var2);
+            xlabel(var3);
             title('Expect a bimodal distribution');
             xlim([0 50]);
-    else
+    if ~mwflag
         % Calculate correlations and generate some visualizations
         output = getCorrelations(data, metricName);
         plotCorrelation(data, output, metricName);
