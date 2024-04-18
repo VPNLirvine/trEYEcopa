@@ -1,17 +1,20 @@
-function ISC = doISC()
+function data = doISC(data)
     % Calculate intersubject correlations of scan paths
     % Generates a heatmap of every trial's scanpath,
     % then correlates each subject's scanpath with the n-1 group average
     % for a particular stimulus.
+    % Expect input of the heatmaps for each video
 
-    % First, get the heatmaps for each video
-    data = getTCData('heatmap');
+    % I've offloaded the heatmaps bc there are two data-getter functions,
+    % depending on the stimulus set.
+    % You could probably eventually merge them, but for now, separate.
+    
     numRows = size(data,1);
 
-    % Init the output variable
-    dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    dtypes = {'string', 'double', 'double', 'double', 'logical'};
-    ISC = table('Size', [0, length(dheader)], 'VariableNames', dheader, 'VariableTypes', dtypes);
+    % Extract the heatmaps from the input data
+    % Then we're just going to overwrite the existing table to save memory
+    heatmapList = data.Eyetrack;
+    data.Eyetrack = zeros(numRows,1);
 
     % Suppress a warning about the way I fill the table
     warning('off', 'MATLAB:table:RowsAddedExistingVars');
@@ -24,7 +27,7 @@ function ISC = doISC()
         % Which subject is this?
         subID = data.Subject{r};
         % Get this subject's heatmap
-        heatmap1 = data.Eyetrack{r};
+        heatmap1 = heatmapList{r};
         
         % Calculate the n-1 group average heatmap
         % First, see what n-1 is for this video
@@ -35,21 +38,15 @@ function ISC = doISC()
             continue
         else
             % Stack all the other heatmaps into a 3D matrix
-            imStack = cat(3,data.Eyetrack{hitList});
+            imStack = cat(3,heatmapList{hitList});
             % Now average across the 3rd dimension
             heatmap2 = mean(imStack, 3);
             % Compare and export
-            ISC.Eyetrack(r) = corr2(heatmap1, heatmap2);
+            data.Eyetrack(r) = corr2(heatmap1, heatmap2);
             
-            % Add all the other bits in too
-            ISC.Subject{r} = subID;
-            ISC.Response(r) = data.Response(r);
-            ISC.RT(r) = data.RT(r);
-            ISC.Flipped(r) = data.Flipped(r);
-            ISC.StimName{r} = stimName;
         end
     end
-    ISC = rmmissing(ISC); % Drop any skipped rows
+    data = rmmissing(data); % Drop any skipped rows
     % Clean up before exit
     warning('on', 'MATLAB:table:RowsAddedExistingVars');
     fprintf(1, 'Done.\n');
