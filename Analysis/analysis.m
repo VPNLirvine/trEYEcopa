@@ -88,22 +88,24 @@ if choice == 1
     % since there's only 1 AQ value per person
     var3 = 'Autism Quotient';
 
-    metric = zeros([numSubs,1]);
+    aqCol = [];
     for s = 1:numSubs
         subID = subList{s};
         subset = strcmp(subID, data.Subject);
-        metric(s) = mean(data.Eyetrack(subset));
+        nrows = sum(subset);
+        aqCol = [aqCol; aq(s) * ones(nrows,1)];
     end
-    output(1,1) = corr(aq, metric, 'Type', 'Pearson');
-    output(1,2) = corr(aq, metric, 'Type', 'Spearman');
+    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson');
+    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman');
         
         % Plot
         figure();
-        scatter(aq, metric);
+        scatter(aqCol, data.Eyetrack);
             title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
             xlabel(var3);
             ylabel(var1);
             ylim(yl);
+            xlim([0 50]);
             
         % Report the correlation score
         fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
