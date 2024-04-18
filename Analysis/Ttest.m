@@ -117,7 +117,7 @@ fprintf("%s the null hypothesis\n",hlist{h+1})
 disp(stats)
 fprintf("\tp = %f\n",p) % stats are indented
 
-boxPlot2(metricName, y, s, condList, edfList); % Generates figures
+BoxplotMW(metricName, y, s, condList, edfList); % Generates figures
 
 function [dataMatrix, subList, condList, trialList] = prepforanova(inStruct)
 % Take a structure with fixation data for separate conditions, per subject

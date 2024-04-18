@@ -135,7 +135,28 @@ if choice == 1
     end
     
 elseif choice == 2
-    % Martin & Weisberg
-    % Amin built his own pipeline, so just call here:
-    Ttest(metricName);
+    % Do a mean comparison across groups
+
+    % RFX ANOVA accounting for subject-level variance
+    % Generates a figure window with statistical table
+    ivs = {data.Category, data.Subject};
+    rfx = [2]; % which IV(s) is a random effect? (e.g. subject ID)
+    [p1, tbl, stats1] = anovan(data.Eyetrack, ivs, 'varnames', {'Condition', 'SubID'}, 'random', rfx);
+    
+    % Generate figures
+    BoxplotMW(data, metricName);
+    
+    % % Plain t-test ignoring subject-level variance
+    % socDat = data.Eyetrack(strcmp(data.Category,'social'));
+    % mecDat = data.Eyetrack(strcmp(data.Category, 'mechanical'));
+    % [h,p,~,stats] = ttest2(socDat,mecDat);
+    % % Print results to screen
+    %     hlist = {'Fail to reject', 'Reject'};
+    %     fprintf("\n\n\n")
+    %     fprintf("%d subjects were considered.\n", subject)
+    %     fprintf("%s the null hypothesis\n",hlist{h+1})
+    % 
+    %     disp(stats)
+    %     fprintf("\tp = %f\n",p)
+
 end
