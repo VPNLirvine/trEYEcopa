@@ -17,12 +17,28 @@ if choice == 1
     % TriCOPA
     fprintf(1, 'Using metric %s\n\n', metricName);
     if strcmp(metricName, 'ISC')
-        data = doISC;
+        data = doISC(getTCData('heatmap'));
         fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
         fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
     else
         data = getTCData(metricName);
     end
+    mwflag = 0;
+elseif choice == 2
+    % Martin & Weisberg
+    if strcmp(metricName, 'ISC')
+        data = doISC(getMWData('heatmap'));
+        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+    else
+        data = getMWData(metricName);
+    end
+    mwflag = 1;
+    choice = menu('Which analysis method do you want for this Martin & Weisberg data?','correlation', 't-test');
+end
+
+if choice == 1
+    % Correlation analysis
     subList = unique(data.Subject);
     numSubs = size(subList, 1);
 
@@ -62,6 +78,9 @@ if choice == 1
                 , numSubs, numAQ);
             error(txt)
         end
+    if mwflag
+        aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
+    end
     % Ensure they're sorted the same as the other data
     for s = 1:numSubs
         subID = subList{s};
@@ -70,9 +89,11 @@ if choice == 1
     aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
     
 
-    if strcmp(metricName, 'ISC')
-        % Directly correlate ISC with AQ
-        % Compress to average ISC per subject since there's only 1 AQ
+    if strcmp(metricName, 'ISC') || mwflag
+        % Directly correlate the metric with AQ
+        % i.e. do not correlate with the clarity rating first
+        % Reduce data to an average value per subject,
+        % since there's only 1 AQ value per person
         metric = zeros([numSubs,1]);
         for s = 1:numSubs
             subID = subList{s};
@@ -95,8 +116,8 @@ if choice == 1
         fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
     else
         % Calculate correlations and generate some visualizations
-        output = getCorrelations(data);
-        plotCorrelation(data,output,metricName);
+        output = getCorrelations(data, metricName);
+        plotCorrelation(data, output, metricName);
     
         % Now Fischer z-transform your correlation coefficients
         zCorr = zscore(output(:,2));
@@ -115,6 +136,6 @@ if choice == 1
     
 elseif choice == 2
     % Martin & Weisberg
-    % Pipeline was already built, just call here:
+    % Amin built his own pipeline, so just call here:
     Ttest(metricName);
 end
