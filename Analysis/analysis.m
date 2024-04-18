@@ -156,13 +156,17 @@ if choice == 1
     
 elseif choice == 2
     % Do a mean comparison across groups
+    subList = unique(data.Subject);
+    numSubs = size(subList, 1);
 
     % RFX ANOVA accounting for subject-level variance
     % Generates a figure window with statistical table
     ivs = {data.Category, data.Subject};
     rfx = [2]; % which IV(s) is a random effect? (e.g. subject ID)
+    ci = 1; % condition of interest
     [p1, tbl, stats1] = anovan(data.Eyetrack, ivs, 'varnames', {'Condition', 'SubID'}, 'random', rfx);
     
+    h = p1(ci) <= .05;
     % Generate figures
     BoxplotMW(data, metricName);
     
@@ -170,13 +174,17 @@ elseif choice == 2
     % socDat = data.Eyetrack(strcmp(data.Category,'social'));
     % mecDat = data.Eyetrack(strcmp(data.Category, 'mechanical'));
     % [h,p,~,stats] = ttest2(socDat,mecDat);
-    % % Print results to screen
-    %     hlist = {'Fail to reject', 'Reject'};
-    %     fprintf("\n\n\n")
-    %     fprintf("%d subjects were considered.\n", subject)
-    %     fprintf("%s the null hypothesis\n",hlist{h+1})
-    % 
-    %     disp(stats)
-    %     fprintf("\tp = %f\n",p)
 
+    % Print results to screen
+        hlist = {'Fail to reject', 'Reject'};
+        fprintf("\n\n\n")
+        fprintf("%d subjects were considered.\n", numSubs)
+        fprintf("%s the null hypothesis.\n",hlist{h+1})
+        F = tbl{ci+1,strcmp(tbl(1,:),'F')};
+        df = tbl{ci+1,strcmp(tbl(1,:),'d.f.')};
+        sse = tbl{ci+1,strcmp(tbl(1,:),'Sum Sq.')};
+        fprintf('\tF(%i) = %0.2f\n', df, F)
+        fprintf("\tp = %f\n",p1(ci))
+        fprintf('\tSSE = %0.2f\n', sse)
+        fprintf('\n')
 end
