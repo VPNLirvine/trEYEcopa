@@ -35,7 +35,7 @@ switch metricName
     case 'meansacdist'
         txt = 'Average saccade distance in degrees';
         hy = [0 45];
-        yl = [0 9];
+        yl = [0 10];
     case 'ISC'
         txt = 'Intersubject correlation with group mean';
         hy = [0 45];
