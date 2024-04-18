@@ -52,19 +52,9 @@ if choice == 1
     % Calculate individually per subject to make it RFX.
     % mdl = fitlm(data, 'Eyetrack ~ Response');
     
-    % Histograms of the input variables
+    % Get axis labels for later
     [var1, ~, yl] = getGraphLabel(metricName);
     var2 = 'Understandability rating';
-    
-    figure();
-    subplot(1,2,1);
-        histogram(data.Eyetrack);
-        xlabel(var1);
-        title('Expect an RT-like distribution');
-    subplot(1,2,2)
-        histogram(data.Response);
-        xlabel(var2);
-        title('Uniform distribution is ideal');
     
     % Get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));
@@ -79,6 +69,9 @@ if choice == 1
             error(txt)
         end
     if mwflag
+        % SubIDs indicate which experiment was run,
+        % But the AQ table only says 'TC'.
+        % TC_01 == MW_01. Compensate.
         aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
     end
     % Ensure they're sorted the same as the other data
@@ -94,6 +87,8 @@ if choice == 1
         % i.e. do not correlate with the clarity rating first
         % Reduce data to an average value per subject,
         % since there's only 1 AQ value per person
+        var2 = 'Autism Quotient';
+
         metric = zeros([numSubs,1]);
         for s = 1:numSubs
             subID = subList{s};
@@ -107,13 +102,26 @@ if choice == 1
         figure();
         scatter(aq, metric);
             title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
-            xlabel('Autism Quotient');
+            xlabel(var2);
             ylabel(var1);
             ylim(yl);
             
         % Report the correlation score
-        fprintf(1, 'Correlation between AQ and %s:\n', var1)
+        fprintf(1, '\nCorrelation between AQ and %s:\n', var1)
         fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
+
+        % Histograms
+        figure();
+        subplot(1,2,1);
+            histogram(data.Eyetrack);
+            xlabel(var1);
+            title('Expect an RT-like distribution');
+            xlim(yl);
+        subplot(1,2,2)
+            histogram(aq);
+            xlabel(var2);
+            title('Expect a bimodal distribution');
+            xlim([0 50]);
     else
         % Calculate correlations and generate some visualizations
         output = getCorrelations(data, metricName);
@@ -132,6 +140,18 @@ if choice == 1
     
         fprintf(1, 'Correlation between AQ and above correlation:\n')
         fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+        
+        % Histograms of the variables at play
+        figure();
+        subplot(1,2,1);
+            histogram(data.Eyetrack);
+            xlabel(var1);
+            title('Expect an RT-like distribution');
+            xlim(yl);
+        subplot(1,2,2)
+            histogram(data.Response);
+            xlabel(var2);
+            title('Uniform distribution is ideal');
     end
     
 elseif choice == 2
