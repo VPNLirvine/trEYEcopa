@@ -7,19 +7,8 @@ function plotCorrelation(data, output, metricName)
 warning('off','stats:boxplot:BadObjectType'); % it's fine
 
 % See if you can use fancy new formatting
-verStr = version('-release');
-vyear = verStr(1:4);
-vlet = verStr(5);
-if str2num(vyear) > 2019
-    % Assume ok since it was introduced in 2019b
-    ok = true;
-elseif str2num(vyear) == 2019 && strcmp(vlet, 'b')
-    ok = true;
-else
-    % Either 2019a or below
-    ok = false;
-end
-
+chk = which('tiledlayout');
+ok = ~isempty(chk); % ok if not empty, not ok if empty
 
 %% Execution
 % Open figures
