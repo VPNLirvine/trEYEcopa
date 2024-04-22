@@ -3,14 +3,23 @@ function plotCorrelation(data, output, metricName)
 % and the pre-calculated correlation coefficients (for labeling),
 % Plot the gaze metric against the clarity ratings.
 
+%% Setup
 warning('off','stats:boxplot:BadObjectType'); % it's fine
 
+% See if you can use fancy new formatting
+chk = which('tiledlayout');
+ok = ~isempty(chk); % ok if not empty, not ok if empty
+
+%% Execution
 % Open figures
 fig1 = figure();
-tiledlayout('horizontal');
+    if ok
+        tiledlayout('horizontal');
+    end
 fig2 = figure();
-tiledlayout('horizontal');
-
+    if ok
+        tiledlayout('horizontal');
+    end
 % Get axis titles
 [var1, ~, yl] = getGraphLabel(metricName);
 var2 = 'Understandability rating';
@@ -22,9 +31,12 @@ numSubs = length(subList);
 for s = 1:numSubs
     subID = subList{s};
     subset = strcmp(subID, data.Subject);
-    % subplot(2, numSubs, s)
     set(0,'CurrentFigure',fig1);
-    nexttile;
+    if ok
+        nexttile;
+    else
+        subplot(1,numSubs, s)
+    end
     % Plot the eyetracking data against the understanding score
     % Use boxplots instead of a scatterplot because Response is ordinal
     % (i.e. it's an integer of 1-5, not a ratio/continuous variable)
@@ -48,7 +60,11 @@ for s = 1:numSubs
         ylim(yl); % ylimit varies by metric
     % subplot(2,numSubs, s+numSubs)
     set(0,'CurrentFigure',fig2);
-    nexttile;
+    if ok
+        nexttile;
+    else
+        subplot(1,numSubs, s)
+    end
     % But also add some scatterplots so you can see ALL your data
     % Helps give a better sense of where numbers are coming from
         scatter(data.Response(subset), data.Eyetrack(subset));
