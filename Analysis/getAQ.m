@@ -9,7 +9,12 @@ warning('off', 'MATLAB:textio:io:UnableToGuessFormat'); % don't care about dates
 % Import AQ data from Qualtrics
 x = dir(fullfile(pths.beh,'Baron Cohen*.tsv'));
 fname = fullfile(pths.beh, x(1).name);
-data = readtable(fname, "FileType", "delimitedtext", "Delimiter", "\t");
+% Qualtrics spits out data in UTF-16 format
+% Matlab versions previous to ~2022 do not support this format
+% Convert to UTF-8 instead, for compatibility
+convertUTF16toUTF8(fname, fname);
+% Now finally read the data in
+data = readtable(fname, "FileType", "text", "Delimiter", "\t");
 
 % Set up export variable
 output = table();
