@@ -12,9 +12,11 @@ fname = fullfile(pths.beh, x(1).name);
 % Qualtrics spits out data in UTF-16 format
 % Matlab versions previous to ~2022 do not support this format
 % Convert to UTF-8 instead, for compatibility
-convertUTF16toUTF8(fname, fname);
+fname = verifyEncoding(fname);
+
 % Now finally read the data in
-data = readtable(fname, "FileType", "text", "Delimiter", "\t");
+opts = detectImportOptions(fname, "FileType", "text", "Delimiter", "\t");
+data = readtable(fname, opts);
 
 % Set up export variable
 output = table();
