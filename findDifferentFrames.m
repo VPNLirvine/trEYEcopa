@@ -22,6 +22,10 @@ for i = 1:numFrames-1
 
     img1 = imread(fname1);
     img2 = imread(fname2);
+    
+    % Filter somehow
+    img1 = im2bw(img1);
+    img2 = im2bw(img2);
 
     if ~isequal(img1, img2)
         output(v, 1) = i+1;
@@ -31,11 +35,15 @@ end
 
 % Final frame with motion
 for i = numFrames:-1:2
-    fname1 = [num2str(i) '.jpg'];
-    fname2 = [num2str(i-1) '.jpg'];
+    fname1 = fullfile(pths.frames, folderName, inOrder{i});
+    fname2 = fullfile(pths.frames, folderName, inOrder{i-1});
 
     img1 = imread(fname1);
     img2 = imread(fname2);
+    
+    % Filter somehow
+    img1 = im2bw(img1);
+    img2 = im2bw(img2);
 
     if ~isequal(img1, img2)
         output(v, 2) = i-1;
