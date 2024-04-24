@@ -127,6 +127,7 @@ if choice == 1
         % Calculate correlations and generate some visualizations
         output = getCorrelations(data, metricName);
         plotCorrelation(data, output, metricName);
+        plotItemwise(data, metricName);
     
         % Now Fischer z-transform your correlation coefficients
         zCorr = zscore(output(:,2));
