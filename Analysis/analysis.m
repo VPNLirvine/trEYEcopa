@@ -119,14 +119,17 @@ if choice == 1
             title('Expect an RT-like distribution');
             xlim(yl);
         subplot(1,2,2)
-            histogram(aq);
+            histogram(aq, 'BinEdges', 0:5:50);
             xlabel(var3);
             title('Expect a bimodal distribution');
             xlim([0 50]);
+            % Add lines indicating the expected distribution(s)
+            overlayAQ(gca);
     if ~mwflag
         % Calculate correlations and generate some visualizations
         output = getCorrelations(data, metricName);
         plotCorrelation(data, output, metricName);
+        plotItemwise(data, metricName);
     
         % Now Fischer z-transform your correlation coefficients
         zCorr = zscore(output(:,2));
