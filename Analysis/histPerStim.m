@@ -3,8 +3,8 @@ addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 outputPath = pths.MWdat;
 edfList = dir(fullfile(outputPath, '*.edf'));
-metricName = 'rawfix';
-axistxt = getGraphLabel(metricName);
+metricName = 'scaledfixation';
+[axistxt, yl, xl] = getGraphLabel(metricName);
 % Aggregate data
 for subject = 1:length(edfList)
     Trials = osfImport(edfList(subject).name);
@@ -31,9 +31,9 @@ for t = 1:length(plotData)
     histogram(plotData(t).data);
     title(stimName);
 %     xticklabels(stimList);
-    ylim([0 25*length(edfList)]);
+    ylim(yl);
     xlabel(axistxt);
-    xlim([0 5000]); % TWEAK
+    xlim(xl);
 end
 
 function plotData = initPlotData(Trials)
