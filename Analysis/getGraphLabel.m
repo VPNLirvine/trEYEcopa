@@ -16,6 +16,11 @@ switch metricName
         txt = 'Percent time spent fixating';
         hy = [0 100];
         yl = [0 1.1];
+    case 'duration'
+        txt = 'Duration of stimulus in sec';
+        % Until I discover the range...
+        hy = 'tight';
+        yl = 'tight';
     case 'meanfix'
         txt = 'Average fixation time in ms';
         hy = [0 60];

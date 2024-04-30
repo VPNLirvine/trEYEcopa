@@ -5,6 +5,7 @@ function output = selectMetric(edfDat, metricName, varargin)
 % Options are as follows:
 %   'fixation' - Total fixation time per trial
 %   'scaledfixation' - Percentage of video time spent fixating
+%   'duration' - Duration of the video (a QC metric)
 %   'meanfix' - Average fixation duration within a trial
 %   'medianfix' - Median fixation duration within a trial
 %   'maxfixOnset' - Onset time of the longest fixation
@@ -39,6 +40,10 @@ switch metricName
         % so just calculate it from start and end time instead.
 
         output = data / duration;
+    case 'duration'
+        numSamples = double(edfDat.Header.endtime - edfDat.Header.starttime);
+        sampleRate = double(edfDat.Header.rec.sample_rate);
+        output = numSamples / sampleRate;
     case 'meanfix'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i);
         data = fixOutliers(data);
