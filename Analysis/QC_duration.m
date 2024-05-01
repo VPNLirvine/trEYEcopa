@@ -21,19 +21,19 @@ exe = sprintf("mdls %s | grep Duration | awk '{ print $3 }'", fname);
 exptDur = str2double(exptDur);
 
 %% Estimate the duration of the video from the EDF data
-dur1 = edf.Header.duration; % Header duration
-dur2 = edf.Header.endtime - edf.Header.starttime; % Header difference
-dur3 = edf.Header.endtime - edf.StartTime; % osfImport duration
-sr = edf.Header.rec.sample_rate;
-sr2 = 250; % I think the above defaults to 500, even though we do 250
+dur1 = double(edf.Header.duration); % Header duration
+dur2 = double(edf.Header.endtime - edf.Header.starttime); % Header difference
+dur3 = double(edf.Header.endtime - edf.StartTime); % osfImport duration
+dur4 = getStimDuration(edf); % PTB presentation time in seconds
+dur5 = double(edf.Samples.time(end) - edf.Samples.time(1)); % Length of eyetracking in ms
+dur6 = findStimOffset(edf) - findStimOnset(edf);
 
 %% Compare all three EDF durations to the expected duration
 fprintf(1, '\nVideo: %s\n', stimName);
 fprintf(1, 'Expected duration is %0.4f sec\n', exptDur);
-fprintf(1, '\tHeader duration at %i Hz is %0.4f sec\n', sr, dur1 / sr);
-fprintf(1, '\tCalculated duration at %i Hz is %0.4f sec\n', sr, dur2 / sr);
-fprintf(1, '\tosfImport duration at %i Hz is %0.4f sec\n', sr, dur3 / sr);
-fprintf(1, '\n');
-fprintf(1, '\tHeader duration at %i Hz is %0.4f sec\n', sr2, dur1 / sr2);
-fprintf(1, '\tCalculated duration at %i Hz is %0.4f sec\n', sr2, dur2 / sr2);
-fprintf(1, '\tosfImport duration at %i Hz is %0.4f sec\n', sr2, dur3 / sr2);
+fprintf(1, '\tEDF Header duration is %0.4f sec\n', dur1 / 1000);
+fprintf(1, '\tCalculated duration is %0.4f sec\n', dur2 / 1000);
+fprintf(1, '\tosfImport-based duration is %0.4f sec\n', dur3 / 1000);
+fprintf(1, '\tMessage-based duration is %0.4f sec\n', dur4);
+fprintf(1, '\tSampling duration is %0.4f sec\n', dur5 / 1000);
+fprintf(1, '\tPrecise video duration is %0.4f sec\n', dur6 / 1000);
