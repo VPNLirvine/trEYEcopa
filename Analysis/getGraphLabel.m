@@ -24,11 +24,11 @@ switch metricName
     case 'meanfix'
         txt = 'Average fixation time in ms';
         hy = [0 60];
-        yl = [220 1000];
+        yl = [0 2000];
     case 'medianfix'
         txt = 'Median fixation time in ms';
         hy = [0 60];
-        yl = [175 800];
+        yl = [0 1000];
     case 'maxfixOnset'
         txt = 'Onset time of longest fixation';
         hy = [0 45];
