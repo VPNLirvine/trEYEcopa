@@ -54,7 +54,7 @@ if choice == 1
     
     % Get axis labels for later
     [var1, yl, distTxt] = getGraphLabel(metricName);
-    [var2, yl2, distTxt2] = getGraphLabel(metricName);
+    [var2, yl2, distTxt2] = getGraphLabel('response');
     
     % Get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));

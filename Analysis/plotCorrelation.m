@@ -22,7 +22,7 @@ fig2 = figure();
     end
 % Get axis titles
 [var1, yl] = getGraphLabel(metricName);
-[var2, yl2] = getGraphLabel(metricName);
+[var2, yl2] = getGraphLabel('response');
 
 % Count subjects to loop over
 subList = unique(data.Subject);
