@@ -4,7 +4,8 @@ pths = specifyPaths('..');
 outputPath = pths.MWdat;
 edfList = dir(fullfile(outputPath, '*.edf'));
 metricName = 'scaledfixation';
-[axistxt, yl, xl] = getGraphLabel(metricName);
+[axistxt, xl] = getGraphLabel(metricName);
+yl = length(edfList) * (0.5 * xl(2)); % estimate a frequency
 % Aggregate data
 for subject = 1:length(edfList)
     Trials = osfImport(edfList(subject).name);

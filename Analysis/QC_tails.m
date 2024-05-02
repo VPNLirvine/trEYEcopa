@@ -1,6 +1,6 @@
 metricName = 'scaledfixation';
 data = getTCData(metricName);
-[var1, ~, yl] = getGraphLabel(metricName);
+[var1, yl] = getGraphLabel(metricName);
 histogram(data.Eyetrack);
         xlabel(var1);
         title('Expect an RT-like distribution');

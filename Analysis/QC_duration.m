@@ -10,15 +10,8 @@ stimName = getStimName(edf);
 pths = specifyPaths('..');
 fname = fullfile(pths.TCstim, stimName);
 
-% % Read the expected duration of the video
-% vidHeader = mmfileinfo(fname);
-% exptDur = vidHeader.Duration;
-%
-% Use a Mac built-in function to find video duration
-% Do this instead of mmfileinfo() bc I get a codec error on my laptop
-exe = sprintf("mdls %s | grep Duration | awk '{ print $3 }'", fname);
-[~,exptDur] = system(exe);
-exptDur = str2double(exptDur);
+% Read the expected duration of the video
+exptDur = getVideoDuration(fname);
 
 %% Estimate the duration of the video from the EDF data
 dur1 = double(edf.Header.duration); % Header duration

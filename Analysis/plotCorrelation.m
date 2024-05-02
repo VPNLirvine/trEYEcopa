@@ -21,8 +21,8 @@ fig2 = figure();
         tiledlayout('horizontal');
     end
 % Get axis titles
-[var1, ~, yl] = getGraphLabel(metricName);
-var2 = 'Understandability rating';
+[var1, yl] = getGraphLabel(metricName);
+[var2, yl2] = getGraphLabel('response');
 
 % Count subjects to loop over
 subList = unique(data.Subject);
@@ -72,9 +72,29 @@ for s = 1:numSubs
         ylabel(var1);
         title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', output(s,2))]);
         ylim(yl); % varies by metric
-        xlim([0 6]); % fixed bc it's response 1-5
+        xlim(yl2); % fixed bc it's response 1-5
         xticks([1 2 3 4 5])
         % lsline
 end
+
+% Also generate an overall plot (i.e. not by subject)
+figure();
+x = nan([length(data.Eyetrack), 5]);
+dat = []; % tmp
+for i = 1:5
+    % Get the values for each response choice
+    dat = data.Eyetrack(data.Response == i);
+    datl = length(dat);
+    if ~isempty(dat)
+        % If no responses with this button, leave nans
+        x(1:datl,i) = dat;
+    end
+end
+boxplot(x, 1:5); % which ignores nans thankfully
+xlabel(var2);
+ylabel(var1);
+title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, output(s,2)));
+ylim(yl); % ylimit varies by metric
+
 warning('on','stats:boxplot:BadObjectType'); % toggle
 end

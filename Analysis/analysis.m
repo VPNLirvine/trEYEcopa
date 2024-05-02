@@ -53,8 +53,8 @@ if choice == 1
     % mdl = fitlm(data, 'Eyetrack ~ Response');
     
     % Get axis labels for later
-    [var1, ~, yl] = getGraphLabel(metricName);
-    var2 = 'Understandability rating';
+    [var1, yl, distTxt] = getGraphLabel(metricName);
+    [var2, yl2, distTxt2] = getGraphLabel('response');
     
     % Get the AQ scores from the Qualtrics output
     aqTable = getAQ(specifyPaths('..'));
@@ -86,7 +86,7 @@ if choice == 1
     % i.e. do not correlate with the clarity rating
     % Reduce data to an average value per subject,
     % since there's only 1 AQ value per person
-    var3 = 'Autism Quotient';
+    [var3, yl3, distTxt3] = getGraphLabel('AQ');
 
     aqCol = [];
     for s = 1:numSubs
@@ -101,11 +101,11 @@ if choice == 1
         % Plot
         figure();
         scatter(aqCol, data.Eyetrack);
-            title(sprintf('Strength of relationship: \x03C1 = %0.2f', output(1,2)));
+            title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, output(1,2)));
             xlabel(var3);
             ylabel(var1);
             ylim(yl);
-            xlim([0 50]);
+            xlim(yl3);
             
         % Report the correlation score
         fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
@@ -116,12 +116,12 @@ if choice == 1
         subplot(1,2,1);
             histogram(data.Eyetrack);
             xlabel(var1);
-            title('Expect an RT-like distribution');
+            title(distTxt);
             xlim(yl);
         subplot(1,2,2)
             histogram(aq, 'BinEdges', 0:5:50);
             xlabel(var3);
-            title('Expect a bimodal distribution');
+            title(distTxt3);
             xlim([0 50]);
             % Add lines indicating the expected distribution(s)
             overlayAQ(gca);
@@ -137,7 +137,7 @@ if choice == 1
         % Plot and analyze relationship between AQ and current metric
         figure();
             scatter(aq, zCorr, 'filled');
-            xlabel('Autism Quotient');
+            xlabel(var3);
             ylabel('Z-Transformed Spearman correlation');
             title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
         secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
@@ -150,12 +150,12 @@ if choice == 1
         subplot(1,2,1);
             histogram(data.Eyetrack);
             xlabel(var1);
-            title('Expect an RT-like distribution');
+            title(distTxt);
             xlim(yl);
         subplot(1,2,2)
             histogram(data.Response);
             xlabel(var2);
-            title('Uniform distribution is ideal');
+            title(distTxt2);
     end
     
 elseif choice == 2

@@ -7,7 +7,7 @@ numConds = length(conds);
 subList = unique(data.Subject);
 numSubs = length(subList);
 
-[axistxt, histy, ylimvec] = getGraphLabel(metricName); % variable axis label text
+[axistxt, ylimvec] = getGraphLabel(metricName); % variable axis label text
 %% Split by condition
 close all
 for i = 1:numConds
@@ -15,7 +15,6 @@ for i = 1:numConds
     figure();
     histogram(data.Eyetrack(strcmp(data.Category, thisCond)));
         title(thisCond);
-        % ylim(histy);
         xlim(ylimvec);
         xlabel(axistxt);
 end
