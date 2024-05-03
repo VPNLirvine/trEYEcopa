@@ -135,12 +135,12 @@ if choice == 1
         zCorr = zscore(output(:,2));
     
         % Plot and analyze relationship between AQ and current metric
+        secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
         figure();
             scatter(aq, zCorr, 'filled');
             xlabel(var3);
             ylabel('Z-Transformed Spearman correlation');
-            title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
-        secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+            title(sprintf('Impact of AQ on %s''s relation with %s\n\x03C1 = %0.2f', var1, var2, secondCorr));
     
         fprintf(1, 'Correlation between AQ and above correlation:\n')
         fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
