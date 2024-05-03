@@ -39,7 +39,7 @@ tit = 'Videos sorted by duration, variance is across subjects';
 % tit = 'Videos sorted alphabetically, variance is across subjects';
 
 % Also calculate a correlation between metric and video duration
-c = corr(plotData.Eyetrack, durCol');
+c = corr(plotData.Eyetrack, durCol', 'rows', 'complete');
 
 % Now make the plot
 figure();

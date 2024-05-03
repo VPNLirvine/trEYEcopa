@@ -5,6 +5,7 @@ function output = selectMetric(edfDat, metricName, varargin)
 % Options are as follows:
 %   'fixation' - Total fixation time per trial
 %   'scaledfixation' - Percentage of video time spent fixating
+%   'firstfix' - Duration of the initial fixation - like an RT to the video
 %   'duration' - Duration of the video  in sec (a QC metric)
 %   'meanfix' - Average fixation duration within a trial
 %   'medianfix' - Median fixation duration within a trial
@@ -30,7 +31,7 @@ end
 % Find timepoints bounding stimulus presentation
 stimStart = findStimOnset(edfDat);
 stimEnd = findStimOffset(edfDat);
-recStart = edfDat.Header.starttime; % time eyetracker starts recording
+recStart = edfDat.Header.rec.time; % time eyetracker starts recording
 
 % The EDF file's 'duration' field is unreliable:
 % sometimes it's 0, sometimes it's far less than the event durations,
@@ -55,9 +56,22 @@ switch metricName
         output = sum(data);
     case 'scaledfixation'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
         data = fixOutliers(data);
         data = sum(data);
         output = data / duration;
+    case 'firstfix'
+        data = edfDat.Fixations.entime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recOffset & edfDat.Fixations.entime >= recOffset);
+        if isempty(data)
+            output = NaN;
+        else
+            % I selected the END TIME of the fixation, not the duration.
+            % The start time could be ANY time b/w recStart and stimStart,
+            % But the end time is always relative to recStart.
+            % Subtracting recOffset gives you the duration from video on,
+            % so that this becomes a sort of reaction time to the video.
+            output = data - recOffset;
+        end
     case 'duration'
         output = getStimDuration(edfDat);
     case 'meanfix'

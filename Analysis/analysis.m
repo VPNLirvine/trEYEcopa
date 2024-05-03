@@ -95,8 +95,8 @@ if choice == 1
         nrows = sum(subset);
         aqCol = [aqCol; aq(s) * ones(nrows,1)];
     end
-    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson');
-    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman');
+    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
+    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
         
         % Plot
         figure();
@@ -134,7 +134,7 @@ if choice == 1
         zCorr = zscore(output(:,2));
     
         % Plot and analyze relationship between AQ and current metric
-        secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+        secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
         figure();
             scatter(aq, zCorr, 'filled');
             xlabel(var3);
