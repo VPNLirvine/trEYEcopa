@@ -54,9 +54,15 @@ switch metricName
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         output = sum(data);
+    case 'gap'
+        % This is ultimately meaningless
+        % so if it correlates strongly with anything,
+        % you've likely got a bug in your pipeline.
+        output = recOffset;
     case 'scaledfixation'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
+        data = [data selectMetric(edfDat, 'lastfix', varargin)]; % include the cut-off final fixation
         data = fixOutliers(data);
         data = sum(data);
         output = data / duration;
@@ -71,6 +77,22 @@ switch metricName
             % Subtracting recOffset gives you the duration from video on,
             % so that this becomes a sort of reaction time to the video.
             output = data - recOffset;
+        end
+    case 'lastfix'
+        % Please don't analyze this by itself
+        data = edfDat.Fixations.sttime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recDur & edfDat.Fixations.entime >= recDur);
+        if isempty(data)
+            output = [];
+        else
+            % I selected the START TIME of the fixation, not the duration.
+            % The end time could be ANY time after the stim ends,
+            % but we need to ignore that part,
+            % and just get the portion from its start to the video end.
+            % Since Fixations.sttime is relative to recording onset,
+            % we need to subtract recOffset as well.
+            % The result is the duration of the final fixation,
+            % minus any time it lasted after the video ended.
+            output = (stimEnd - stimStart) - data(end) - recOffset;
         end
     case 'duration'
         output = getStimDuration(edfDat);

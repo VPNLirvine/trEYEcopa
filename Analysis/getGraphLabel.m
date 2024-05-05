@@ -21,6 +21,10 @@ switch metricName
         txt = 'Percent time spent fixating';
         yl = [0 1.1];
         dist = 'Expect an RT-like distribution';
+    case 'gap'
+        txt = 'Delay between recording and video onset';
+        yl = [0 200];
+        dist = 'Expect a normal distribution';
     case 'firstfix'
         txt = 'Duration of first fixation in ms';
         yl = [0 1000]; % though there are MANY outliers beyond this
