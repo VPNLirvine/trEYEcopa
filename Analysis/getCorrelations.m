@@ -7,8 +7,8 @@ numSubs = length(subList);
 for s = 1:numSubs
     subID = subList{s};
     subset = strcmp(subID, data.Subject);
-    output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson');
-    output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman');
+    output(s, 1) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Pearson', 'rows', 'complete');
+    output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman', 'rows', 'complete');
 end
 
 % Get the names of what you're correlating

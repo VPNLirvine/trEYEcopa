@@ -5,6 +5,7 @@ function output = selectMetric(edfDat, metricName, varargin)
 % Options are as follows:
 %   'fixation' - Total fixation time per trial
 %   'scaledfixation' - Percentage of video time spent fixating
+%   'firstfix' - Duration of the initial fixation - like an RT to the video
 %   'duration' - Duration of the video  in sec (a QC metric)
 %   'meanfix' - Average fixation duration within a trial
 %   'medianfix' - Median fixation duration within a trial
@@ -24,50 +25,97 @@ else
     i = n;
 end
 
+% Account for differences between TRIAL duration and STIMULUS duration
+% (the full stream of samples per trial includes drift checking etc)
+
 % Find timepoints bounding stimulus presentation
-recStart = findStimOnset(edfDat);
-recEnd = findStimOffset(edfDat);
+stimStart = findStimOnset(edfDat);
+stimEnd = findStimOffset(edfDat);
+recStart = edfDat.Header.rec.time; % time eyetracker starts recording
+
+% The EDF file's 'duration' field is unreliable:
+% sometimes it's 0, sometimes it's far less than the event durations,
+% so just calculate it from start and end time instead.
+duration = stimEnd - stimStart;
+
+% There is a short delay b/w the eyetracker starting and stimulus onset.
+% All the "Fixation" onset times are relative to the former, not the latter.
+% e.g. a fixation with sttime == 100 began 100ms after recording,
+% which may be before the stimulus actually started.
+% Filter out any events that begin before this delay has passed.
+recOffset = stimStart - recStart; % delay b/w eyetracker and stim, ~140ms
+
+% Look for end times that happen before this interval.
+recDur = stimEnd - recStart;
+
 
 switch metricName
     case 'fixation'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         output = sum(data);
+    case 'gap'
+        % This is ultimately meaningless
+        % so if it correlates strongly with anything,
+        % you've likely got a bug in your pipeline.
+        output = recOffset;
     case 'scaledfixation'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
+        data = [data selectMetric(edfDat, 'lastfix', varargin)]; % include the cut-off final fixation
         data = fixOutliers(data);
         data = sum(data);
-        % duration = double(edfDat.Header.duration);
-        % duration = double(edfDat.Header.endtime - edfDat.Header.starttime);
-        % duration = double(edfDat.Samples.time(end) - edfDat.Samples.time(1));
-        duration = recEnd - recStart;
-        % The provided duration value is unreliable:
-        % sometimes it's 0, sometimes it's far less than sum(fixations)
-        % so just calculate it from start and end time instead.
-
         output = data / duration;
+    case 'firstfix'
+        data = edfDat.Fixations.entime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recOffset & edfDat.Fixations.entime >= recOffset);
+        if isempty(data)
+            output = NaN;
+        else
+            % I selected the END TIME of the fixation, not the duration.
+            % The start time could be ANY time b/w recStart and stimStart,
+            % But the end time is always relative to recStart.
+            % Subtracting recOffset gives you the duration from video on,
+            % so that this becomes a sort of reaction time to the video.
+            output = data - recOffset;
+        end
+    case 'lastfix'
+        % Please don't analyze this by itself
+        data = edfDat.Fixations.sttime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recDur & edfDat.Fixations.entime >= recDur);
+        if isempty(data)
+            output = [];
+        else
+            % I selected the START TIME of the fixation, not the duration.
+            % The end time could be ANY time after the stim ends,
+            % but we need to ignore that part,
+            % and just get the portion from its start to the video end.
+            % Since Fixations.sttime is relative to recording onset,
+            % we need to subtract recOffset as well.
+            % The result is the duration of the final fixation,
+            % minus any time it lasted after the video ended.
+            output = (stimEnd - stimStart) - data(end) - recOffset;
+        end
     case 'duration'
         output = getStimDuration(edfDat);
     case 'meanfix'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         output = mean(data);
     case 'medianfix'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         output = median(data);
     case 'maxfixOnset'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         [~, position] = max(data);
         output = edfDat.Fixations.sttime(:,position);
     case 'minfixOnset'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         data = fixOutliers(data);
         [~, position] = min(data);
         output = edfDat.Fixations.sttime(:,position);
     case 'meansacdist'
-        data = edfDat.Saccades.ampl(edfDat.Saccades.eye == i & edfDat.Saccades.sttime <= recEnd - recStart);
+        data = edfDat.Saccades.ampl(edfDat.Saccades.eye == i & edfDat.Saccades.entime <= recDur & edfDat.Saccades.sttime >= recOffset);
         % ampl = amplitude of saccade (ie distance)
         % there is also phi, which is direction in degrees (ie not rads)
         data = fixOutliers(data);
@@ -79,18 +127,18 @@ switch metricName
         output = mean(data);
     case 'positionMax'
         % This is probably useless
-        A = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
-        B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
-        C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        A = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         [~, colIdx] = max(A);
         valueInB = B(colIdx);
         valueInC = C(colIdx);
         output = [valueInB; valueInC];
     case 'positionMin'
         % This also seems useless
-        A = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
-        B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
-        C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recEnd - recStart);
+        A = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        B = edfDat.Fixations.gavx(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
+        C = edfDat.Fixations.gavy(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         [~, colIdx] = min(A);
         valueInB = B(colIdx);
         valueInC = C(colIdx);

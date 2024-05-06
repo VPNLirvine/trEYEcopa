@@ -95,8 +95,8 @@ if choice == 1
         nrows = sum(subset);
         aqCol = [aqCol; aq(s) * ones(nrows,1)];
     end
-    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson');
-    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman');
+    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
+    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
         
         % Plot
         figure();
@@ -129,18 +129,17 @@ if choice == 1
         % Calculate correlations and generate some visualizations
         output = getCorrelations(data, metricName);
         plotCorrelation(data, output, metricName);
-        plotItemwise(data, metricName);
     
         % Now Fischer z-transform your correlation coefficients
         zCorr = zscore(output(:,2));
     
         % Plot and analyze relationship between AQ and current metric
+        secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
         figure();
             scatter(aq, zCorr, 'filled');
             xlabel(var3);
             ylabel('Z-Transformed Spearman correlation');
-            title(sprintf('Impact of AQ on %s''s relation with %s', var1, var2));
-        secondCorr = corr(aq, zCorr, 'Type', 'Spearman');
+            title(sprintf('Impact of AQ on %s''s relation with %s\n\x03C1 = %0.2f', var1, var2, secondCorr));
     
         fprintf(1, 'Correlation between AQ and above correlation:\n')
         fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
@@ -192,3 +191,4 @@ elseif choice == 2
         fprintf('\tSSE = %0.2f\n', sse)
         fprintf('\n')
 end
+plotItemwise(data, metricName, mwflag);
