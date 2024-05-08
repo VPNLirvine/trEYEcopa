@@ -18,21 +18,22 @@ yMax = 1200;
 tMax = max(tbl.time);
 binRes = round(deg2pix(2));
 tbinRes = 200; % ms?
-xBins = 1:binRes:xMax;
-yBins = 1:binRes:yMax;
-tBins = 0:tbinRes:tMax;
 
-nxbins = length(xBins);
-nybins = length(yBins);
-ntbins = length(tBins);
+nxbins = ceil(xMax / binRes);
+nybins = ceil(yMax / binRes);
+ntbins = ceil(tMax / tbinRes);
+
+xBins = linspace(1,xMax,nxbins+1);
+yBins = linspace(1,yMax,nybins+1);
+tBins = linspace(1,tMax,ntbins+1);
 
 %% Count density
 % we start counting density along in the [X,Y] plane (Z axis aglomerated)
-[Nz,xBins,yBins,binX,binY] = histcounts2(x,y,xBins,yBins) ;
-npt = sum(Nz, 'all'); % we may be excluding outliers like blinks here
+[Nz1,~,~,binY,binX] = histcounts2(y,x,yBins,xBins) ;
+npt = sum(Nz1, 'all'); % we may be excluding outliers like blinks here
 % preallocate 3D containers
-N3d = zeros(nxbins,nybins,ntbins) ; % 3D matrix containing the counts
-Npc = zeros(nxbins,nybins,ntbins) ; % 3D matrix containing the percentages
+N3d = zeros(nybins,nxbins,ntbins) ; % 3D matrix containing the counts
+Npc = zeros(nybins,nxbins,ntbins) ; % 3D matrix containing the percentages
 colorpc = zeros(npt,1) ;         % 1D vector containing the percentages
 
 % we do not want to loop on every block of the domain because:
@@ -40,8 +41,8 @@ colorpc = zeros(npt,1) ;         % 1D vector containing the percentages
 %   - a large number of them can be empty
 % So we first find the [X,Y] blocks which are not empty, we'll only loop on
 % these blocks.
-validbins = find(Nz) ;                              % find the indices of non-empty blocks
-[xbins,ybins] = ind2sub([nxbins,nybins],validbins) ;  % convert linear indices to 2d indices
+validbins = find(Nz1) ;                              % find the indices of non-empty blocks
+[ybins,xbins] = ind2sub([nybins,nxbins],validbins) ;  % convert linear indices to 2d indices
 nv = numel(xbins) ;                                 % number of block to process
 
 % Now for each [X,Y] block, we get the distribution over a [Z] column and
@@ -53,12 +54,17 @@ for k=1:nv
 
     % find linear indices of the `x` and `y` values which are located into this block
     idx = find( binX==xbin & binY==ybin ) ;
+    assert(~isempty(idx), 'xbin and ybin do not point to a valid cell. Bin sizes likely off by one.')
     % make a subset with the corresponding 'z' value
     subZ = z(idx) ;
+    assert(length(subZ) == Nz1(ybin,xbin), 'valid idx either did not find the correct data, or only a portion. Could be that the bins do not cover the full range of values.');
     % find the distribution and assign to 3D matrices
     [Nz,~,zbins] = histcounts( subZ , tBins ) ;
-    N3d(xbin,ybin,:) = Nz ;         % total counts for this block
-    Npc(xbin,ybin,:) = Nz ./ npt ;  % density % for this block
+
+    % validate again
+    assert(sum(Nz) == Nz1(ybin,xbin), 'valid position data did not gather from all timepoints - time bins likely wrong size');
+    N3d(ybin,xbin,:) = Nz ;         % total counts for this block
+    Npc(ybin,xbin,:) = Nz ./ npt ;  % density % for this block
 
     % Now we have to assign this value (color or percentage) to all the points
     % which were found in the blocks
@@ -71,7 +77,12 @@ for k=1:nv
     end
 
 end
-numCounted = sum(sum(sum(N3d)));
+
+% Validate
+% N3d flattened over z should equal Nz1
+chk = sum(N3d,3);
+assert(isequal(chk,Nz1), 'Encountered an unexpected binning error after passing all previous checks')
+numCounted = sum(N3d, 'all');
 assert(  numCounted == npt, 'Only considered %i of %i timepoints!', numCounted, npt ) % double check we counted everything
 
 %% Display final result
