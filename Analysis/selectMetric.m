@@ -25,6 +25,25 @@ else
     i = n;
 end
 
+% See if the optional screen dimensions were included
+if nargin > 3
+    % Expecting screen dimensions: [xsize ysize]
+    % e.g. a typical HD screen is [1920 1080]
+    scDim = varargin{2};
+    assert(length(scDim) == 2, '4th input must be a 2-element array of screen dimensions: [xwidth yheight]');
+else
+    % Use defaults
+    scDim = [1920 1200];
+end
+
+% See if the data needs to be flipped or not
+if nargin > 2
+    flipFlag = varargin{1};
+    assert(islogical(flipFlag), '3rd input must be a boolean indicating whether the stimulus was flipped or not');
+else
+    flipFlag = false;
+end
+
 % Account for differences between TRIAL duration and STIMULUS duration
 % (the full stream of samples per trial includes drift checking etc)
 
@@ -145,40 +164,51 @@ switch metricName
         output = [valueInB; valueInC];
     case 'heatmap'
         % This is a 2D matrix, not a single value! Be careful.
-
-        % Extract x and y timeseries
-        xdat = pickCoordData(edfDat.Samples.gx);
-        ydat = pickCoordData(edfDat.Samples.gy);
-
-        % See if the optional screen dimensions were included
-        if nargin > 3
-            % Expecting screen dimensions: [xsize ysize]
-            % e.g. a typical HD screen is [1920 1080]
-            scDim = varargin{2};
-            assert(length(scDim) == 2, '4th input must be a 2-element array of screen dimensions: [xwidth yheight]');
-        else
-            % Use defaults
-            scDim = [1920 1200];
-        end
         
-        % See if the data needs to be flipped or not
-        if nargin > 2
-            flipFlag = varargin{1};
-            assert(islogical(flipFlag), '3rd input must be a boolean indicating whether the stimulus was flipped or not');
-            if flipFlag
-                xdat = mirrorX(xdat, scDim(1));
-            end
-        end
+        % First get the full gaze trajectory for this trial
+        dat = selectMetric(edfDat, 'gaze', varargin);
+        
+        % Separate x and y timeseries
+        xdat = dat(1,:);
+        ydat = dat(2,:);
+        clear dat
+
         % A number >= 1 of pixels to average over
         % 1 = full-resolution, 10 is what Isik used.
         % Another Isik paper averaged 900x900 videos into 20 bins per side,
         % Which is about 2 deg of visual angle.
         binRes = round(deg2pix(2)); % calculate bin size using trig
         % binRes = 80;
+        
+        % We need to un-flip the gaze for flipped videos
+        if flipFlag
+            xdat = mirrorX(xdat, scDim(1));
+        end
 
         % Get the data
         output = getHeatmap(xdat, ydat, scDim, binRes);
         
+    case 'gaze'
+        % This is a 2-row matrix of X-Y coordinate pairs
+        % that represents gaze position on screen over time,
+        % plus a 3rd row giving the time in ms from onset.
+        % Not intended as its own 'metric' per se.
+
+        % Only consider timepoints where the stimulus was visible
+        stimPeriod = edfDat.Samples.time >= stimStart & edfDat.Samples.time <= stimEnd;
+        
+        % i is 0 or 1 for left or right eye, so i+1 is 1st or 2nd row.
+        % xdat = pickCoordData(edfDat.Samples.gx(:, stimPeriod));
+        % ydat = pickCoordData(edfDat.Samples.gy(:, stimPeriod));
+        xdat = edfDat.Samples.gx(i+1, stimPeriod);
+        ydat = edfDat.Samples.gy(i+1, stimPeriod);
+        tdat = edfDat.Samples.time(stimPeriod) - stimStart;
+
+        % We need to un-flip the gaze for flipped videos
+        if flipFlag
+            xdat = mirrorX(xdat, scDim(1));
+        end
+        output = [xdat;ydat; tdat];
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
