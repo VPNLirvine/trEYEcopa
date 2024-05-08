@@ -1,7 +1,7 @@
 function duration = getVideoDuration(fname)
 % Given the name+location of a video file, find its duration
 
-assert(exist(fname,'file'), 'Could not find file: %s', fname)
+assert(exist(fname,'file') ~= 0, 'Could not find file: %s', fname)
 if ismac
     % Use a Mac shell function to find the video's duration
     % I do this instead of mmfileinfo() bc I get a codec error on my laptop
