@@ -6,10 +6,6 @@ function getHeatPath(data, stim)
 % Input 1 is the data table of gaze paths, e.g. from getTCData('gaze');
 % Input 2 is the stimulus name, 
 
-% First get the data
-% Contains an array of cells, each with the 2*n x-y coordinate pairs
-data = getMWData('gaze');
-
 % Then pick a stim name
 stimList = unique(data.StimName);
 s = find(strcmp(stim, stimList));
