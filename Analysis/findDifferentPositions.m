@@ -25,45 +25,41 @@ else
 end
 
 % Find the first index with a change in position/rotation
-for i = 1:length(posData.X1_Values{m})-1
-    x1 = ~isequal(posData.X1_Values{m}(i), posData.X1_Values{m}(i+1));
-    y1 = ~isequal(posData.Y1_Values{m}(i), posData.Y1_Values{m}(i+1));
-    x2 = ~isequal(posData.X2_Values{m}(i), posData.X2_Values{m}(i+1));
-    y2 = ~isequal(posData.Y2_Values{m}(i), posData.Y2_Values{m}(i+1));
-    x3 = ~isequal(posData.X3_Values{m}(i), posData.X3_Values{m}(i+1));
-    y3 = ~isequal(posData.Y3_Values{m}(i), posData.Y3_Values{m}(i+1));
-    x4 = ~isequal(posData.X4_Values{m}(i), posData.X4_Values{m}(i+1));
-    y4 = ~isequal(posData.Y4_Values{m}(i), posData.Y4_Values{m}(i+1));
-    r1 = ~isequal(posData.R1_Values{m}(i), posData.R1_Values{m}(i+1));
-    r2 = ~isequal(posData.R2_Values{m}(i), posData.R2_Values{m}(i+1));
-    r3 = ~isequal(posData.R3_Values{m}(i), posData.R3_Values{m}(i+1));
-    r4 = ~isequal(posData.R4_Values{m}(i), posData.R4_Values{m}(i+1));
-    if x1 || x2 || x3 || x4 || y1 || y2 || y3 || y4 || r1 || r2 || r3 || r4
-        % If ANY character has moved or rotated in frame i+1,
-        % then frame i is considered the first frame.
-        output(1) = i;
-        break
-    end
-end
+    % diff compares element i to element i+1
+    % find the first non-zero element
+    x1 = find(diff(posData.X1_Values{m}),1);
+    y1 = find(diff(posData.Y1_Values{m}),1);
+    x2 = find(diff(posData.X2_Values{m}),1);
+    y2 = find(diff(posData.Y2_Values{m}),1);
+    x3 = find(diff(posData.X3_Values{m}),1);
+    y3 = find(diff(posData.Y3_Values{m}),1);
+    x4 = find(diff(posData.X4_Values{m}),1);
+    y4 = find(diff(posData.Y4_Values{m}),1);
+    r1 = find(diff(posData.R1_Values{m}),1);
+    r2 = find(diff(posData.R2_Values{m}),1);
+    r3 = find(diff(posData.R3_Values{m}),1);
+    r4 = find(diff(posData.R4_Values{m}),1);
+    % If ANY character has moved or rotated in frame i+1,
+    % then frame i is considered the first frame.
+    output(1) = min([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
 
 % Find the final index with a change in position/rotation
-for i = length(posData.X1_Values{m}):-1:2
-    x1 = ~isequal(posData.X1_Values{m}(i), posData.X1_Values{m}(i-1));
-    y1 = ~isequal(posData.Y1_Values{m}(i), posData.Y1_Values{m}(i-1));
-    x2 = ~isequal(posData.X2_Values{m}(i), posData.X2_Values{m}(i-1));
-    y2 = ~isequal(posData.Y2_Values{m}(i), posData.Y2_Values{m}(i-1));
-    x3 = ~isequal(posData.X3_Values{m}(i), posData.X3_Values{m}(i-1));
-    y3 = ~isequal(posData.Y3_Values{m}(i), posData.Y3_Values{m}(i-1));
-    x4 = ~isequal(posData.X4_Values{m}(i), posData.X4_Values{m}(i-1));
-    y4 = ~isequal(posData.Y4_Values{m}(i), posData.Y4_Values{m}(i-1));
-    r1 = ~isequal(posData.R1_Values{m}(i), posData.R1_Values{m}(i-1));
-    r2 = ~isequal(posData.R2_Values{m}(i), posData.R2_Values{m}(i-1));
-    r3 = ~isequal(posData.R3_Values{m}(i), posData.R3_Values{m}(i-1));
-    r4 = ~isequal(posData.R4_Values{m}(i), posData.R4_Values{m}(i-1));
-    if x1 || x2 || x3 || x4 || y1 || y2 || y3 || y4 || r1 || r2 || r3 || r4
-        % If ANY character has moved or rotated in frame i-1,
-        % then frame i is considered the final frame.
-        output(2) = i;
-        break
-    end
+% diff compares i to i+1
+% look at the last non-zero element of diff, and use the next one
+% since that means i ~= i+1, but i+1 == i+2 and we want to keep all motion
+    x1 = find(diff(posData.X1_Values{m}),1, 'last') + 1;
+    y1 = find(diff(posData.Y1_Values{m}),1, 'last') + 1;
+    x2 = find(diff(posData.X2_Values{m}),1, 'last') + 1;
+    y2 = find(diff(posData.Y2_Values{m}),1, 'last') + 1;
+    x3 = find(diff(posData.X3_Values{m}),1, 'last') + 1;
+    y3 = find(diff(posData.Y3_Values{m}),1, 'last') + 1;
+    x4 = find(diff(posData.X4_Values{m}),1, 'last') + 1;
+    y4 = find(diff(posData.Y4_Values{m}),1, 'last') + 1;
+    r1 = find(diff(posData.R1_Values{m}),1, 'last') + 1;
+    r2 = find(diff(posData.R2_Values{m}),1, 'last') + 1;
+    r3 = find(diff(posData.R3_Values{m}),1, 'last') + 1;
+    r4 = find(diff(posData.R4_Values{m}),1, 'last') + 1;
+    % If ANY character has moved or rotated in frame i+1,
+    % then frame i is considered the final frame.
+    output(2) = max([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
 end
