@@ -4,20 +4,16 @@ x = tbl.x;
 y = tbl.y;
 z = tbl.time;
 
+numSubs = length(unique(tbl.Subject));
 npt = numel(x);
 
 
 %% Define domain and grid parameters
-% nbins    = 100 ;
-% maxDim   = 300 ;
-% binEdges = linspace(0,maxDim,nbins+1) ;
-
-% try again
 xMax = 1920;
 yMax = 1200;
 tMax = max(tbl.time);
 binRes = round(deg2pix(2));
-tbinRes = 200; % ms?
+tbinRes = 200; % ms
 
 nxbins = ceil(xMax / binRes);
 nybins = ceil(yMax / binRes);
@@ -35,6 +31,7 @@ npt = sum(Nz1, 'all'); % we may be excluding outliers like blinks here
 N3d = zeros(nybins,nxbins,ntbins) ; % 3D matrix containing the counts
 Npc = zeros(nybins,nxbins,ntbins) ; % 3D matrix containing the percentages
 colorpc = zeros(npt,1) ;         % 1D vector containing the percentages
+pctsubs = zeros(npt,1) ;
 
 % we do not want to loop on every block of the domain because:
 %   - depending on the grid size there can be many
@@ -74,6 +71,8 @@ for k=1:nv
         idz   = find( zbins==vzbins(kz) ) ;
         idx3d = idx(idz) ;
         colorpc(idx3d) = thisColorpc ;
+        numUsedSubs = length(unique(tbl.Subject(idx)));
+        pctsubs(idx3d) = numUsedSubs / numSubs;
     end
 
 end
@@ -87,26 +86,33 @@ assert(  numCounted == npt, 'Only considered %i of %i timepoints!', numCounted, 
 
 %% Display final result
 dotSize = (colorpc + eps) ./ max(colorpc + eps); % rescale to percentage
+% dotColor = dotSize;
+dotColor = pctsubs;
 % Apply a threshold on which dots to plot,
-% otherwise it plots literally all of them.
+% otherwise it plots literally every sample for every subject.
 dropThese = dotSize < 0.1; % apply a threshold
     x(dropThese) = [];
     z(dropThese) = [];
     y(dropThese) = [];
     dotSize(dropThese) = [];
-    colorpc(dropThese) = [];
+    dotColor(dropThese) = [];
 dotSize = dotSize .* binRes; % resize based on bin size
 % Now draw the plot
 h=figure;
-hs=scatter3(x, z, y, dotSize , colorpc ,'filled' );
+hs=scatter3(x, z, y, dotSize , dotColor ,'filled' );
 xlabel('x');
 ylabel('Time in ms');
 zlabel('y');
 title(replace(stim,'_','\_'));
 xlim([0 xMax]);
 zlim([0 yMax]);
-set(gca, 'YDir', 'reverse'); % time goes from back to front
-set(gca, 'ZDir', 'reverse');
+% Avoid using scientific notation for the time axis
+ax = gca; % axes handle
+ax.YAxis.Exponent = 0;
+% Fix axis directions
+set(ax, 'YDir', 'reverse'); % time goes from back to front
+set(ax, 'ZDir', 'reverse');
+% Set colorbar
 cb = colorbar ;
-cb.Label.String = 'Probability density estimate';
-
+cb.Label.String = 'Percentage of subjects with data in this bin';
+% cb.Label.String = 'Bin density';

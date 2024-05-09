@@ -4,12 +4,11 @@ function getHeatPath(data, stim)
 % It's like a 3D histogram.
 %
 % Input 1 is the data table of gaze paths, e.g. from getTCData('gaze');
-% Input 2 is the stimulus name, 
+% Input 2 is the stimulus name as it appears in data.StimName
 
-% Then pick a stim name
+% Find the index of that stim name
 stimList = unique(data.StimName);
 s = find(strcmp(stim, stimList));
-% s = 11;
 
 numStims = length(stimList);
 
@@ -18,8 +17,17 @@ pathList = data.Eyetrack(strcmp(stim, data.StimName));
 subList = data.Subject(strcmp(stim, data.StimName));
 numSub = length(subList);
 
-% For all subs with this video,
-% write each element of the gaze vectors into a new row of one giant table
+% As an intermediary step, plot all those paths stacked on top of each other
+% but turn this section off if you're looping over stimulus
+figure();
+hold on
+for i = 1:length(pathList)
+    plotGaze(pathList{i}, stim);
+end
+hold off
+
+% Now reorganize the data in prep for making a histogram:
+% write each element of each gaze vector into a single row of one giant table
 varNames = {'Subject','x','y','time','c'};
 varTypes = {'string','double','double','double','double'};
 tbl = table('Size', [0 5], 'VariableTypes',varTypes,'VariableNames',varNames);
@@ -36,10 +44,6 @@ for i = 1:numSub
     xdat(bad) = [];
     ydat(bad) = [];
     tdat(bad) = [];
-
-    % Now compress this data to be 20x20 instead of 1920x1200
-    % xdat = round(xdat / 1920 * 20);
-    % ydat = round(ydat / 1200 * 20);
     
     subID = subList{i};
     numRows = length(tdat);
@@ -49,22 +53,6 @@ for i = 1:numSub
     a = a + numRows;
 end
 
-fprintf(1, '\tPlotting stim %i / %i...', s, numStims)
-% Plot all eye paths directly from the big table
-figure();
-colormap('lines');
-scatter3(tbl.x,tbl.time,tbl.y, 36, tbl.c);
-xlabel('x');
-ylabel('Time in ms');
-zlabel('y');
-title(replace(stim,'_','\_'));
-xlim([0 1920]);
-zlim([0 1200]);
-set(gca, 'YDir', 'reverse'); % time goes from back to front
-set(gca, 'ZDir', 'reverse'); % y axis goes from top to bottom
-
-% Cool, now aggregate across subjects and plot again.
+% Finally, run it through a 3D histogram and plot again.
 plotDensity(tbl, stim);
 fprintf(1, 'Done.\n')
-
-
