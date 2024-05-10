@@ -39,11 +39,11 @@ for v = loopRange
         img2 = imread(fname2);
 
         % Filter somehow
-        img1 = im2bw(img1);
-        img2 = im2bw(img2);
+        img1 = imbinarize(img1(:,:,3), 0.5);
+        img2 = imbinarize(img2(:,:,3), 0.5);
 
-        if sum(img1 ~= img2, 'all') > 7
-            frange(1) = i+1;
+        if sum(img1 ~= img2, 'all') > 6
+            frange(1) = i;
             break
         end
     end
@@ -57,16 +57,16 @@ for v = loopRange
         img2 = imread(fname2);
 
         % Filter somehow
-        img1 = im2bw(img1);
-        img2 = im2bw(img2);
+        img1 = imbinarize(img1(:,:,3), 0.5);
+        img2 = imbinarize(img2(:,:,3), 0.5);
 
-        if sum(img1 ~= img2, 'all') > 7
-            frange(2) = i-1;
+        if sum(img1 ~= img2, 'all') > 6
+            frange(2) = i;
             break
         end
     end
     if numVids == 1
-        % 
+        % Don't make a big empty thing if we only did one
         output(1).StimName = movName;
         output(1).FrameRange = frange;
     else
