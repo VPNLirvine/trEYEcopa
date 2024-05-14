@@ -45,7 +45,7 @@ end
 
 % Step 3 - Tally subscales
 output.SocialSkills = sum(questions{:, strcmp(scoreAQ.Subscale, 'Social Skills')}, 2);
-output.AttentionSwiching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
+output.AttentionSwitching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
 output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
 output.Communication = sum(questions{:, strcmp(scoreAQ.Subscale, 'Communication')}, 2);
 output.Imagination = sum(questions{:, strcmp(scoreAQ.Subscale, 'Imagination')}, 2);
