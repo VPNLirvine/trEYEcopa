@@ -8,7 +8,12 @@ function frame3movie(movName)
     frameFormat = '.jpg';
 
     % Get location of the stimulus
-    movFName = [movName '.MOV']; % heh
+    if ~strcmpi(movName(end-3:end), '.mov')
+        movFName = [movName '.MOV']; % heh
+    else
+        movFName = movName;
+        movName = movFName(1:end-4);
+    end
     imPath = fullfile(pths.frames, movFName);
     
     % Verify the frames we want to draw actually exist
