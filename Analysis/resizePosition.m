@@ -28,7 +28,7 @@ function posDat = resizePosition(movName, varargin)
     % line those points up, interpolate between, and pad the ends out.
 
     % Get the start and end FRAMES
-    dfFrames = findDifferentFrames(movFName);
+    [dfFrames, numFrames] = findDifferentFrames(movName);
     % This gives every video - extract just this one.
     dfFrames = dfFrames.FrameRange;
 

@@ -1,4 +1,4 @@
-function output = findDifferentFrames(fpath)
+function [output, varargout] = findDifferentFrames(fpath)
 % Given the filename of a stimulus video, do motion detection:
 % Assuming the video has some amount of dead air on either end,
 % report back the first and final frames of the video that cut that out.
@@ -103,12 +103,16 @@ for g = numFrames-globSize:-globSize:2
 end
 
 % Clear video object just in case
-clear thisVid
+clear thisVid img1 img2 img1e img2e
 
 % Set outputs
 output.StimName = movName;
 output.FrameRange = frange;
 
 fprintf(1, 'Done.\n')
+
+if nargout > 1
+    varargout{1} = numFrames;
+end
 
 end

@@ -3,47 +3,29 @@ function frame3movie(movName)
     % Requires having run frameGenerator on the corresponding stimulus
     % Input is the name of a video
 
-    addpath('..'); % to allow specifyPaths to run
-    pths = specifyPaths('..');
-    frameFormat = '.jpg';
+    % Load in the video data
+    movFName = findVidPath(movName);
+    fprintf(1, 'Loading frames...');
+    thisVid = VideoReader(movFName);
+    frames = read(thisVid);
+    fprintf(1, 'Done.\n');
 
-    % Get location of the stimulus
-    if ~strcmpi(movName(end-3:end), '.mov')
-        movFName = [movName '.MOV']; % heh
-    else
-        movFName = movName;
-        movName = movFName(1:end-4);
-    end
-    imPath = fullfile(pths.frames, movFName);
-    
-    % Verify the frames we want to draw actually exist
-    if ~exist(imPath, 'dir')
-        fprintf(1, 'Must extract video frames first...\n');
-        frameGenerator(movFName);
-    end
-    
-    % Load the first frame and get its dimensions
-    imhndl = imread(fullfile(imPath, '1.jpg'));
-    [imh, imw, ~] = size(imhndl);
+    % Get the dimensions of the video
+    imh = thisVid.Height;
+    imw = thisVid.Width;
+    numFrames = size(frames,4);
+    clear thisVid % release memory
+
 %     scVec = get(0, 'ScreenSize');  % Get the screen size
     scVec = [1,1,1920,1200]; % size of stimulus monitor
     scw = scVec(3);
     sch = scVec(4);
     
-    % Load up all the frames before drawing anything
-    frameList = dir([imPath filesep '*' frameFormat]);
-    numFrames = length(frameList);
-    fprintf(1, 'Loading frames...');
-    for f = numFrames:-1:1 % backward!
-        frames(f).dat = imread([imPath filesep num2str(f) frameFormat]);
-    end
-    fprintf(1, 'Done.\n');
-    
 %     pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
     pos = [1 imw 1 imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = resizePosition(movFName, pos);
+    posDat = resizePosition(movName, pos);
     
     % Set up image
         figure();
@@ -52,7 +34,7 @@ function frame3movie(movName)
         ax.Units = 'pixels';  % Set the units of the axes to pixels
         i = 1;
         title(movName);
-        h0 = image([pos(1), pos(2)], [pos(3), pos(4)], frames(i).dat);
+        h0 = image([pos(1), pos(2)], [pos(3), pos(4)], frames(:,:,:,i));
         hold on;
         h1 = plot(posDat(1).X(i), posDat(1).Y(i), '^', 'MarkerFaceColor', 'r', 'MarkerSize', 40);
         h2 = plot(posDat(2).X(i), posDat(2).Y(i), 'o', 'MarkerFaceColor', 'b', 'MarkerSize', 30);
@@ -63,7 +45,7 @@ function frame3movie(movName)
     % Now animate in a new loop
     tic
     for i = 2:numFrames
-        h0.CData = frames(i).dat;
+        h0.CData = frames(:,:,:,i);
         h1.XData = posDat(1).X(i);
         h1.YData = posDat(1).Y(i);
         h2.XData = posDat(2).X(i);
@@ -79,4 +61,5 @@ function frame3movie(movName)
     
     toc  % Display the elapsed time
     close all  % Close all figures
+    clear frames % in case it doesn't automatically
 end
