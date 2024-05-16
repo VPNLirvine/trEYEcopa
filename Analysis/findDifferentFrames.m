@@ -1,77 +1,76 @@
-function output = findDifferentFrames(varargin)
+function output = findDifferentFrames(fpath)
+% Given the filename of a stimulus video, do motion detection:
+% Assuming the video has some amount of dead air on either end,
+% report back the first and final frames of the video that cut that out.
+% e.g. if frames 1 to 10 are all identical, and frame 11 changes,
+% then frame 10 is the first frame needed to capture all motion.
 
-pths = specifyPaths('..');
-vlist = dir(pths.frames);
-vlist(startsWith({vlist(:).name}, '.')) = []; % drop system folders
-numVids = length(vlist);
-
-if nargin > 0
-    % Input should be a video name
-    % "loop" over just that one video
-    loopRange = find(strcmpi(varargin{1}, {vlist(:).name}));
-    assert(~isempty(loopRange), 'Provided movie name %s not found!', varargin{1});
-    numVids = 1;
+% VALIDATE INPUT
+% See if the input has a path attached to it or not
+[f0,f1, f2] = fileparts(fpath);
+fname = [f1 f2]; % file name and extension, no path
+if ~isempty(f0)
+    % Validate path if provided
+    if exist(fpath, 'file')
+        % If it DOES exist, then just use it.
+        movName = fpath;
+    else
+        % If NOT, strip out the bogus path and fish for a new one.
+        % Errors out if file not found in known stim dirs.
+        movName = findVidPath(fname);
+    end
 else
-    loopRange = 1:numVids;
+    % If no path provided, then find a valid one.
+    % Errors out if file not found in known stim dirs.
+    movName = findVidPath(fpath);
 end
 
-fprintf(1, 'Finding first and last frames of motion in videos\n');
-fprintf(1, 'Operating over %i videos\n', numVids);
-for v = loopRange
-    folderName = vlist(v).name;
-    movName = erase(folderName, '.MOV');
-    movName = erase(movName, '.mov'); % either case
-    flist = dir(fullfile(pths.frames, folderName, '*.jpg')); % get list of frames
-    numFrames = length(flist);
-    % Account for jank sorting
-    for j = 1:numFrames
-        inOrder{j} = [num2str(j) '.jpg'];
+% START OPERATING
+fprintf(1, 'Finding first and last frames of motion for video:\n');
+fprintf(1, '\t%s...',fname);
+
+% Load the video
+thisVid = VideoReader(movName);
+numFrames = thisVid.NumFrames;
+
+frange = []; % init output
+
+% Find first frame with motion
+for i = 1:numFrames-1
+    img1 = read(thisVid, i);
+    img2 = read(thisVid, i+1);
+
+    % Filter somehow
+    img1 = imbinarize(img1(:,:,3), 0.5);
+    img2 = imbinarize(img2(:,:,3), 0.5);
+
+    if sum(img1 ~= img2, 'all') > 6
+        frange(1) = i;
+        break
     end
-    
-    frange = []; % init per vid
-    fprintf(1, '\tVideo %i/%i: %s...', v, numVids, movName);
-    % Find first frame with motion
-    for i = 1:numFrames-1
-        fname1 = fullfile(pths.frames, folderName, inOrder{i});
-        fname2 = fullfile(pths.frames, folderName, inOrder{i+1});
+end
 
-        img1 = imread(fname1);
-        img2 = imread(fname2);
+% Final frame with motion
+for i = numFrames:-1:2
+    img1 = read(thisVid, i);
+    img2 = read(thisVid, i-1);
 
-        % Filter somehow
-        img1 = imbinarize(img1(:,:,3), 0.5);
-        img2 = imbinarize(img2(:,:,3), 0.5);
+    % Filter somehow
+    img1 = imbinarize(img1(:,:,3), 0.5);
+    img2 = imbinarize(img2(:,:,3), 0.5);
 
-        if sum(img1 ~= img2, 'all') > 6
-            frange(1) = i;
-            break
-        end
+    if sum(img1 ~= img2, 'all') > 6
+        frange(2) = i;
+        break
     end
+end
 
-    % Final frame with motion
-    for i = numFrames:-1:2
-        fname1 = fullfile(pths.frames, folderName, inOrder{i});
-        fname2 = fullfile(pths.frames, folderName, inOrder{i-1});
+% Clear video object just in case
+clear thisVid
 
-        img1 = imread(fname1);
-        img2 = imread(fname2);
+% Set outputs
+output.StimName = movName;
+output.FrameRange = frange;
 
-        % Filter somehow
-        img1 = imbinarize(img1(:,:,3), 0.5);
-        img2 = imbinarize(img2(:,:,3), 0.5);
-
-        if sum(img1 ~= img2, 'all') > 6
-            frange(2) = i;
-            break
-        end
-    end
-    if numVids == 1
-        % Don't make a big empty thing if we only did one
-        output(1).StimName = movName;
-        output(1).FrameRange = frange;
-    else
-        output(v).StimName = movName;
-        output(v).FrameRange = frange;
-    end
-    fprintf(1, 'Done.\n')
+fprintf(1, 'Done.\n')
 end
