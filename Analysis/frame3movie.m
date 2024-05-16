@@ -22,11 +22,6 @@ function frame3movie(movName)
         frameGenerator(movFName);
     end
     
-    figure();
-    ax = gca;  % Get the current axes
-    ax.YDir = 'reverse';  % Reverse the y-axis direction
-    ax.Units = 'pixels';  % Set the units of the axes to pixels
-    
     % Load the first frame and get its dimensions
     imhndl = imread(fullfile(imPath, '1.jpg'));
     [imh, imw, ~] = size(imhndl);
@@ -64,7 +59,7 @@ function frame3movie(movName)
     dfFrames = dfFrames.FrameRange;
 
     % Get the start and end POSITIONS
-    dfPosition = findDifferentPositions(posData, m);
+    dfPosition = findDifferentPositions(posData, m, xrs, yrs);
     
     % Now use those two variables to line up the videos with the positions
     tlead = dfFrames(1);
@@ -111,6 +106,10 @@ function frame3movie(movName)
     posDat(4).Y(tlag:numFrames) = posData.Y4_Values{m}(end) .* yrs;
     
     % Set up image
+        figure();
+        ax = gca;  % Get the current axes
+        ax.YDir = 'reverse';  % Reverse the y-axis direction
+        ax.Units = 'pixels';  % Set the units of the axes to pixels
         i = 1;
         title(movName);
         h0 = image([pos(1), pos(2)], [pos(3), pos(4)], frames(i).dat);

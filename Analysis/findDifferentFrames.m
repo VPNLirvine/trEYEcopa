@@ -34,33 +34,70 @@ thisVid = VideoReader(movName);
 numFrames = thisVid.NumFrames;
 
 frange = []; % init output
+flag = false; % to break out of two fors at once
+globSize = ceil(thisVid.FrameRate); % read many frames at once to improve performance
 
 % Find first frame with motion
-for i = 1:numFrames-1
-    img1 = read(thisVid, i);
-    img2 = read(thisVid, i+1);
-
-    % Filter somehow
-    img1 = imbinarize(img1(:,:,3), 0.5);
-    img2 = imbinarize(img2(:,:,3), 0.5);
-
-    if sum(img1 ~= img2, 'all') > 6
-        frange(1) = i;
+for g = 1:globSize:numFrames-1
+    fs = read(thisVid, [g, min([numFrames, g + globSize])]);
+    for j = 1:size(fs,4)-1
+        i = g + j - 1; % frame number
+        img1 = fs(:,:,:,j);
+        img2 = fs(:,:,:,j+1);
+    
+        % Attempt to filter the jpg noise
+    
+        % Shrink image by half
+        sz = size(img1);
+        img1e = imresize(img1, [round(sz(1)/2), round(sz(2)/2)]);
+        img2e = imresize(img2, [round(sz(1)/2), round(sz(2)/2)]);
+        
+        % Do edge detection and compare
+        img1e = edge(double(im2gray(img1e)));
+        img2e = edge(double(im2gray(img2e)));
+        
+        if sum(img1e ~= img2e, 'all') > 100
+            frange(1) = i;
+            flag = true;
+        end
+        if flag
+            break
+        end
+    end
+    if flag
         break
     end
 end
+flag = false;
 
 % Final frame with motion
-for i = numFrames:-1:2
-    img1 = read(thisVid, i);
-    img2 = read(thisVid, i-1);
-
-    % Filter somehow
-    img1 = imbinarize(img1(:,:,3), 0.5);
-    img2 = imbinarize(img2(:,:,3), 0.5);
-
-    if sum(img1 ~= img2, 'all') > 6
-        frange(2) = i;
+for g = numFrames-globSize:-globSize:2
+    fs = read(thisVid, [g, min([numFrames, g + globSize])]);
+    for j = size(fs,4):-1:2
+        i = g + j - 1; % frame number
+        img1 = fs(:,:,:,j);
+        img2 = fs(:,:,:,j-1);
+        
+        % Attempt to filter the jpg noise
+        
+        % Shrink image by half
+        sz = size(img1);
+        img1e = imresize(img1, [round(sz(1)/2), round(sz(2)/2)]);
+        img2e = imresize(img2, [round(sz(1)/2), round(sz(2)/2)]);
+        
+        % Do edge detection and compare
+        img1e = edge(double(im2gray(img1e)));
+        img2e = edge(double(im2gray(img2e)));
+        % Compare
+        if sum(img1e ~= img2e, 'all') > 10
+            frange(2) = i;
+            flag = true;
+        end
+        if flag
+            break
+        end
+    end
+    if flag
         break
     end
 end
@@ -73,4 +110,5 @@ output.StimName = movName;
 output.FrameRange = frange;
 
 fprintf(1, 'Done.\n')
+
 end
