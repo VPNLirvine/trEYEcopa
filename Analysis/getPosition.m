@@ -21,8 +21,11 @@ for i = 1:numTrials
     end
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
     % Catch special cases:
+    flag = 0;
     if contains(t, 'Q31')
         data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
+    elseif contains(t, 'Q33')
+        flag = 33;
     end
     
     % Sort characters
@@ -49,6 +52,16 @@ for i = 1:numTrials
     data.X4_Values{i} = str2num(tmp.X4_Values{i});
     data.Y4_Values{i} = str2num(tmp.Y4_Values{i});
     data.R4_Values{i} = str2num(tmp.R4_Values{i});
+
+    % special cases
+    if flag == 33
+        % The video jumps a bit at the beginning,
+        % but the positions drift over the same period,
+        % so set the positions to jump too.
+        data.X2_Values{i}(1:50) = data.X2_Values{i}(1);
+        data.Y2_Values{i}(1:50) = data.Y2_Values{i}(1);
+        data.R2_Values{i}(1:50) = data.R2_Values{i}(1);
+    end
 end
 warning('on', 'MATLAB:table:RowsAddedExistingVars');
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
