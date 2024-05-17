@@ -47,6 +47,9 @@ for i = 1:numTrials
     data.X3_Values{i} = str2num(tmp.X3_Values{i});
     data.Y3_Values{i} = str2num(tmp.Y3_Values{i});
     data.R3_Values{i} = str2num(tmp.R3_Values{i});
+        % Except this just gives the unmoving fulcrum
+        % So let's calculate the location of the swinging endpoint
+        [data.X3_Values{i}, data.Y3_Values{i}] = rotateDoor(data.X3_Values{i}, data.Y3_Values{i}, data.R3_Values{i});
     % Character 4 - littleTriangle
     data.C4_Name{i} = ch{4};
     data.X4_Values{i} = str2num(tmp.X4_Values{i});
