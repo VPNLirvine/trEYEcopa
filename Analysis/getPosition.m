@@ -11,6 +11,9 @@ assert(numTrials == 100, 'Error importing TriCOPA position data - less than the 
 
 data = table();
 for i = 1:numTrials
+    if i == 37
+        fprintf(1, 'help')
+    end
     % Recreate filename
     t = erase(tmp.Performance_Label_ID{i}, 'COPA ');
     t = replace(t, ' ', '_');
@@ -26,6 +29,19 @@ for i = 1:numTrials
         data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
     elseif contains(t, 'Q33')
         flag = 33;
+    elseif contains(t, 'Q29')
+        data.StimName{i} = 'Q29_6672_hide_follow'; % not moving_away
+    elseif contains(t, 'Q51')
+        data.StimName{i} = 'Q51_6694_attack'; % not 6695
+    elseif contains(t, 'Q60-racing')
+        data.StimName{i} = 'Q59_6703_racing'; % Q59 not Q60
+    elseif contains(t, 'Q71')
+        data.StimName{i} = 'Q71_6716_knock_and_hide';
+    elseif contains(t, 'Q72')
+        % YO THIS IS TOTALLY THE WRONG VIDEO
+        data.StimName{i} = 'Q72_6717_kidnap';
+    elseif contains(t, 'Q79')
+        data.StimName{i} = 'Q79_6726_jelous_dance'; % video is misspelled
     end
     
     % Sort characters
