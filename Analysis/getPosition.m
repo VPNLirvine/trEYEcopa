@@ -11,9 +11,6 @@ assert(numTrials == 100, 'Error importing TriCOPA position data - less than the 
 
 data = table();
 for i = 1:numTrials
-    if i == 37
-        fprintf(1, 'help')
-    end
     % Recreate filename
     t = erase(tmp.Performance_Label_ID{i}, 'COPA ');
     t = replace(t, ' ', '_');
