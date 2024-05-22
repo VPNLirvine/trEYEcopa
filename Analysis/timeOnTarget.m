@@ -9,6 +9,9 @@ pths = specifyPaths('..');
 % ...but it may have a path attached that we should remove
 stimName = getStimName(edfDat);
 [~,stimName] = fileparts(stimName);
+if flipFlag
+    stimName = erase(stimName, 'f_');
+end
 
 % The 'window' vector defining the location of the video on screen
 % pos = [xLeft xRight yTop yBottom];
