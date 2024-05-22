@@ -22,7 +22,7 @@ function frame3movie(movName)
     sch = scVec(4);
     
 %     pos = [[scw/2 - imw/2, scw/2 + imw/2], [sch/2 - imh/2, sch/2 + imh/2]];  % Position of the image
-    pos = [1 imw 1 imh];
+    pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
     posDat = resizePosition(movName, pos);
@@ -34,7 +34,7 @@ function frame3movie(movName)
         ax.Units = 'pixels';  % Set the units of the axes to pixels
         i = 1;
         title(movName);
-        h0 = image([pos(1), pos(2)], [pos(3), pos(4)], frames(:,:,:,i));
+        h0 = image([pos(1), pos(3)], [pos(2), pos(4)], frames(:,:,:,i));
         hold on;
         h1 = plot(posDat(1).X(i), posDat(1).Y(i), '^', 'MarkerFaceColor', 'r', 'MarkerSize', 40);
         h2 = plot(posDat(2).X(i), posDat(2).Y(i), 'o', 'MarkerFaceColor', 'b', 'MarkerSize', 30);

@@ -13,13 +13,16 @@ function posDat = resizePosition(movName, varargin)
         pos = varargin{1};
     else
         % Default video size
-        pos = [1 678 1 508];
+        pos = [1 1 508 678];
     end
+    % For the rescaled videos, during the experiment,
+    % pos = [157.62 0 1762.4 1200];
+
     posData = getPosition;
     m = strcmp(posData.StimName, movName);
     % Rescaling factors (since data is 4000x3000 instead of 678x508)
-    xrs = pos(2)/4000;
-    yrs = pos(4)/3000;
+    xrs = (pos(3) - pos(1)) / 4000;
+    yrs = (pos(4) - pos(2)) / 3000;
     % Now do some temporal rescaling of the position data:
     % It exists at some unknown framerate that doesn't match the video.
     % It also includes a variable amount of dead air time
