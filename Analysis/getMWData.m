@@ -26,7 +26,8 @@ numSubs = length(edfList);
 % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Category', 'StimName'};
-    if strcmp(metricName, 'heatmap')
+    useCell = any(strcmp(metricName, {'heatmap','gaze'}));
+    if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'string', 'string'};
     else
@@ -58,8 +59,8 @@ for subject = 1:numSubs
         i = i + 1;
         stimName = getStimName(Trials(trial));
 
-        if strcmp(metricName, 'heatmap')
-            eyetrack{1} = selectMetric(Trials(trial), 'heatmap');
+        if useCell
+            eyetrack{1} = selectMetric(Trials(trial), metricName);
             % Note above is cell, not double like below
         else
             eyetrack(1) = selectMetric(Trials(trial), metricName);
