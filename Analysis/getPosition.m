@@ -13,8 +13,34 @@ data = table();
 for i = 1:numTrials
     % Recreate filename
     t = erase(tmp.Performance_Label_ID{i}, 'COPA ');
+    t = replace(t, ' ', '_');
+    if strcmp(t(end), '_')
+        % Drop any trailing underscore
+        % Results from the poorly-made CSV having a space in the filename
+        t = t(1:end-1);
+    end
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
-
+    % Catch special cases:
+    flag = 0;
+    if contains(t, 'Q31')
+        data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
+    elseif contains(t, 'Q33')
+        flag = 33;
+    elseif contains(t, 'Q29')
+        data.StimName{i} = 'Q29_6672_hide_follow'; % not moving_away
+    elseif contains(t, 'Q51')
+        data.StimName{i} = 'Q51_6694_attack'; % not 6695
+    elseif contains(t, 'Q60-racing')
+        data.StimName{i} = 'Q59_6703_racing'; % Q59 not Q60
+    elseif contains(t, 'Q71')
+        data.StimName{i} = 'Q71_6716_knock_and_hide';
+    elseif contains(t, 'Q72')
+        % YO THIS IS TOTALLY THE WRONG VIDEO
+        data.StimName{i} = 'Q72_6717_kidnap';
+    elseif contains(t, 'Q79')
+        data.StimName{i} = 'Q79_6726_jelous_dance'; % video is misspelled
+    end
+    
     % Sort characters
     c = tmp{i,3}; c = c{:}; % from table to cell to string
     ch = strsplit(c, ' ');
@@ -34,11 +60,24 @@ for i = 1:numTrials
     data.X3_Values{i} = str2num(tmp.X3_Values{i});
     data.Y3_Values{i} = str2num(tmp.Y3_Values{i});
     data.R3_Values{i} = str2num(tmp.R3_Values{i});
+        % Except this just gives the unmoving fulcrum
+        % So let's calculate the location of the swinging endpoint
+        [data.X3_Values{i}, data.Y3_Values{i}] = rotateDoor(data.X3_Values{i}, data.Y3_Values{i}, data.R3_Values{i});
     % Character 4 - littleTriangle
     data.C4_Name{i} = ch{4};
     data.X4_Values{i} = str2num(tmp.X4_Values{i});
     data.Y4_Values{i} = str2num(tmp.Y4_Values{i});
     data.R4_Values{i} = str2num(tmp.R4_Values{i});
+
+    % special cases
+    if flag == 33
+        % The video jumps a bit at the beginning,
+        % but the positions drift over the same period,
+        % so set the positions to jump too.
+        data.X2_Values{i}(1:50) = data.X2_Values{i}(1);
+        data.Y2_Values{i}(1:50) = data.Y2_Values{i}(1);
+        data.R2_Values{i}(1:50) = data.R2_Values{i}(1);
+    end
 end
 warning('on', 'MATLAB:table:RowsAddedExistingVars');
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
