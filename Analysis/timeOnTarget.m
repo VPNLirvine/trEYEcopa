@@ -1,26 +1,14 @@
+function output = timeOnTarget(edfDat, i, flipFlag)
 % This is to be a case inside selectMetric,
 % which means it should operate on a SINGLE ROW of an EDF file
 % (i.e. one trial of one subject)
 % So we DON'T want to load in frames or positions of anything extraneous
+pths = specifyPath('..');
 
-% ...so ask for them as input!
-%% SCRATCHPAD - find out what the inputs should be
-
-% The edf data that goes into a given call of selectMetric
-trialNum = 5; % say
-edf = osfImport('TC_19.edf');
-edfDat = edf(trialNum);
-
-% A flag for whether the video was flipped on this trial or not
-% Comes as a varargin to selectMetric
-flipFlag = true;
-
-% selectMetric determines which eye to use
-i = 2; % for now
-
-    % We can extract the stim name from that
-    % ...but it may have a path attached that we should remove
-    stimName = getStimName(edfDat);
+% We can extract the stim name from edfDat
+% ...but it may have a path attached that we should remove
+stimName = getStimName(edfDat);
+[~,stimName] = fileparts(stimName);
 
 % The 'window' vector defining the location of the video on screen
 % pos = [xLeft xRight yTop yBottom];
@@ -56,23 +44,28 @@ if flipFlag
     gaze(1,:) = mirrorX(gaze(1,:), wRect(3));
 end
 % Row 3 is the frame number. Use that to index out of posDat.
-C1pos = [ posDat(1).X(gaze(3,:)) ; posDat(1).Y(gaze(3,:)) ];
-C2pos = [ posDat(2).X(gaze(3,:)) ; posDat(2).Y(gaze(3,:)) ];
-C3pos = [ posDat(3).X(gaze(3,:)) ; posDat(3).Y(gaze(3,:)) ];
-C4pos = [ posDat(4).X(gaze(3,:)) ; posDat(4).Y(gaze(3,:)) ];
+p.C1 = [ posDat(1).X(gaze(3,:)) ; posDat(1).Y(gaze(3,:)) ];
+p.C2 = [ posDat(2).X(gaze(3,:)) ; posDat(2).Y(gaze(3,:)) ];
+p.C3 = [ posDat(3).X(gaze(3,:)) ; posDat(3).Y(gaze(3,:)) ];
+p.C4 = [ posDat(4).X(gaze(3,:)) ; posDat(4).Y(gaze(3,:)) ];
 
 %% COMPARE GAZE AND POSITION
 % Define a radius around each character
 rad = 200; % for now - need to know character size on screen
 
 % Define logicals to indicate whether gaze is near each character
-gazeOnC1 = gaze(1,:) >= C1pos(1,:) - rad & gaze(1,:) <= C1pos(1,:) + rad & gaze(2,:) >= C1pos(2,:) - rad & gaze(2,:) <= C1pos(2,:) + rad;
-gazeOnC2 = gaze(1,:) >= C2pos(1,:) - rad & gaze(1,:) <= C2pos(1,:) + rad & gaze(2,:) >= C2pos(2,:) - rad & gaze(2,:) <= C2pos(2,:) + rad;
-gazeOnC3 = gaze(1,:) >= C3pos(1,:) - rad & gaze(1,:) <= C3pos(1,:) + rad & gaze(2,:) >= C3pos(2,:) - rad & gaze(2,:) <= C3pos(2,:) + rad;
-gazeOnC4 = gaze(1,:) >= C4pos(1,:) - rad & gaze(1,:) <= C4pos(1,:) + rad & gaze(2,:) >= C4pos(2,:) - rad & gaze(2,:) <= C4pos(2,:) + rad;
+gazeOnC1 = gaze(1,:) >= p.C1(1,:) - rad & gaze(1,:) <= p.C1(1,:) + rad & gaze(2,:) >= p.C1(2,:) - rad & gaze(2,:) <= p.C1(2,:) + rad;
+gazeOnC2 = gaze(1,:) >= p.C2(1,:) - rad & gaze(1,:) <= p.C2(1,:) + rad & gaze(2,:) >= p.C2(2,:) - rad & gaze(2,:) <= p.C2(2,:) + rad;
+gazeOnC3 = gaze(1,:) >= p.C3(1,:) - rad & gaze(1,:) <= p.C3(1,:) + rad & gaze(2,:) >= p.C3(2,:) - rad & gaze(2,:) <= p.C3(2,:) + rad;
+gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,:) >= p.C4(2,:) - rad & gaze(2,:) <= p.C4(2,:) + rad;
 
 % From here, you can do multiple things,
 % like calculate the time spent on one specific character,
 % or tally the total number of alternations between any characters,
 % or 'triangle time' i.e. proportion of time on any character,
 % etc.
+
+% 
+output = p; % FOR NOW
+
+end
