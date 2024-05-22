@@ -3,7 +3,7 @@ function output = timeOnTarget(edfDat, i, flipFlag)
 % which means it should operate on a SINGLE ROW of an EDF file
 % (i.e. one trial of one subject)
 % So we DON'T want to load in frames or positions of anything extraneous
-pths = specifyPath('..');
+pths = specifyPaths('..');
 
 % We can extract the stim name from edfDat
 % ...but it may have a path attached that we should remove
