@@ -37,7 +37,7 @@ else
 end
 
 % See if the data needs to be flipped or not
-if nargin > 2
+if nargin > 2 && ~isempty(varargin{1})
     flipFlag = varargin{1};
     assert(islogical(flipFlag), '3rd input must be a boolean indicating whether the stimulus was flipped or not');
 else
