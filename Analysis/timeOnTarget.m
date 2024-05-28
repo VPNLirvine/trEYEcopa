@@ -65,10 +65,13 @@ gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,
 % From here, you can do multiple things,
 % like calculate the time spent on one specific character,
 % or tally the total number of alternations between any characters,
-% or 'triangle time' i.e. proportion of time on any character,
+% or 'triangle time' i.e. proportion of time on characters vs not,
 % etc.
 
-% 
 output = p; % FOR NOW
+
+% To visualize gaze against position, do this:
+% plotGazeChars(p, gaze, gaze(4,:));
+% title(replace(stimName, '_', '\_'));
 
 end
