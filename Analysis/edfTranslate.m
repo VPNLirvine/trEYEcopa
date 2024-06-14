@@ -15,6 +15,7 @@ output = struct('Header', [], 'Samples', [], 'Events', []);
 events = struct2table(data.FEVENT);
 
 numRecs = length(data.RECORDINGS);
+fprintf(1, 'Separating data stream into %i trials...', numRecs/2);
 for i = 1:2:numRecs
     t = (i+1)/2; % index for output. i goes 1,3,5... but we want 1,2,3...
     % Get start and end time
@@ -103,7 +104,8 @@ for i = 1:2:numRecs
     output(t).Events.buttons = events.buttons(stevent:enevent)';
     output(t).Events.parsedby = events.parsedby(stevent:enevent)';
     output(t).Events.message = events.message(stevent:enevent)';
-
+    % Replace [] messages with '', so they are all still strings.
+    output(t).Events.message(cellfun(@isempty, output(t).Events.message)) = {''};
 end
-
+fprintf(1, 'Done.\n');
 end % function
