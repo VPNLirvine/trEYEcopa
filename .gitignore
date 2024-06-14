@@ -20,6 +20,8 @@ __pycache__/
 /beh/*.tsv
 /beh/pilot/
 notes.txt
+/ExpOutputs/TCoutput/*.mat
+test*
 
 # Stimuli
 *.mov
