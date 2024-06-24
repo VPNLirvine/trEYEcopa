@@ -11,5 +11,6 @@ function input = fixOutliers(input)
 %     input(scores > threshold) = mu;
 
     input(scores > threshold) = [];
+    input(scores < -threshold) = [];
 end
     

@@ -51,15 +51,41 @@ try
     response = -1; % 0 causes panic, anything else is a button
     lastPressed = -1;
     maxWait = 4; % max duration to wait for a response
-%     escKey = KbName('ESCAPE');
-    keyList(1) = KbName('1!');
-    keyList(2) = KbName('2@');
-    keyList(3) = KbName('3#');
-    keyList(4) = KbName('4$');
-    keyList(5) = KbName('5%');
+    
+    clear PsychHID; % re-scan for devices
+    devices = PsychHID('Devices');
+    mfg = {devices(:).manufacturer}; % i hate structs
+    indicator = [];
+    if sum(contains(mfg, 'Empirisoft Research Software')) > 0
+        % use other
+        keyList(1) = KbName('3#');
+        keyList(2) = KbName('4$');
+        keyList(3) = KbName('5%');
+        keyList(4) = KbName('6^');
+        keyList(5) = KbName('7&');
+        
+        % Response keys
+        spaceBar = KbName('9(');
+        deleteKey = KbName('1!');
+        indicator = 'rightmost button';
+
+    else
+        keyList(1) = KbName('1!');
+        keyList(2) = KbName('2@');
+        keyList(3) = KbName('3#');
+        keyList(4) = KbName('4$');
+        keyList(5) = KbName('5%');
+        
+        % Some response keys
+        spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
+        deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
+        indicator = 'spacebar';
+
+    end
+%         escKey = KbName('ESCAPE');
 
     qText = 'How understandable was the action in that video?';
-    respChoices = {'1', '2', '3', '4', '5'}; % not used yet
+    respChoices = {'1', '2', '3', '4', '5'}; % used by getResp
     numResps = length(respChoices);
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
@@ -86,6 +112,19 @@ try
     % Parse input
     [stimPath, outputPath, vidList, prefix] = stimFinder(answer{1}, answer{2});
     subID = strcat(prefix, answer{1});
+    
+    % Ask for response?
+    switch answer{2}
+        case '1'
+            % TriCOPA
+            rText = ['After each video, \n' ...
+            'you will be asked how well you understood the interaction\n'...
+            'on a scale of 1 (low) to 5 (high).\n'...
+            'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
+        case '2'
+            % Martin & Weisberg     
+            rText = '\nNo responses needed this time - simply watch and enjoy.\n\n\n';
+    end
     
     edfFile = subID; % Save file name to a variable
     % Print some text in Matlab's Command Window if file name is longer than 8 characters
@@ -249,26 +288,28 @@ try
 %     fprintf(fid2, '%s\n', datestr(now));
 %     fprintf(fid2, 'Trial \tStimName \tFrame \tOnset\n');
     
-    % Some response keys
-    spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
-    deleteKey = KbName('DELETE'); % Panic button - press delete to quit immediately
     
     % Truncate the number of trials if debugging
     if debugmode
         numTrials = 4;
     else
-        numTrials = length(vidList);
+        switch taskID
+            case 'MartinWeisberg'
+                % Use all 16 videos
+                numTrials = length(vidList);
+            case 'TriCOPA'
+                % Use a subset
+                % This lets us run both experiments within an hour
+                numTrials = 70;
+        end
     end
     
     
     %% STEP 4C: Display instructions before experiment starts
     
-    iText = sprintf(['You are about to watch a series of 100 short video clips,\n'...
-    'depicting some interacting shapes. After each video, \n' ...
-    'you will be asked how well you understood the interaction\n'...
-    'on a scale of 1 (low) to 5 (high).\n'...
-    'Press the corresponding button on the keyboard as fast as you can.\n\n\n' ...
-    'Please press the spacebar when you are ready to begin.']);
+    iText = sprintf(['You are about to watch a series of %i short video clips,\n'...
+    'depicting some interacting shapes. %s' ...
+    'Please press the %s when you are ready to begin.'], numTrials, rText, indicator);
     Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
     DrawFormattedText(window, iText, 'center', 'center', TextColor);
     Screen('Flip', window);
@@ -448,8 +489,20 @@ try
             % Exit trial loop, but still export files
             break
         else
-            % Code for response screen goes here
-            RT = getResp;
+            switch taskID
+                case 'MartinWeisberg'
+                % Don't bother collecting a rating of "understandability"
+                % The videos are so simple, they'll all be 4 or 5
+                % Ideally you'd avoid opening a response file at all,
+                % but I don't want to retool all the code. Just do this.
+                    RT = -1; response = -1;
+                case 'TriCOPA'
+                % Invoke subroutine for collecting response.
+                % Keep in mind that this happens AFTER the video,
+                % so the RT is kind of useless at the moment.
+                % But it also sets a global 'response' variable we need.
+                    RT = getResp;
+            end
             if panic
                 break
             end
@@ -604,8 +657,8 @@ end
             % Interrupt the experiment for up to a minute
             bText = sprintf(['You have completed %i of %i trials!\n' ...
                 'Take a minute to relax your eyes.\n\n' ...
-                'Press the spacebar when you are ready to continue'], ...
-                trial-1, maxTrials);
+                'Press the %s when you are ready to continue'], ...
+                trial-1, maxTrials, indicator);
             Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
             DrawFormattedText(window, bText, 'center', 'center', TextColor);
             

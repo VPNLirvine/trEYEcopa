@@ -8,8 +8,9 @@ function data = getTCData(metricName)
     
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
+    useCell = any(strcmp(metricName, {'heatmap','gaze', 'tot'}));
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    if strcmp(metricName, 'heatmap')
+    if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'double', 'double', 'logical'};
     else
@@ -26,6 +27,10 @@ function data = getTCData(metricName)
         % Get subject ID
         edfName = edfList(subject).name;
         subID = erase(edfName, '.edf');
+        if contains(subID, '.EDF')
+            % Catch uppercase ext while preserving everything else's case
+            subID = erase(subID, '.EDF');
+        end
         
         % Get behavioral data
         blist = dir(fullfile(pths.beh, [subID, '_task-TriCOPA_', '*.txt']));
@@ -56,9 +61,9 @@ function data = getTCData(metricName)
                 % Remember to drop this trial from the behavioral data
                 badList = [badList, t];
             else
-                if strcmp(metricName, 'heatmap')
+                if useCell
                     opts = behav.Flipped(t);
-                    eyetrack{t} = selectMetric(edf(t), 'heatmap', opts);
+                    eyetrack{t} = selectMetric(edf(t), metricName, opts);
                     % Note above is cell, not double like below
                 else
                     eyetrack(t) = selectMetric(edf(t), metricName);
