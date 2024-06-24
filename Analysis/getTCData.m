@@ -61,12 +61,12 @@ function data = getTCData(metricName)
                 % Remember to drop this trial from the behavioral data
                 badList = [badList, t];
             else
+                opts = logical(behav.Flipped(t));
                 if useCell
-                    opts = behav.Flipped(t);
                     eyetrack{t} = selectMetric(edf(t), metricName, opts);
                     % Note above is cell, not double like below
                 else
-                    eyetrack(t) = selectMetric(edf(t), metricName);
+                    eyetrack(t) = selectMetric(edf(t), metricName, opts);
                 end
             end
         end

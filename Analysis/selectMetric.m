@@ -166,7 +166,7 @@ switch metricName
         % This is a 2D matrix, not a single value! Be careful.
         
         % First get the full gaze trajectory for this trial
-        dat = selectMetric(edfDat, 'gaze', varargin);
+        dat = selectMetric(edfDat, 'gaze', varargin{:});
         
         % Separate x and y timeseries
         xdat = dat(1,:);
