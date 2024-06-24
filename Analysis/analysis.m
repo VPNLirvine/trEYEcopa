@@ -109,7 +109,8 @@ if choice == 1
             
         % Report the correlation score
         fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
-        fprintf(1, '\t\x03C1 = %0.2f\n', output(1,2));
+        fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', output(1,2));
+        fprintf(1, '\tPearson''s r = %0.2f\n', output(1,1));
 
         % Histograms
         figure();
