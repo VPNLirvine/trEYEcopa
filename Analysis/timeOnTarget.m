@@ -68,7 +68,21 @@ gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,
 % or 'triangle time' i.e. proportion of time on characters vs not,
 % etc.
 
-output = p; % FOR NOW
+% Triangle time: PERCENTAGE of time spent on the characters (but not door)
+onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
+triTime = nnz(onTarget) / length(onTarget);
+
+% Percentage of time on individual characters (including door)
+% ...not sure what all to do with this yet.
+% Could compare to percentage of time each character is in motion?
+timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
+timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
+timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
+timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
+
+% output = p; % output position data struct, i.e. NOT a summary metric.
+output = triTime; % output percentage of time on any character
+
 
 % To visualize gaze against position, do this:
 % plotGazeChars(p, gaze, gaze(4,:));
