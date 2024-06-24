@@ -3,12 +3,15 @@ function output = timeOnTarget(edfDat, i, flipFlag)
 % which means it should operate on a SINGLE ROW of an EDF file
 % (i.e. one trial of one subject)
 % So we DON'T want to load in frames or positions of anything extraneous
-pths = specifyPath('..');
+pths = specifyPaths('..');
 
 % We can extract the stim name from edfDat
 % ...but it may have a path attached that we should remove
 stimName = getStimName(edfDat);
 [~,stimName] = fileparts(stimName);
+if flipFlag
+    stimName = erase(stimName, 'f_');
+end
 
 % The 'window' vector defining the location of the video on screen
 % pos = [xLeft xRight yTop yBottom];
@@ -62,10 +65,27 @@ gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,
 % From here, you can do multiple things,
 % like calculate the time spent on one specific character,
 % or tally the total number of alternations between any characters,
-% or 'triangle time' i.e. proportion of time on any character,
+% or 'triangle time' i.e. proportion of time on characters vs not,
 % etc.
 
-% 
-output = p; % FOR NOW
+% Triangle time: PERCENTAGE of time spent on the characters (but not door)
+onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
+triTime = nnz(onTarget) / length(onTarget);
+
+% Percentage of time on individual characters (including door)
+% ...not sure what all to do with this yet.
+% Could compare to percentage of time each character is in motion?
+timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
+timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
+timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
+timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
+
+% output = p; % output position data struct, i.e. NOT a summary metric.
+output = triTime; % output percentage of time on any character
+
+
+% To visualize gaze against position, do this:
+% plotGazeChars(p, gaze, gaze(4,:));
+% title(replace(stimName, '_', '\_'));
 
 end

@@ -1,6 +1,7 @@
 function plotGazeChars(posDat, gazeDat, varargin)
 % Assuming you've already rescaled everything properly,
-% Just overlay the two on top of each other.
+% Overlay the gaze and position plots on top of each other.
+% Call this from within timeOnTarget().
 
 
 x = [ posDat.C1(1,:); posDat.C2(1,:); posDat.C3(1,:); posDat.C4(1,:); gazeDat(1,:) ];
@@ -17,12 +18,14 @@ else
 end
 
 figure();
-plot3(x,t,y);
+h = plot3(x,t,y);
 
 ax = gca;
-ax.YDir = 'reverse';
-ax.ZDir = 'reverse';
+ax.YDir = 'reverse'; % Time goes from back to front
+ax.ZDir = 'reverse'; % Image Y goes from top to bottom
 
+% Restrict plot limits to screen size
+% Otherwise it will scale axes to fit blink data that goes to infinity
 xlim([0 1920]);
 zlim([0 1200]);
 
@@ -34,4 +37,6 @@ grid on;
 
 legend({'Big Triangle', 'Circle', 'Door', 'Little Triangle', 'Gaze'}, 'Location', 'southoutside', 'Orientation', 'horizontal');
 
+% Emphasize gaze over the characters
+set(h(5), 'linewidth', 2);
 end

@@ -209,6 +209,10 @@ switch metricName
             xdat = mirrorX(xdat, scDim(1));
         end
         output = [xdat;ydat; tdat];
+    case 'tot'
+        % Time on Target
+        % Not fully fleshed out yet
+        output = timeOnTarget(edfDat, i+1, flipFlag);
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
