@@ -81,7 +81,7 @@ switch metricName
     case 'scaledfixation'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
-        data = [data selectMetric(edfDat, 'lastfix', varargin)]; % include the cut-off final fixation
+        data = [data selectMetric(edfDat, 'lastfix', varargin{:})]; % include the cut-off final fixation
         data = fixOutliers(data);
         data = sum(data);
         output = data / duration;
