@@ -1,5 +1,9 @@
 function BoxplotMW(data, metricName)
 
+% See if you can use fancy new formatting
+chk = which('tiledlayout');
+ok = ~isempty(chk); % ok if not empty, not ok if empty
+
 %% Constants
 condList = data.Category;
 conds = unique(condList);
@@ -23,10 +27,18 @@ end
 % close all
 
 figure();
+if ok
+    tiledlayout('horizontal');
+    warning('off','stats:boxplot:BadObjectType'); % it's fine
+end
 for sub = 1:numSubs
     subID = subList{sub};
     subDat = strcmp(data.Subject, subID);
-    subplot(1,numSubs,sub);
+    if ok
+        nexttile;
+    else
+        subplot(1,numSubs,sub);
+    end
     boxplot(data.Eyetrack(subDat), data.Category(subDat), 'GroupOrder',conds);
         title(strrep(subID,'_','\_'));
         xticklabels(conds);
@@ -47,4 +59,6 @@ for c = 1:numConds
         ylim(ylimvec);
         ylabel(axistxt);
 end
+
+warning('on','stats:boxplot:BadObjectType'); % return to dflt
     
