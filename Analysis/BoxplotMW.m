@@ -11,6 +11,10 @@ numConds = length(conds);
 subList = unique(data.Subject);
 numSubs = length(subList);
 
+% Have 10 subs per row
+numPerRow = 10;
+nRows = ceil(numSubs/numPerRow);
+
 [axistxt, ylimvec] = getGraphLabel(metricName); % variable axis label text
 %% Split by condition
 close all
@@ -28,7 +32,7 @@ end
 
 figure();
 if ok
-    tiledlayout('horizontal');
+    tiledlayout(nRows, numPerRow);
     warning('off','stats:boxplot:BadObjectType'); % it's fine
 end
 for sub = 1:numSubs
@@ -37,10 +41,11 @@ for sub = 1:numSubs
     if ok
         nexttile;
     else
-        subplot(1,numSubs,sub);
+        subplot(nRows,numPerRow,sub);
     end
+    efSz = mean(data.Eyetrack(subDat & strcmp(data.Category, 'social'))) - mean(data.Eyetrack(subDat & strcmp(data.Category, 'mechanical')));
     boxplot(data.Eyetrack(subDat), data.Category(subDat), 'GroupOrder',conds);
-        title(strrep(subID,'_','\_'));
+        title(sprintf(' %s, diff = %0.2f%%', strrep(subID,'_','\_'), 100 * efSz));
         xticklabels(conds);
         ylim(ylimvec);
         ylabel(axistxt);

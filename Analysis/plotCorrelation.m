@@ -10,23 +10,26 @@ warning('off','stats:boxplot:BadObjectType'); % it's fine
 chk = which('tiledlayout');
 ok = ~isempty(chk); % ok if not empty, not ok if empty
 
+% Count subjects to loop over
+subList = unique(data.Subject);
+numSubs = length(subList);
+% Have 10 subs per row
+numPerRow = 10;
+nRows = ceil(numSubs/numPerRow);
+
 %% Execution
 % Open figures
 fig1 = figure();
     if ok
-        tiledlayout('horizontal');
+        tiledlayout(nRows, 10);
     end
 fig2 = figure();
     if ok
-        tiledlayout('horizontal');
+        tiledlayout(nRows, 10);
     end
 % Get axis titles
 [var1, yl] = getGraphLabel(metricName);
 [var2, yl2] = getGraphLabel('response');
-
-% Count subjects to loop over
-subList = unique(data.Subject);
-numSubs = length(subList);
 
 for s = 1:numSubs
     subID = subList{s};
@@ -35,7 +38,7 @@ for s = 1:numSubs
     if ok
         nexttile;
     else
-        subplot(1,numSubs, s)
+        subplot(nRows,numPerRow, s)
     end
     % Plot the eyetracking data against the understanding score
     % Use boxplots instead of a scatterplot because Response is ordinal
