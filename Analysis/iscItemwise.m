@@ -3,7 +3,7 @@ function iscItemwise()
 % Instead of a subjectwise analysis, analyze within each video
 % Look for video-based trends that could influence subject-level data
 
-data = doISC;
+data = doISC(getTCData('heatmap'));
 stimList = unique(data.StimName);
 numVids = length(stimList);
 
@@ -37,12 +37,14 @@ for v = 1:numVids
         ylim([0 5]);
 end
 
-% Overall scatterplot shows no relation
+% Scatterplot and correlation
+z = corr(output.meanResp', output.meanISC', 'Type', 'Spearman');
 figure();
     scatter(output.meanResp, output.meanISC);
     xlabel('Rating');
     ylabel('ISC');
-    title('Each dot = one video, averaged across subjects')
+    ttxt = sprintf('Each dot = one video, averaged across subjects\n\x03C1 = %0.2f', z);
+    title(ttxt);
     xlim([0,6]);
     ylim([0,1]);
 
