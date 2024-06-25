@@ -112,6 +112,13 @@ if choice == 1
         fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', output(1,2));
         fprintf(1, '\tPearson''s r = %0.2f\n', output(1,1));
 
+        % Report secondary correlation
+        aq2rating(1) = corr(aqCol, data.Response, 'Type', 'Spearman', 'rows', 'complete');
+        aq2rating(2) = corr(aqCol, data.Response, 'Type', 'Pearson', 'rows', 'complete');
+        fprintf(1, '\n\nCorrelation between AQ and %s:\n', var2);
+        fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
+        fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
+
         % Histograms
         figure();
         subplot(1,2,1);
