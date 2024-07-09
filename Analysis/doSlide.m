@@ -43,37 +43,24 @@ for r = 1:numRows
     else
         % Stack all the other gaze paths together
         imStack = gazeList(hitList);
-        % Not all have the same length/sample rate.
-        % To fix it, interpolate anything with a different length
-        % so that it matches the time vector of gaze1.
-        timeRef = gaze1(3,:);
         N = height(imStack);
-        X = [];
-        Y = [];
-        gaze2 = [];
-        for i = 1:N
-            gazeN = single(imStack{i});
-            % get time vector of this subj
-            timeComp = gazeN(3,:);
-            % Interpolate to fit the timescale of the reference subject
-            X(i,:) = interp1(timeComp, gazeN(1,:), timeRef, 'spline');
-            Y(i,:) = interp1(timeComp, gazeN(2,:), timeRef, 'spline');
-        end
-
-        % Now average across the 4th dimension?
-        gaze2(1,:) = mean(X,1);
-        gaze2(2,:) = mean(Y,1);
+        % Not all have the same length/sample rate.
+        % To account for this,
+        % we'll compress the samples within each window into a heatmap, 
+        % instead of working on raw scanpaths.
+        
         % Now do the heavy lifting of sliding-window correlation
         % Potentially faster via fft or something
         numT = length(gaze1);
         tmp = zeros([numT, 1]); % preallocate
         winSize = 200; % but that's in ms, while t is in indices.
         for t = 1:numT
-            % gaze1 is this subject
-            % gaze2 is the n-1 group average
-            % Both have 3 rows: x, y, and timestamp
+            % Print feedback about progress
+            pct = pad(num2str(round(t/numT * 100)), 3, 'left', '0');
+            fprintf(1, ': %s%%', pct);
 
             % Define the sliding window for this timestamp
+            % gaze has 3 rows: x, y, and timestamp
             drmax = find(gaze1(3,:) >= gaze1(3,t) + winSize, 1);
             if isempty(drmax)
                 % if no timestamps >= t+200, then t is near the end,
@@ -82,10 +69,46 @@ for r = 1:numRows
                 drmax = numT;
             end
             drange = t:drmax;
+            % These numbers help us find the relevant range in other subjs
+            tmin = gaze1(3,t);
+            tmax = gaze1(3,drmax);
+
+            gs1x = gaze1(1, drange); % gaze subset
+            gs1y = gaze1(2, drange); % gaze subset
+            % Convert to a heatmap
+            scDim = [1920 1200]; % copied over from another function
+            hm1 = getHeatmap(gs1x, gs1y, scDim);
+            % Normalize
+            hm1 = zscore(hm1);
+            % Smooth
+            sigma = 2; % ??
+            hm1 = imgaussfilt(hm1, sigma);
+            % Get the n-1 average heatmap for the same time window
+            hmN = zeros([scDim(2), scDim(1), N]);
+            for i = 1:N
+                % Extract scanpath
+                gazeN = single(imStack{i});
+                % Determine which elements fit in this window
+                timeComp = gazeN(3,:) >= tmin & gazeN(3,:) <= tmax;
+                % Subset
+                gs2x = gazeN(1, timeComp);
+                gs2y = gazeN(2, timeComp);
+                % Convert to heatmap
+                hmN(:,:,i) = getHeatmap(gs2x, gs2y, scDim);
+                % Normalize
+                hmN(:,:,i) = zscore(hmN(:,:,i));
+                % Smooth
+                hmN(:,:,i) = imgaussfilt(hmN(:,:,i), sigma);
+            end
+            % Compress into a group average heatmap for this window
+            hm2 = mean(hmN, 3);
             % Calculate the correlation within the window
-            tmp(t) = corr2(gaze1(1:2,drange), gaze2(1:2,drange));
+            tmp(t) = corr2(hm1, hm2);
+
+            % Backspace over percent complete
+            fprintf(1,'\b\b\b\b\b\b');
         end
-        data.Eyetrack{r} = sltmp;
+        data.Eyetrack{r} = tmp;
     end
 end
 data = rmmissing(data); % Drop any skipped rows
