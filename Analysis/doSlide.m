@@ -54,6 +54,11 @@ for r = 1:numRows
         numT = length(gaze1);
         tmp = zeros([numT, 1]); % preallocate
         winSize = 200; % but that's in ms, while t is in indices.
+
+        % Predefine your Gaussian filter here for performance
+        sigma = 2; % ??
+        hsize = round(deg2pix(2)); % convert 2 deg to x pixels
+        myFilt = fspecial('gaussian', hsize, sigma);
         for t = 1:numT
             % Print feedback about progress
             pct = pad(num2str(round(t/numT * 100)), 3, 'left', '0');
@@ -77,12 +82,12 @@ for r = 1:numRows
             gs1y = gaze1(2, drange); % gaze subset
             % Convert to a heatmap
             scDim = [1920 1200]; % copied over from another function
+            x = [];
             hm1 = getHeatmap(gs1x, gs1y, scDim);
             % Normalize
             hm1 = zscore(hm1);
             % Smooth
-            sigma = 2; % ??
-            hm1 = imgaussfilt(hm1, sigma);
+            hm1 = imfilter(hm1, myFilt, 'replicate');
             % Get the n-1 average heatmap for the same time window
             hmN = zeros([scDim(2), scDim(1), N]);
             for i = 1:N
@@ -94,11 +99,12 @@ for r = 1:numRows
                 gs2x = gazeN(1, timeComp);
                 gs2y = gazeN(2, timeComp);
                 % Convert to heatmap
-                hmN(:,:,i) = getHeatmap(gs2x, gs2y, scDim);
+                x = []; % init
+                x = getHeatmap(gs2x, gs2y, scDim);
                 % Normalize
-                hmN(:,:,i) = zscore(hmN(:,:,i));
+                x = zscore(x);
                 % Smooth
-                hmN(:,:,i) = imgaussfilt(hmN(:,:,i), sigma);
+                hmN(:,:,i) = imfilter(x, myFilt, 'replicate');
             end
             % Compress into a group average heatmap for this window
             hm2 = mean(hmN, 3);
