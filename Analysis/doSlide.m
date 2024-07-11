@@ -80,17 +80,19 @@ for r = 1:numRows
 
             gs1x = gaze1(1, drange); % gaze subset
             gs1y = gaze1(2, drange); % gaze subset
-            % Convert to a heatmap
+
+            % Convert gaze vector to a heatmap
             scDim = [1920 1200]; % copied over from another function
-            x = [];
             hm1 = getHeatmap(gs1x, gs1y, scDim);
-            % Normalize
-            hm1 = zscore(hm1);
-            % Smooth
-            hm1 = imfilter(hm1, myFilt, 'replicate');
-            % Get the n-1 average heatmap for the same time window
-            hmN = zeros([scDim(2), scDim(1), N]);
+                % Normalize
+                hm1 = zscore(hm1);
+                % Smooth
+                hm1 = imfilter(hm1, myFilt, 'replicate');
+
+            % Get the n-1 *average* heatmap for the same time window
+            hmN = zeros([scDim(2), scDim(1), N]); % preallocate
             for i = 1:N
+                % For all other subjects with this video:
                 % Extract scanpath
                 gazeN = single(imStack{i});
                 % Determine which elements fit in this window
@@ -103,12 +105,13 @@ for r = 1:numRows
                 x = getHeatmap(gs2x, gs2y, scDim);
                 % Normalize
                 x = zscore(x);
-                % Smooth
+                % Smooth, store result in temp
                 hmN(:,:,i) = imfilter(x, myFilt, 'replicate');
             end
-            % Compress into a group average heatmap for this window
+            % hmN is now a stack of 2D heatmaps per subject
+            % Compress into a group average
             hm2 = mean(hmN, 3);
-            % Calculate the correlation within the window
+            % Calculate correlation bw subject and group
             tmp(t) = corr2(hm1, hm2);
 
             % Backspace over percent complete
