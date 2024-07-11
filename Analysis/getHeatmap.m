@@ -34,15 +34,12 @@ if ~iscolumn(ydat)
 end
 assert(iscolumn(xdat) && iscolumn(ydat), 'Inputs 1 and 2 must be column vectors');
 
-% Horizontally concatenate the two column vectors
-timeSeries = [xdat, ydat];
-
 % Define the bin centers (as opposed to the edges)
 xctr = 1:binRes:xMax;
 yctr = 1:binRes:yMax; 
 
 % Calculate a histogram of gaze locations
-gazeMap = hist3(timeSeries, 'Ctrs', {xctr,yctr});
+gazeMap = hist3([xdat, ydat], 'Ctrs', {xctr,yctr});
 
 % Perform any necessary data rotation here.
 % For one, it comes out sideways and needs to be rotated 90 deg.
