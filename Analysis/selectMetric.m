@@ -164,13 +164,35 @@ switch metricName
         valueInC = C(colIdx);
         output = [valueInB; valueInC];
     case 'pupil'
-        % Uncalibrated size of pupil, given as diameter OR area
+        % "Uncalibrated" size of pupil, given as either diameter or area
+        % edfDat.Header.rec.pupil_type indicates which
+        % But since both are in arbitrary units, it doesn't really matter.
         % Size varies over time, and that variation could be informative
         
-        % This is the raw signal, which will screw up the regular analysis
-        % Either need to write a custom timeseries analysis,
-        % or else average this down to a single number
+        % This is the raw signal, i.e. a timeseries
+        % but the main analysis script expects a single number per trial
+        % So we must use this in a separate analysis script
         output = pickCoordData(edfDat.Samples.pa);
+            output = single(output);
+
+        % Reject blink data and interpolate replacement values
+        % But the original blink estimation is too conservative,
+        % so pad the given values to catch on/off artifacts
+        % These are round numbers based on qualitative assessment of one subject.
+        if isfield(edfDat, 'Blinks') && ~isempty(edfDat.Blinks)
+            st = edfDat.Blinks.sttime - 50;
+            en = edfDat.Blinks.entime + 150;
+            blinkDurs = cell2mat(arrayfun(@(start, stop) start:stop, st, en, 'UniformOutput', false));
+                blinkDurs = single(blinkDurs);
+            gazeTimes = edfDat.Samples.time - recStart;
+                gazeTimes = single(gazeTimes);
+            % Can't index directly with blinkDurs since it may have extra vals
+            % So first, find the values in blinkDurs that exist in gazeTimes
+            bs = ismember(gazeTimes, blinkDurs); % blink samples
+            % Now interpolate the values for bs based on everything else
+            output(bs) = interp1(gazeTimes(~bs), output(~bs), gazeTimes(bs), 'spline');
+        end
+
         % You should also include the frame number here, for syncing
         output = [output; findFrameNums(edfDat)];
     case 'heatmap'
