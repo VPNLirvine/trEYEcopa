@@ -53,6 +53,10 @@ switch metricName
         txt = 'Average saccade distance in degrees';
         yl = [0 10];
         dist = 'Expect a normal distribution';
+    case 'blinkrate'
+        txt = 'Number of blinks per second';
+        yl = [0 2]; % Usually < 1, avg 0.3, but sub15 was WILD
+        dist = 'Expect an RT-like distribution';
     case 'ISC'
         txt = 'Intersubject correlation with group mean';
         yl = [0 1.1]; % correlation bounded 0:1
