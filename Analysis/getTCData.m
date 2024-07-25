@@ -8,8 +8,10 @@ function data = getTCData(metricName)
     
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
+    useCell = any(strcmp(metricName, {'heatmap','gaze', 'tot'}));
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    if any(strcmp(metricName, {'heatmap', 'pupil'}))
+
+    if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'double', 'double', 'logical'};
     else
@@ -60,16 +62,15 @@ function data = getTCData(metricName)
                 % Remember to drop this trial from the behavioral data
                 badList = [badList, t];
             else
-                if strcmp(metricName, 'heatmap')
-                    opts = behav.Flipped(t);
-                    eyetrack{t} = selectMetric(edf(t), 'heatmap', opts);
+                opts = logical(behav.Flipped(t));
+                if useCell
+                    eyetrack{t} = selectMetric(edf(t), metricName, opts);
                     % Note above is cell, not double like below
                 elseif strcmp(metricName, 'pupil')
                     % Use a cell to contain a vector
                     eyetrack{t} = selectMetric(edf(t), metricName);
                 else
-                    % Use a double bc it's just one number
-                    eyetrack(t) = selectMetric(edf(t), metricName);
+                    eyetrack(t) = selectMetric(edf(t), metricName, opts);
                 end
             end
         end

@@ -26,10 +26,24 @@ try
     else
         fileLoc = pths.data;
     end
-    
-    
+
     addpath(pths.edf);
-    [Trials, Preamble] = edfImport([fileLoc filesep fileName], [1 1 1], '');
+
+    % Check for .mat file, in case bad subject (or just to be lazy)
+    fileName2 = [fileName(1:end-3) 'mat'];
+    fp = [fileLoc filesep fileName2];
+    if exist(fp, 'file')
+        % Import existing data
+        fprintf(1, 'Importing data from .mat file.\n');
+        Trials = importdata(fp);
+        if isfield(Trials, 'FILENAME')
+            % Convert to look like edfImport output
+            Trials = edfTranslate(Trials);
+        end
+    else
+        % Perform standard import via mex
+        [Trials, Preamble] = edfImport([fileLoc filesep fileName], [1 1 1], '');
+    end
     Trials = edfExtractInterestingEvents(Trials);
 
 catch ME

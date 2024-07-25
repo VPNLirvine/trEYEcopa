@@ -9,7 +9,14 @@ warning('off', 'MATLAB:textio:io:UnableToGuessFormat'); % don't care about dates
 % Import AQ data from Qualtrics
 x = dir(fullfile(pths.beh,'Baron Cohen*.tsv'));
 fname = fullfile(pths.beh, x(1).name);
-data = readtable(fname, "FileType", "delimitedtext", "Delimiter", "\t");
+% Qualtrics spits out data in UTF-16 format
+% Matlab versions previous to ~2022 do not support this format
+% Convert to UTF-8 instead, for compatibility
+fname = verifyEncoding(fname);
+
+% Now finally read the data in
+opts = detectImportOptions(fname, "FileType", "text", "Delimiter", "\t");
+data = readtable(fname, opts);
 
 % Set up export variable
 output = table();
@@ -38,7 +45,7 @@ end
 
 % Step 3 - Tally subscales
 output.SocialSkills = sum(questions{:, strcmp(scoreAQ.Subscale, 'Social Skills')}, 2);
-output.AttentionSwiching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
+output.AttentionSwitching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
 output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
 output.Communication = sum(questions{:, strcmp(scoreAQ.Subscale, 'Communication')}, 2);
 output.Imagination = sum(questions{:, strcmp(scoreAQ.Subscale, 'Imagination')}, 2);

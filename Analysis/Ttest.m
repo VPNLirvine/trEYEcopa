@@ -109,13 +109,15 @@ anovan(y, {condList, subList}, 'varnames', {'Condition', 'SubID'}, 'random', [2]
 
 
 [h,p,~,stats] = ttest2(aggregateSocFix,aggregateMecFix);
+hlist = {'Fail to reject', 'Reject'};
 fprintf("\n\n\n")
 fprintf("%d subjects were considered.\n", subject)
-fprintf("h = %d\n",h)
-fprintf("p = %f\n",p)
-disp(stats)
+fprintf("%s the null hypothesis\n",hlist{h+1})
 
-boxPlot2(metricName, y, s, condList, edfList); % Generates figures
+disp(stats)
+fprintf("\tp = %f\n",p) % stats are indented
+
+BoxplotMW(metricName, y, s, condList, edfList); % Generates figures
 
 function [dataMatrix, subList, condList, trialList] = prepforanova(inStruct)
 % Take a structure with fixation data for separate conditions, per subject
