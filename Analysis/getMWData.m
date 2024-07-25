@@ -26,7 +26,7 @@ numSubs = length(edfList);
 % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Category', 'StimName'};
-    useCell = any(strcmp(metricName, {'heatmap','gaze'}));
+    useCell = any(strcmp(metricName, {'heatmap','gaze', 'pupil'}));
     if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'string', 'string'};
