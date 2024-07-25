@@ -13,6 +13,8 @@ function output = selectMetric(edfDat, metricName, varargin)
 %   'minfixOnset' - Onset time of the shortest fixation
 %   'meansacdist' - Average distance of all saccades within a trial
 %   'heatmap' - a 2D heatmap summarizing the scanpath
+%   'gaze' - gives the scanpath as coords over time. Rows are X, Y, and T.
+%   'blinkrate' - number of blinks / duration of video. 
 
 % Determine how many eyes were used
 % values of n: 0 = left, 1 = right.
@@ -213,6 +215,16 @@ switch metricName
         % Time on Target
         % Not fully fleshed out yet
         output = timeOnTarget(edfDat, i+1, flipFlag);
+    case 'blinkrate'
+        % Pretty straightforward.
+        % Duration is in msec, so 1000x gives you the rate in Hz
+        if isempty(edfDat.Blinks)
+            numBlinks = 0;
+        else
+            % Length of edfDat.Blinks will just be 1, so count this way.
+            numBlinks = length(edfDat.Blinks.sttime);
+        end
+        output = 1000 * numBlinks / duration;
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
