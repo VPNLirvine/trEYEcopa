@@ -171,6 +171,8 @@ switch metricName
         % Either need to write a custom timeseries analysis,
         % or else average this down to a single number
         output = pickCoordData(edfDat.Samples.pa);
+        % You should also include the frame number here, for syncing
+        output = [output; findFrameNums(edfDat)];
     case 'heatmap'
         % This is a 2D matrix, not a single value! Be careful.
         

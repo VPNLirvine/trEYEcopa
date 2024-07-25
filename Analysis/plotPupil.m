@@ -14,7 +14,9 @@ for i = 1:n
     trialID = data.StimName{j};
     subplot(n,1,i);
     x = 0:1/sr:(length(eyetrack{i}) - 1)/sr;
-    plot(x, eyetrack{i});
+    y = eyetrack{i};
+    y = y(1,:); % strip out the second row
+    plot(x, y);
     t = sprintf('%s\n%s', subID, trialID);
     title(replace(t, '_', '\_'));
     % Y axis is pupil size, but units unknown.
