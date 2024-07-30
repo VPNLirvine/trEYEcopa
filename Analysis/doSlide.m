@@ -103,14 +103,13 @@ for r = 1:numRows
                 % Convert to heatmap
                 x = []; % init
                 x = getHeatmap(gs2x, gs2y, scDim);
-                % Normalize
-                x = zscore(x);
                 % Smooth, store result in temp
                 hmN(:,:,i) = imfilter(x, myFilt, 'replicate');
             end
             % hmN is now a stack of 2D heatmaps per subject
-            % Compress into a group average
-            hm2 = mean(hmN, 3);
+            % Compress into a group map
+            hm2 = sum(hmN, 3);
+            hm2 = zscore(hm2);
             % Calculate correlation bw subject and group
             tmp(t) = corr2(hm1, hm2);
 
