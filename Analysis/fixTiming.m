@@ -9,7 +9,7 @@ function input = fixTiming(input)
 % or the timestamps don't perfectly line up e.g. odds vs evens,
 % etc.
 
-fprintf(1, "Standardizing timing...")
+% fprintf(1, "Standardizing timing...")
 
 numCells = height(input);
 
@@ -47,5 +47,5 @@ for i = 1:numCells
     input.Eyetrack{i} = [interpolatedX; interpolatedY; newTimeVector];
 end
 
-fprintf(1, "Done.\n")
+% fprintf(1, "Done.\n")
 end
