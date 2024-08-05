@@ -30,14 +30,14 @@ else
 end
 plotFlag = 0; % For getting the initial heatpaths. PLEASE DON'T PLOT omg
 
-% fprintf(1, 'Getting heatpaths...')
-% for i = 1:length(stimList)
-%     stim = stimList{i};
-%     plotFlag = 0; % 2 to visualize
-%     [heatpaths(i).Data, heatpaths(i).Bins] = getHeatPath(data, stim, plotFlag);
-%     heatpaths(i).Stim = stim;
-% end
-% fprintf(1, 'Done getting heatpaths.\n');
+fprintf(1, 'Getting heatpaths...')
+for i = 1:length(stimList)
+    stim = stimList{i};
+    plotFlag = 0; % 2 to visualize
+    [heatpaths(i).Data, heatpaths(i).Bins] = getHeatPath(data, stim, plotFlag);
+    heatpaths(i).Stim = stim;
+end
+fprintf(1, 'Done getting heatpaths.\n');
 
 % So now we have heatpaths.Data, which is the counts,
 % and heatpaths.Bins, which lists the bin edges for X, Y, and T.
@@ -130,7 +130,8 @@ for s = 1:length(stimList)
 
     % Output
     output.Data{s} = mean(d, 2, 'omitnan');
-    [~, bins] = getHeatPath(data, stim, plotFlag); % get bins of full group
+    bins = heatpaths(strcmp({heatpaths.Stim}, stim)).Bins;
+    % [~, bins] = getHeatPath(data, stim, plotFlag); % get bins of full group
     output.Bins{s} = bins.TbinEdges(1:end-1) + (diff(bins.TbinEdges) / 2); % centers, not edges
     output.StimName{s} = stim;
 

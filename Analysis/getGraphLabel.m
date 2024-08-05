@@ -9,6 +9,10 @@ function [txt, varargout] = getGraphLabel(metricName)
 % This should typically be used as the histogram's title
 
 switch metricName
+    case 'coherence'
+        txt = 'Average scanpath similarity to group';
+        yl = [0 1.1];
+        dist = 'Expect an RT-like distribution';
     case 'rawfix'
         txt = 'Fixation durations in ms';
         yl = 'tight';
