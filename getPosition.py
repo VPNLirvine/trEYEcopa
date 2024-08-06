@@ -3,8 +3,8 @@ import numpy as np
 import csv
 import os 
 
-video_path = 'path to a tricopa video' 
-cap = cv2.VideoCapture(video_path)
+video_name = 'Q5_6644_argue_and_door_slam.mov' # eventually do this in a loop
+
 def detect_shapes(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -77,9 +77,16 @@ class BoundaryTracker:
                 for col in unusedCols:
                     self.register(inputBboxes[col])
         return self.objects
+    
+## Begin script portion
+video_path = os.path.normpath('stims/TriCOPA/normal/')
+fname = os.path.join(video_path, video_name)
+cap = cv2.VideoCapture(fname)
+
 tracker = BoundaryTracker()
 frame_count = 0
 position_data = []
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -103,6 +110,8 @@ while cap.isOpened():
         break
 cap.release()
 cv2.destroyAllWindows()
+cv2.waitKey(1) # this allows it to close the window on Mac
+
 with open('position_data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["Frame", "ObjectID", "X", "Y", "W", "H"])
