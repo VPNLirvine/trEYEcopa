@@ -94,7 +94,7 @@ while cap.isOpened():
     shapes = detect_shapes(frame)
     bboxes = []
     for contour, shape_type, x, y, w, h in shapes:
-        cv2.putText(frame, shape_type, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.putText(frame, shape_type, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
         cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
         bboxes.append((x, y, w, h))
     objects = tracker.update(bboxes)
