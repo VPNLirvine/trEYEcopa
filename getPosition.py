@@ -4,7 +4,40 @@ import csv
 import os 
 
 video_name = 'Q5_6644_argue_and_door_slam.mov' # eventually do this in a loop
+# video_name = 'Q1_6640_stalker.mov' # eventually do this in a loop
 
+def compare_shapes(contour, triangle, circle, approx):
+    # contour_area = cv2.contourArea(contour)
+    contour_perimeter = cv2.arcLength(contour, True)
+    
+    # triangle_area = cv2.contourArea(triangle)
+    triangle_perimeter = cv2.arcLength(triangle, True)
+    
+    # circle_area = np.pi * (circle ** 2)
+    circle_perimeter = 2 * np.pi * circle
+    
+    # approx_area = cv2.contourArea(approx)
+    approx_perimeter = cv2.arcLength(approx, True)
+    
+    # contour_vs_triangle = (abs(contour_area - triangle_area) / contour_area) + \
+    #                       (abs(contour_perimeter - triangle_perimeter) / contour_perimeter)
+    
+    # contour_vs_circle = (abs(contour_area - circle_area) / contour_area) + \
+    #                     (abs(contour_perimeter - circle_perimeter) / contour_perimeter)
+    # contour_vs_approx = (abs(contour_area - approx_area) / contour_area) + \
+    #                     (abs(contour_perimeter - approx_perimeter) / contour_perimeter)
+    
+    contour_vs_triangle = triangle_perimeter - contour_perimeter
+    contour_vs_circle = circle_perimeter - contour_perimeter
+    contour_vs_approx = approx_perimeter - contour_perimeter
+    
+    if ((contour_vs_triangle < contour_vs_circle) and (contour_vs_triangle <= contour_vs_approx)):
+        shapeName = "Triangle"
+    elif ((contour_vs_circle < contour_vs_triangle) and (contour_vs_circle <= contour_vs_approx)):
+        shapeName = "Circle"
+    else:
+        shapeName = "Unknown"
+    return shapeName
 def detect_shapes(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -15,14 +48,17 @@ def detect_shapes(frame):
         if cv2.contourArea(contour) > 50: #can change to other numbers, this is just filtering small contour.
             approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
             x, y, w, h = cv2.boundingRect(contour)
-            if len(approx) == 3:
-                shape_type = "Triangle"
-            elif len(approx) == 4:
-                shape_type = "Quadrilateral"
-            elif len(approx) > 4:
-                shape_type = "Circle"
-            else:
-                shape_type = "Unknown"
+            cirC, cirR = cv2.minEnclosingCircle(contour)
+            _, triP = cv2.minEnclosingTriangle(contour)
+            shape_type = compare_shapes(contour, triP, cirR, approx)
+            # if len(approx) == 3:
+            #     shape_type = "Triangle"
+            # elif len(approx) == 4:
+            #     shape_type = "Quadrilateral"
+            # elif len(approx) > 4:
+            #     shape_type = "Circle"
+            # else:
+            #     shape_type = "Unknown"
             shapes.append((contour, shape_type, x, y, w, h))
     return shapes
 class BoundaryTracker:
