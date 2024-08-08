@@ -45,10 +45,13 @@ end
 
 % Step 3 - Tally subscales
 output.SocialSkills = sum(questions{:, strcmp(scoreAQ.Subscale, 'Social Skills')}, 2);
-output.AttentionSwitching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
-output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
 output.Communication = sum(questions{:, strcmp(scoreAQ.Subscale, 'Communication')}, 2);
-output.Imagination = sum(questions{:, strcmp(scoreAQ.Subscale, 'Imagination')}, 2);
+output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
+
+% Re-calculate total AQ based on the subscales
+% But keep in mind that the English paper said total scores are useless,
+% because some subscales are anti-correlated...
+output.AQ = output.SocialSkills + output.Communication + output.AttentionDetail;
 
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 warning('on', 'MATLAB:textio:io:UnableToGuessFormat');
