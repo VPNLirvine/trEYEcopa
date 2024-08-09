@@ -22,6 +22,7 @@ __pycache__/
 notes.txt
 /ExpOutputs/TCoutput/*.mat
 test*
+/Analysis/posDat/
 
 # Stimuli
 *.mov
