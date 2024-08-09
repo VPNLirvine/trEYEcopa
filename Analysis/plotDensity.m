@@ -32,12 +32,14 @@ nxbins = ceil(xMax / binRes);
 nybins = ceil(yMax / binRes);
 ntbins = ceil(tMax / tbinRes);
 
-xBins = linspace(1,xMax,nxbins+1);
+xBins = linspace(1,xMax,nxbins+1); % add 1 bc this defines the EDGES
 yBins = linspace(1,yMax,nybins+1);
-tBins = linspace(1,tMax,ntbins+1);
+% tBins = linspace(1,tMax,ntbins+1);
+tBins = 0:tbinRes:(ntbins * tbinRes); % ensure consistent spacing
 
 %% Count density
-% we start counting density along in the [X,Y] plane (Z axis aglomerated)
+% Take density over [Z] at each possible [X,Y] position
+% Anything with 0 density will be skipped later (to speed things up)
 [Nz1,~,~,binY,binX] = histcounts2(y,x,yBins,xBins) ;
 npt = sum(Nz1, 'all'); % we may be excluding outliers like blinks here
 % preallocate 3D containers
@@ -47,29 +49,30 @@ Nsub = zeros(nybins,nxbins,ntbins); % 3D matrix containing subject agreemnt
 colorpc = zeros(npt,1) ;         % 1D vector containing the percentages
 pctsubs = zeros(npt,1) ;
 
-% we do not want to loop on every block of the domain because:
-%   - depending on the grid size there can be many
-%   - a large number of them can be empty
-% So we first find the [X,Y] blocks which are not empty, we'll only loop on
-% these blocks.
+% We don't want to loop over every single block of XYZ because:
+%   - most of them are probably empty
+%   - depending on the resolution, there can be a LOT of empties
+% So instead, we'll find the [X,Y] blocks with non-zero density,
+% then ONLY loop over those.
 validbins = find(Nz1) ;                              % find the indices of non-empty blocks
 [ybins,xbins] = ind2sub([nybins,nxbins],validbins) ;  % convert linear indices to 2d indices
 nv = numel(xbins) ;                                 % number of block to process
 
-% Now for each [X,Y] block, we get the distribution over a [Z] column and
-% assign the results to the full 3D matrices
+% Now for each "valid" [X,Y] position (i.e. at least one non-zero [Z] bin),
+% Find the density of each individual [Z] bin (i.e. not collapsed),
+% then save the results to the 3D bricks N3d and Npc
 for k=1:nv
-    % this block coordinates
+    % Coordinates into Nz1 of the next "valid" bin
     xbin = xbins(k) ;
     ybin = ybins(k) ;
 
-    % find linear indices of the `x` and `y` values which are located into this block
+    % Find the 1-D bin nums for all [Z]s that match the [X,Y] coords
     idx = find( binX==xbin & binY==ybin ) ;
     assert(~isempty(idx), 'xbin and ybin do not point to a valid cell. Bin sizes likely off by one.')
-    % make a subset with the corresponding 'z' value
+    % Grab the corresponding Z values from your input matrix [XYZ]
     subZ = z(idx) ;
     assert(length(subZ) == Nz1(ybin,xbin), 'valid idx either did not find the correct data, or only a portion. Could be that the bins do not cover the full range of values.');
-    % find the distribution and assign to 3D matrices
+    % Bin your continuous [Z] and count the density in each bin
     [Nz,~,zbins] = histcounts( subZ , tBins ) ;
 
     % validate again
@@ -101,7 +104,8 @@ assert(  numCounted == npt, 'Only considered %i of %i timepoints!', numCounted, 
 
 %% Define function outputs
 % Main output should give the bin counts
-output = Nsub;
+% output = Nsub;
+output = Npc; % percent density at each bin
 
 % Second output gives you the bin widths/edges
 if nargout > 1

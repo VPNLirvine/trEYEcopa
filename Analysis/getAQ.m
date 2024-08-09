@@ -31,24 +31,26 @@ questions = data(:,idx);
 
 clear data % save memory?
 
-% Step 2 - Recode values of 1:4 to 0 or 1
+% Step 2 - Recode the reversed questions
 scoreAQ = defineAQ(); % Get 'answer key'
 for i = 1:50
     if strcmp(scoreAQ.Valence(i), 'Agree')
-        questions{questions{:,i} <= 2, i} = 1;
-        questions{questions{:,i} >= 3, i} = 0;
-    elseif strcmp(scoreAQ.Valence(i), 'Disagree')
-        questions{questions{:,i} <= 2, i} = 0;
-        questions{questions{:,i} >=3, i} = 1;
+        % On a scale of 1-4, if 1 means "strongly agree" and that's bad,
+        % then change that 1/4 to a 4/4, etc.
+        questions{:,i} = 5 - questions{:,i};
     end
 end
 
 % Step 3 - Tally subscales
 output.SocialSkills = sum(questions{:, strcmp(scoreAQ.Subscale, 'Social Skills')}, 2);
-output.AttentionSwitching = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention Switching')}, 2);
-output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
 output.Communication = sum(questions{:, strcmp(scoreAQ.Subscale, 'Communication')}, 2);
-output.Imagination = sum(questions{:, strcmp(scoreAQ.Subscale, 'Imagination')}, 2);
+output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to Detail')}, 2);
+
+% Re-calculate total AQ based on the subscales
+% Score range is now 28 to 112, not 0 to 50
+% But keep in mind that the English paper said total scores are useless,
+% because some subscales are anti-correlated...
+output.AQ = output.SocialSkills + output.Communication + output.AttentionDetail;
 
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
 warning('on', 'MATLAB:textio:io:UnableToGuessFormat');
