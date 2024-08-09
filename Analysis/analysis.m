@@ -143,11 +143,10 @@ if choice == 1
                 title(distTxt3);
                 xlim(yl3);
                 % Add lines indicating the expected distribution(s)
-                overlayAQ(gca);
+                % overlayAQ(gca); % skip this 
         if ~mwflag
             % Calculate correlations and generate some visualizations
             output = getCorrelations(data, metricName);
-            plotCorrelation(data, output, metricName);
         
             % Now Fischer z-transform your correlation coefficients
             zCorr = zscore(output(:,2));
@@ -164,19 +163,24 @@ if choice == 1
             fprintf(1, 'Correlation between %s and above correlation:\n', var3)
             fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
             
-            % Histograms of the variables at play
-            figure();
-            subplot(1,2,1);
-                histogram(data.Eyetrack);
-                xlabel(var1);
-                title(distTxt);
-                xlim(yl);
-            subplot(1,2,2)
-                histogram(data.Response);
-                xlabel(var2);
-                title(distTxt2);
         end % if not MW data
     end % for each AQ subscale
+
+    if ~mwflag % avoid doing this inside the loop over AQ subscales
+        % Plot correlation of gaze and clarity, i.e. not considering AQ
+        plotCorrelation(data, output, metricName);
+        % Histograms of gaze and clarity
+        figure();
+        subplot(1,2,1);
+            histogram(data.Eyetrack);
+            xlabel(var1);
+            title(distTxt);
+            xlim(yl);
+        subplot(1,2,2)
+            histogram(data.Response);
+            xlabel(var2);
+            title(distTxt2);
+    end
 elseif choice == 2
     % Do a mean comparison across groups
     subList = unique(data.Subject);
