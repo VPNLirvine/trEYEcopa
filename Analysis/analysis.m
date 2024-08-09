@@ -20,6 +20,14 @@ if choice == 1
         data = doISC(getTCData('heatmap'));
         fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
         fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+    elseif strcmp(metricName, 'coherence')
+        [~, data] = doGazePath(getTCData('gaze'));
+        % Compress the timecourse down to a single number
+        for i = 1:height(data)
+            data.Eyetrack{i} = mean(data.Eyetrack{i}(1,:), 'omitnan');
+        end
+        % Now that they're not vectors, turn the column into a single mat
+        data.Eyetrack = cell2mat(data.Eyetrack);
     else
         data = getTCData(metricName);
     end

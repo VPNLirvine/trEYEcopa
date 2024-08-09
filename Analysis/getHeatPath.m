@@ -1,4 +1,4 @@
-function output = getHeatPath(data, stim, varargin)
+function [Data, Bins] = getHeatPath(data, stim, varargin)
 % If a heat MAP is a 2D representation of single subject's 3D gaze path,
 % then a heat PATH is a 3D representation of ALL subjects' gaze paths.
 % It's like a 3D histogram.
@@ -75,5 +75,4 @@ end
 
 % Finally, run it through a 3D histogram and plot again.
 flag2 = flag >= 2; % Determine whether to plot or not
-[output.Data, output.Bins] = plotDensity(tbl, stim, flag2); % Get data, maybe plot too
-fprintf(1, 'Done.\n')
+[Data, Bins] = plotDensity(tbl, stim, flag2); % Get data, maybe plot too
