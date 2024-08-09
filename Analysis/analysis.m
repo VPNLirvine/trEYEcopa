@@ -82,85 +82,102 @@ if choice == 1
         % TC_01 == MW_01. Compensate.
         aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
     end
-    % Ensure they're sorted the same as the other data
-    for s = 1:numSubs
-        subID = subList{s};
-        aq(s) = aqTable.AQ(strcmp(subID, aqTable.SubID));
-    end
-    aq = aq'; % Rotate 90 deg so it's a column vector like zCorr below
+    for a = 1:3 % AQ subscales
+        % Loop over the three AQ subscales
+        % Ensure they're sorted the same as the other data
+        aq = zeros([numSubs, 1]); % preallocate as column
+        for s = 1:numSubs
+            subID = subList{s};
+            if a == 1
+                aq(s) = aqTable.SocialSkills(strcmp(subID, aqTable.SubID));
+                aqt = 'AQ1';
+            elseif a == 2
+                aq(s) = aqTable.Communication(strcmp(subID, aqTable.SubID));
+                aqt = 'AQ2';
+            elseif a == 3
+                aq(s) = aqTable.AttentionDetail(strcmp(subID, aqTable.SubID));
+                aqt = 'AQ3';
+            end
+        end
     
-
-    % First, directly correlate the metric with AQ
-    % i.e. do not correlate with the clarity rating
-    % Reduce data to an average value per subject,
-    % since there's only 1 AQ value per person
-    [var3, yl3, distTxt3] = getGraphLabel('AQ');
-
-    aqCol = [];
-    for s = 1:numSubs
-        subID = subList{s};
-        subset = strcmp(subID, data.Subject);
-        nrows = sum(subset);
-        aqCol = [aqCol; aq(s) * ones(nrows,1)];
-    end
-    output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
-    output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
-        
-        % Plot
-        figure();
-        scatter(aqCol, data.Eyetrack);
-            title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, output(1,2)));
-            xlabel(var3);
-            ylabel(var1);
-            ylim(yl);
-            xlim(yl3);
+        % First, directly correlate the metric with AQ
+        % i.e. do not correlate with the clarity rating
+        % Reduce data to an average value per subject,
+        % since there's only 1 AQ value per person
+        [var3, yl3, distTxt3] = getGraphLabel(aqt);
+    
+        aqCol = [];
+        for s = 1:numSubs
+            subID = subList{s};
+            subset = strcmp(subID, data.Subject);
+            nrows = sum(subset);
+            aqCol = [aqCol; aq(s) * ones(nrows,1)];
+        end
+        output = zeros([1,2]); % clear on each loop
+        output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
+        output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
             
-        % Report the correlation score
-        fprintf(1, '\n\nCorrelation between AQ and %s:\n', var1)
-        fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', output(1,2));
-        fprintf(1, '\tPearson''s r = %0.2f\n', output(1,1));
-
-        % Report secondary correlation
-        aq2rating(1) = corr(aqCol, data.Response, 'Type', 'Spearman', 'rows', 'complete');
-        aq2rating(2) = corr(aqCol, data.Response, 'Type', 'Pearson', 'rows', 'complete');
-        fprintf(1, '\n\nCorrelation between AQ and %s:\n', var2);
-        fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
-        fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
-
-        % Histograms
-        figure();
-        subplot(1,2,1);
-            histogram(data.Eyetrack);
-            xlabel(var1);
-            title(distTxt);
-            xlim(yl);
-        subplot(1,2,2)
-            histogram(aq, 'BinEdges', 0:5:50);
-            xlabel(var3);
-            title(distTxt3);
-            xlim([0 50]);
-            % Add lines indicating the expected distribution(s)
-            overlayAQ(gca);
-    if ~mwflag
-        % Calculate correlations and generate some visualizations
-        output = getCorrelations(data, metricName);
-        plotCorrelation(data, output, metricName);
+            % Plot
+            figure();
+            scatter(aqCol, data.Eyetrack);
+                title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, output(1,2)));
+                xlabel(var3);
+                ylabel(var1);
+                ylim(yl);
+                xlim(yl3);
+                
+            % Report the correlation score
+            fprintf(1, '\n\nCorrelation between %s and %s:\n', var3, var1)
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', output(1,2));
+            fprintf(1, '\tPearson''s r = %0.2f\n', output(1,1));
     
-        % Now Fischer z-transform your correlation coefficients
-        zCorr = zscore(output(:,2));
+            % Report secondary correlation
+            aq2rating(1) = corr(aqCol, data.Response, 'Type', 'Spearman', 'rows', 'complete');
+            aq2rating(2) = corr(aqCol, data.Response, 'Type', 'Pearson', 'rows', 'complete');
+            fprintf(1, '\n\nCorrelation between %s and %s:\n', var3, var2);
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
+            fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
     
-        % Plot and analyze relationship between AQ and current metric
-        secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
-        figure();
-            scatter(aq, zCorr, 'filled');
-            xlabel(var3);
-            ylabel('Z-Transformed Spearman correlation');
-            title(sprintf('Impact of AQ on %s''s relation with %s\n\x03C1 = %0.2f', var1, var2, secondCorr));
-    
-        fprintf(1, 'Correlation between AQ and above correlation:\n')
-        fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+            % Histograms
+            figure();
+            subplot(1,2,1);
+                histogram(data.Eyetrack);
+                xlabel(var1);
+                title(distTxt);
+                xlim(yl);
+            subplot(1,2,2)
+                histogram(aq, 'BinEdges', 0:5:50);
+                xlabel(var3);
+                title(distTxt3);
+                xlim(yl3);
+                % Add lines indicating the expected distribution(s)
+                % overlayAQ(gca); % skip this 
+        if ~mwflag
+            % Calculate correlations and generate some visualizations
+            output = getCorrelations(data, metricName);
         
-        % Histograms of the variables at play
+            % Now Fischer z-transform your correlation coefficients
+            zCorr = zscore(output(:,2));
+        
+            % Plot and analyze relationship between AQ and current metric
+            secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
+            figure();
+                scatter(aq, zCorr, 'filled');
+                xlabel(var3);
+                ylabel('Z-Transformed Spearman correlation');
+                title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f', var3, var1, var2, secondCorr));
+                xlim(yl3);
+        
+            fprintf(1, 'Correlation between %s and above correlation:\n', var3)
+            fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+            
+        end % if not MW data
+    end % for each AQ subscale
+
+    if ~mwflag % avoid doing this inside the loop over AQ subscales
+        % Plot correlation of gaze and clarity, i.e. not considering AQ
+        plotCorrelation(data, output, metricName);
+        % Histograms of gaze and clarity
         figure();
         subplot(1,2,1);
             histogram(data.Eyetrack);
@@ -172,7 +189,6 @@ if choice == 1
             xlabel(var2);
             title(distTxt2);
     end
-    
 elseif choice == 2
     % Do a mean comparison across groups
     subList = unique(data.Subject);

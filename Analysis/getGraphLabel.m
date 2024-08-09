@@ -13,6 +13,18 @@ switch metricName
         txt = 'Average scanpath similarity to group';
         yl = [0 1.1];
         dist = 'Expect an RT-like distribution';
+    case 'AQ1'
+        txt = 'Social Skills score';
+        yl = [13 52]; % 13 questions scored 1-4
+        dist = 'Expect a bimodal distribution';
+    case 'AQ2'
+        txt = 'Communication Skills score';
+        yl = [8 32]; % 8 questions scored 1-4
+        dist = 'Expect a bimodal distribution';
+    case 'AQ3'
+        txt = 'Attention to Detail score';
+        yl = [7 28]; % 7 questions scored 1-4
+        dist = 'Expect a bimodal distribution';
     case 'rawfix'
         txt = 'Fixation durations in ms';
         yl = 'tight';
@@ -57,14 +69,14 @@ switch metricName
         txt = 'Average saccade distance in degrees';
         yl = [0 10];
         dist = 'Expect a normal distribution';
+    case 'blinkrate'
+        txt = 'Number of blinks per second';
+        yl = [0 2]; % Usually < 1, avg 0.3, but sub15 was WILD
+        dist = 'Expect an RT-like distribution';
     case 'ISC'
         txt = 'Intersubject correlation with group mean';
         yl = [0 1.1]; % correlation bounded 0:1
         dist = 'Expect a normal distribution';
-    case 'AQ'
-        txt = 'Autism Quotient';
-        yl = [0 50]; % fixed score 0-50
-        dist = 'Expect a bimodal distribution';
     case 'response'
         txt = 'Understandability rating';
         yl = [0 6]; % fixed response limit 1-5
