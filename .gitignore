@@ -23,6 +23,7 @@ notes.txt
 /ExpOutputs/TCoutput/*.mat
 test*
 /Analysis/posDat/
+/Analysis/masks/
 
 # Stimuli
 *.mov
