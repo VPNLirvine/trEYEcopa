@@ -39,12 +39,18 @@ class BoundaryTracker:
         del self.disappeared[objectID]
     def update(self, inputBboxes):
         if len(inputBboxes) == 0:
+            # If the list of bounding boxes is empty,
+            # but we previously had been tracking some object(s),
+            # wait until it's been gone for 50 frames before dropping it.
             for objectID in list(self.disappeared.keys()):
                 self.disappeared[objectID] += 1
                 if self.disappeared[objectID] > 50:
                     self.deregister(objectID)
             return self.objects
         if len(self.objects) == 0:
+            # If nothing is currently being tracked,
+            # but we drew a bounding box around something,
+            # then register each bounding box as a new object.
             for i in range(len(inputBboxes)):
                 self.register(inputBboxes[i])
         else:
@@ -52,6 +58,9 @@ class BoundaryTracker:
             objectBboxes = list(self.objects.values())
             inputCentroids = [(bbox[0] + bbox[2]//2, bbox[1] + bbox[3]//2) for bbox in inputBboxes]
             objectCentroids = [(bbox[0] + bbox[2]//2, bbox[1] + bbox[3]//2) for bbox in objectBboxes]
+            # Track the change in location of each object's centroid
+            # by measuring the distances to each centroid in the new frame
+            # and assuming the shortest distance means the same object
             D = np.linalg.norm(np.array(objectCentroids)[:, np.newaxis] - np.array(inputCentroids), axis=2)
             rows = D.min(axis=1).argsort()
             cols = D.argmin(axis=1)[rows]
