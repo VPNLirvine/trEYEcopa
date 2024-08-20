@@ -4,6 +4,7 @@ import csv
 import os 
 
 video_name = 'Q5_6644_argue_and_door_slam.mov' # eventually do this in a loop
+file_out = os.path.splitext(video_name)[0] + '.csv' # change extension
 
 def detect_shapes(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -96,6 +97,11 @@ tracker = BoundaryTracker()
 frame_count = 0
 position_data = []
 
+vidWidth = cap.get(3)
+vidHeight = cap.get(4)
+outWidth = 4000
+outHeight = 3000
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -109,10 +115,13 @@ while cap.isOpened():
     objects = tracker.update(bboxes)
     for (objectID, bbox) in objects.items():
         x, y, w, h = bbox
+        centrX = x + w//2
+        centrY = y - h//2
         text = "ID {}".format(objectID)
         cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        position_data.append([frame_count, objectID, x, y, w, h])
+        # position_data.append([frame_count, objectID, x, y, w, h])
+        position_data.append([frame_count, objectID, centrX, centrY])
     cv2.imshow("Frame", frame)
     frame_count += 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -121,7 +130,16 @@ cap.release()
 cv2.destroyAllWindows()
 cv2.waitKey(1) # this allows it to close the window on Mac
 
-with open('position_data.csv', 'w', newline='') as file:
+# Rescale values
+
+# Save results to disk
+path_out = os.path.normpath('Analysis/posDatOpenCV')
+fout = os.path.join(path_out, file_out)
+if not os.path.exists(path_out):
+    # Ensure path exists before writing to it
+    os.makedirs(path_out)
+with open(fout, 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["Frame", "ObjectID", "X", "Y", "W", "H"])
+    # writer.writerow(["Frame", "ObjectID", "X", "Y", "W", "H"])
+    writer.writerow(["Frame", "ObjectID", "X", "Y"])
     writer.writerows(position_data)
