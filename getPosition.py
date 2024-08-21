@@ -14,17 +14,51 @@ def detect_shapes(frame):
     shapes = []
     for contour in contours:
         if cv2.contourArea(contour) > 50: #can change to other numbers, this is just filtering small contour.
-            approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
+            # approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
             x, y, w, h = cv2.boundingRect(contour)
-            if len(approx) == 3:
-                shape_type = "Triangle"
-            elif len(approx) == 4:
-                shape_type = "Quadrilateral"
-            elif len(approx) > 4:
+            # approxArea = cv2.contourArea(approx)
+            rect = cv2.minAreaRect(contour)
+            rectArea = cv2.contourArea(cv2.boxPoints(rect))
+            triArea, tri = cv2.minEnclosingTriangle(contour)
+            tri = np.int32(tri)
+            (cirX, cirY), cirRad = cv2.minEnclosingCircle(contour)
+            cirArea = np.pi * cirRad ** 2
+            
+            # Determine shape by comparing areas
+            # Also draw an appropriate bounding contour in a unique color
+            if (triArea < cirArea) and (triArea < rectArea):
+                # It's a triangle. But which one?
+                if triArea < 2000:
+                    shape_type = "littleTriangle"
+                    cv2.drawContours(frame, [tri], -1, (0, 128, 255), 2) # orange
+                else:
+                    shape_type = "bigTriangle"
+                    cv2.drawContours(frame, [tri], -1, (0, 255, 0), 2) # green
+                triM = cv2.moments(tri)
+                X = int(triM["m10"] / triM["m00"])
+                Y = int(triM["m01"] / triM["m00"])
+            elif (cirArea < triArea) and (cirArea < rectArea):
                 shape_type = "Circle"
+                X = int(cirX)
+                Y = int(cirY)
+                cv2.circle(frame, (X, Y), int(cirRad), (255, 0, 0), 2) # circle in blue
+            elif (rectArea < triArea) and (rectArea < cirArea):
+                shape_type = "House"
+                X = x + w//2
+                Y = y + h//2
+                box = cv2.boxPoints(rect)
+                box = box.reshape((-1, 1, 2))
+                box = np.int32(box)
+                cv2.drawContours(frame, [box], -1, (0, 255, 255), 2) # slanted box in cyan
             else:
                 shape_type = "Unknown"
-            shapes.append((contour, shape_type, x, y, w, h))
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2) # OG box in red
+                X = x + w//2
+                Y = y + h//2
+            # Specify outputs
+            bbox = (x, y, w, h)
+            _, _, Angle = rect
+            shapes.append((contour, shape_type, bbox, X, Y, int(Angle)))
     return shapes
 class BoundaryTracker:
     def __init__(self):
@@ -57,8 +91,8 @@ class BoundaryTracker:
         else:
             objectIDs = list(self.objects.keys())
             objectBboxes = list(self.objects.values())
-            inputCentroids = [(bbox[0] + bbox[2]//2, bbox[1] + bbox[3]//2) for bbox in inputBboxes]
-            objectCentroids = [(bbox[0] + bbox[2]//2, bbox[1] + bbox[3]//2) for bbox in objectBboxes]
+            inputCentroids = [(bbox[1], bbox[2]) for bbox in inputBboxes]
+            objectCentroids = [(bbox[1], bbox[2]) for bbox in objectBboxes]
             # Track the change in location of each object's centroid
             # by measuring the distances to each centroid in the new frame
             # and assuming the shortest distance means the same object
@@ -108,20 +142,22 @@ while cap.isOpened():
         break
     shapes = detect_shapes(frame)
     bboxes = []
-    for contour, shape_type, x, y, w, h in shapes:
+    for contour, shape_type, bbox, X, Y, Angle in shapes:
+        x, y, w, h = bbox
+        # Write a label above each shape
         cv2.putText(frame, shape_type, (x + 40, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-        cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-        bboxes.append((x, y, w, h))
+        # cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+        
+        bboxes.append((bbox, X, Y, Angle))
     objects = tracker.update(bboxes)
     for (objectID, bbox) in objects.items():
-        x, y, w, h = bbox
-        centrX = x + w//2
-        centrY = y - h//2
+        (x, y, w, h), X, Y, Angle = bbox
         text = "ID {}".format(objectID)
         cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
         # position_data.append([frame_count, objectID, x, y, w, h])
-        position_data.append([frame_count, objectID, centrX, centrY])
+        position_data.append([frame_count, objectID, X, Y, Angle])
     cv2.imshow("Frame", frame)
     frame_count += 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -141,5 +177,5 @@ if not os.path.exists(path_out):
 with open(fout, 'w', newline='') as file:
     writer = csv.writer(file)
     # writer.writerow(["Frame", "ObjectID", "X", "Y", "W", "H"])
-    writer.writerow(["Frame", "ObjectID", "X", "Y"])
+    writer.writerow(["Frame", "ObjectID", "X", "Y", "Angle"])
     writer.writerows(position_data)
