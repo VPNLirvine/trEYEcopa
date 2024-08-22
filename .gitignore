@@ -25,6 +25,7 @@ test*
 /Analysis/posDat/
 /Analysis/posDatOpenCV/
 /Analysis/masks/
+/Analysis/motionData/
 
 # Stimuli
 *.mov
