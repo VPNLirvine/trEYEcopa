@@ -8,7 +8,7 @@ import numpy as np
 import csv
 
 # Read the video
-video_name = 'Q71_6716_knock_and_hide.mov'
+video_name = 'Q5_6644_argue_and_door_slam.mov'
 video_path = os.path.normpath('stims/TriCOPA/normal/')
 fname = os.path.join(video_path, video_name)
 cap = cv2.VideoCapture(fname)
@@ -20,9 +20,10 @@ file_out = os.path.splitext(video_name)[0] + '.csv' # change extension
 
 # Set up before actually running the video:
 # Parameters for Shi-Tomasi corner detection (gives us something to track)
+# qualityLevel < 0.02 needed to detect "corners" of the circle
 feature_params = dict( maxCorners = 100,
-                       qualityLevel = 0.02,
-                       minDistance = 7,
+                       qualityLevel = 0.015,
+                       minDistance = 2,
                        blockSize = 7 )
 # Parameters for Lucas-Kanade optical flow
 lk_params = dict( winSize  = (15, 15),
@@ -57,7 +58,7 @@ while cap.isOpened():
         c, d = old.ravel()
         mask = cv2.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
         frame = cv2.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
-    img = cv2.add(frame, mask)
+    img = cv2.addWeighted(frame, .7, mask, .3, 0.0)
     # Calculate total motion and export
     # output[frame_count] = np.sum(np.linalg.norm(good_new - good_old))
     motion = np.sum(np.linalg.norm(good_new - good_old))
