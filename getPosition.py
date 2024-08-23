@@ -3,26 +3,33 @@ import numpy as np
 import csv
 import os 
 
-video_name = 'Q5_6644_argue_and_door_slam.mov' # eventually do this in a loop
+video_name = 'Q71_6716_knock_and_hide.mov' # eventually do this in a loop
 file_out = os.path.splitext(video_name)[0] + '.csv' # change extension
 
 def detect_shapes(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edged = cv2.Canny(blurred, 50, 150)
-    contours, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarch = cv2.findContours(edged, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    # RETR_CCOMP returns a hierarchy of nested shapes, INCLUDING donut holes.
+    # This helps us continue to track shapes if e.g. the house's door closes,
+    # but then the house may have 2 or 3 contours we need to filter out.
+    # So only retain contours at the top level of the hierarchy (-1).
+    contours = tuple(contour for contour, h in zip(contours, hierarch[0]) if h[3] == -1)
+    
     shapes = []
     for contour in contours:
         if cv2.contourArea(contour) > 50: #can change to other numbers, this is just filtering small contour.
-            # approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
+            approx = cv2.approxPolyDP(contour, 0.04 * cv2.arcLength(contour, True), True)
             x, y, w, h = cv2.boundingRect(contour)
-            # approxArea = cv2.contourArea(approx)
+            approxArea = cv2.contourArea(approx)
             rect = cv2.minAreaRect(contour)
             rectArea = cv2.contourArea(cv2.boxPoints(rect))
             triArea, tri = cv2.minEnclosingTriangle(contour)
             tri = np.int32(tri)
             (cirX, cirY), cirRad = cv2.minEnclosingCircle(contour)
             cirArea = np.pi * cirRad ** 2
+            actualArea = cv2.contourArea(contour)
             
             # Determine shape by comparing areas
             # Also draw an appropriate bounding contour in a unique color
@@ -49,12 +56,13 @@ def detect_shapes(frame):
                 box = cv2.boxPoints(rect)
                 box = box.reshape((-1, 1, 2))
                 box = np.int32(box)
-                cv2.drawContours(frame, [box], -1, (0, 255, 255), 2) # slanted box in cyan
+                cv2.drawContours(frame, [box], -1, (0, 255, 255), 2) # slanted box in yellow
             else:
                 shape_type = "Unknown"
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2) # OG box in red
                 X = x + w//2
                 Y = y + h//2
+                cv2.drawContours(frame, [contour], -1, (192, 0, 255), 2) # draw in pink
             # Specify outputs
             bbox = (x, y, w, h)
             _, _, Angle = rect
@@ -148,16 +156,21 @@ while cap.isOpened():
         cv2.putText(frame, shape_type, (x + 40, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
         # cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
         
-        bboxes.append((bbox, X, Y, Angle))
+        bboxes.append((bbox, X, Y, Angle, shape_type))
     objects = tracker.update(bboxes)
     for (objectID, bbox) in objects.items():
-        (x, y, w, h), X, Y, Angle = bbox
+        (x, y, w, h), X, Y, Angle, shape_type = bbox
         text = "ID {}".format(objectID)
         cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         # cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         # cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
         # position_data.append([frame_count, objectID, x, y, w, h])
-        position_data.append([frame_count, objectID, X, Y, Angle])
+        
+        # Rescale values before saving to position_data
+        X = X/vidWidth * outWidth
+        Y = Y/vidHeight * outHeight
+        # Export
+        position_data.append([frame_count, objectID, shape_type, X, Y, Angle])
     cv2.imshow("Frame", frame)
     frame_count += 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -177,5 +190,5 @@ if not os.path.exists(path_out):
 with open(fout, 'w', newline='') as file:
     writer = csv.writer(file)
     # writer.writerow(["Frame", "ObjectID", "X", "Y", "W", "H"])
-    writer.writerow(["Frame", "ObjectID", "X", "Y", "Angle"])
+    writer.writerow(["Frame", "ObjectID", "ObjectName", "X", "Y", "Angle"])
     writer.writerows(position_data)
