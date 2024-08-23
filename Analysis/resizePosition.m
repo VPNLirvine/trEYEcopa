@@ -1,11 +1,13 @@
 function posDat = resizePosition(movName, varargin)
-    % Given the name of a video, preprocesses the position data
+    % Given the name of a video, preprocesses the position data.
     % The data provided by asgordon does not fit the actual videos:
     % the videos have a few seconds of freeze-frame added on either end.
     % Here I rescale the position vectors over time to fit the videos.
-    % Also rescale in size to fit the video resolution.
-    % You may want to allow a second input to bypass that specific size,
-    % for when you want to analyze fullscreen eyetracking data.
+    % An optional second input (defining a windowed area on the screen)
+    % allows you to also rescale the position vectors over space,
+    % so that the output will e.g. match a particular video resolution.
+    % This is especially handy since the videos are not all the same res,
+    % so a standardized output space allows better comparison.
     
     if nargin > 1
         % Read in PTB size vector
