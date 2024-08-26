@@ -15,10 +15,10 @@ for s = 1:numStims
     fprintf(1, '\t%i\n', s);
     stimName = stimList(s).name;
     fname = fullfile(stimDir, stimName);
-    motion = getMotionEnergy(fname);
+    motionVec = findMotionEnergy(fname);
 
     motion.StimName{s} = stimName;
-    motion.MotionEnergy{s} = motion;
+    motion.MotionEnergy{s} = motionVec;
 end
 fprintf(1, 'Done.\n');
 

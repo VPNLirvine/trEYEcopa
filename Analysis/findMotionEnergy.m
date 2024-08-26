@@ -1,17 +1,18 @@
-function output = findMotionEnergy(vidPath)
+function [flow] = findMotionEnergy(vidPath)
 % For a given video, estimate the amount of motion per frame
-% Rather than using complicated methods with e.g. banks of Gabor filters,
-% or anything from the Matlab Computer Vision Toolbox,
-% here we just report the average intensity difference per frame.
-% Results for TriCOPA videos are basically the same as other methods.
+% Uses a Farneback optical flow algorithm
 
 % Load the video
 thisVid = VideoReader(vidPath);
 numFrames = thisVid.NumFrames;
 
+% Initialize motion tracker
+opticFlow = opticalFlowFarneback;
+
 globSize = ceil(thisVid.FrameRate); % read many frames at once to improve performance
 
-output = zeros([numFrames, 1]); % column
+flow = zeros([numFrames, 1]); % column
+% output = flow;
 
 % Read in a glob of frames, then compare each j to j+1
 for g = 1:globSize:numFrames-1
@@ -21,8 +22,15 @@ for g = 1:globSize:numFrames-1
         img1 = fs(:,:,:,j);
         img2 = fs(:,:,:,j+1);
         
-        % Simple comparison
-        output(i+1) = mean(abs(img2 - img1), 'all');
+        % % Simple comparison
+        % output(i+1) = mean(abs(img2 - img1), 'all');
+
+        % More complicated comparison
+        img3 = im2gray(img2);
+        img3 = imcomplement(img3);
+        x = estimateFlow(opticFlow, img3); % x is a struct with vectors etc
+        flow(i+1) = mean(x.Magnitude, 'all');
     end
 end
+flow(2) = 0; % This is the difference between no video and first frame
 end
