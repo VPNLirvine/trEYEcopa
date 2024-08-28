@@ -28,6 +28,7 @@ pos = resizeVideo(Movx, Movy, wRect);
 % so you're wasting compute if you do this inside a loop.
 % ...which means I need to re-tool this function
 posDat = resizePosition(stimName, pos);
+posDat = postab2struct(posDat);
 
 % So now the position data follows the frames of the video,
 % but the gaze data operates at its own sampling rate.

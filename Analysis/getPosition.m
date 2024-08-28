@@ -2,8 +2,8 @@ function data = getPosition()
 % Import the XY position data from all TriCOPA videos as a table
 % Reads from a specific CSV file
 
-warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
-warning('off', 'MATLAB:table:RowsAddedExistingVars');
+q1 = warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
+q2 = warning('off', 'MATLAB:table:RowsAddedExistingVars');
 
 tmp = readtable('TriCOPA-animations.csv');
 numTrials = height(tmp);
@@ -79,6 +79,6 @@ for i = 1:numTrials
         data.R2_Values{i}(1:50) = data.R2_Values{i}(1);
     end
 end
-warning('on', 'MATLAB:table:RowsAddedExistingVars');
-warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
+warning(q2.state, 'MATLAB:table:RowsAddedExistingVars');
+warning(q1.state, 'MATLAB:table:ModifiedAndSavedVarnames');
 end % function

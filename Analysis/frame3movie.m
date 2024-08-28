@@ -26,6 +26,7 @@ function frame3movie(movName)
     
     % Get the position data and rescale it to fit the plot size
     posDat = resizePosition(movName, pos);
+    posDat = postab2struct(posDat);
     
     % Set up image
         figure();
@@ -41,7 +42,7 @@ function frame3movie(movName)
         h3 = plot(posDat(3).X(i), posDat(3).Y(i), '+', 'MarkerFaceColor', 'g', 'MarkerSize', 30);
         h4 = plot(posDat(4).X(i), posDat(4).Y(i), '^', 'MarkerFaceColor', 'c', 'MarkerSize', 30);
         hold off;
-    
+    titxt = strrep(movName, '_', '\_');
     % Now animate in a new loop
     tic
     for i = 2:numFrames
@@ -54,6 +55,7 @@ function frame3movie(movName)
         h3.YData = posDat(3).Y(i);
         h4.XData = posDat(4).X(i);
         h4.YData = posDat(4).Y(i);
+        title(titxt);
         drawnow;
 %         pause(1/15); % compensate for frame rate
         pause(1/60);
