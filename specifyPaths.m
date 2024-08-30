@@ -3,8 +3,8 @@ function pths = specifyPaths(varargin)
 % Define base directory everything else is relative to
 % Allow an input to serve as the base dir
 if nargin == 0
-    % Default value is local directory
-    pths.base = pwd;
+    % Default value is the location of this function
+    pths.base = fileparts(mfilename("fullpath"));
 else
     base = varargin{1};
     assert(ischar(base), 'Input to specifyPaths must be a string!')
