@@ -1,4 +1,4 @@
-function posDat = resizePosition(movName, varargin)
+function posDat = resizePosition(movfName, varargin)
     % Given the name of a video, preprocesses the position data.
     % The data provided by asgordon does not fit the actual videos:
     % the videos have a few seconds of freeze-frame added on either end.
@@ -9,6 +9,8 @@ function posDat = resizePosition(movName, varargin)
     % This is especially handy since the videos are not all the same res,
     % so a standardized output space allows better comparison.
     
+    [~, movName, ~] = fileparts(movfName);
+
     if nargin > 1
         % Read in PTB size vector
         % This should have the x and y max values you want to rescale to
@@ -30,6 +32,7 @@ function posDat = resizePosition(movName, varargin)
     % Rescaling factors (since data is 4000x3000 instead of 678x508)
     xrs = (pos(3) - pos(1)) / 4000;
     yrs = (pos(4) - pos(2)) / 3000;
+    
     % Now do some temporal rescaling of the position data:
     % It exists at some unknown framerate that doesn't match the video.
     % It also includes a variable amount of dead air time
@@ -38,7 +41,7 @@ function posDat = resizePosition(movName, varargin)
     % line those points up, interpolate between, and pad the ends out.
 
     % Get the start and end FRAMES
-    [dfFrames, numFrames] = findDifferentFrames(movName);
+    [dfFrames, numFrames] = findDifferentFrames(movfName);
     % This gives every video - extract just this one.
     dfFrames = dfFrames.FrameRange;
 

@@ -1,7 +1,6 @@
 function frame3movie(movName)
     % Plays a stimulus video with position data overlaid
-    % Requires having run frameGenerator on the corresponding stimulus
-    % Input is the name of a video
+    % Input is the name of a video, e.g. 'Q100_6751_antisocial.mov'
 
     % Load in the video data
     movFName = findVidPath(movName);
@@ -25,7 +24,7 @@ function frame3movie(movName)
     pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = resizePosition(movName, pos);
+    posDat = resizePosition(movFName, pos);
     posDat = postab2struct(posDat);
     
     % Set up image
