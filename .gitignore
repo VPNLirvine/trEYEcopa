@@ -19,14 +19,18 @@ __pycache__/
 /beh/*.txt
 /beh/*.tsv
 /beh/pilot/
-notes.txt
 /ExpOutputs/TCoutput/*.mat
-test*
-/Analysis/posDat/
-/Analysis/posDatOpenCV/
-/Analysis/masks/
-/Analysis/motionData/
 
 # Stimuli
 *.mov
 *.avi
+
+# Development-related
+notes.txt
+test*
+
+# Other assets
+/Analysis/posDat/
+/Analysis/posDatOpenCV/
+/Analysis/masks/
+/Analysis/motionData/
