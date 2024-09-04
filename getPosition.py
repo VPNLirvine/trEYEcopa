@@ -6,8 +6,11 @@ import os
 video_name = 'Q71_6716_knock_and_hide.mov' # eventually do this in a loop
 file_out = os.path.splitext(video_name)[0] + '.csv' # change extension
 
-def detect_shapes(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def detect_shapes(frame, mask):
+    # Apply mask to frame
+    frame2 = frame + mask
+    # Filter image to simplify contour detection
+    gray = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edged = cv2.Canny(blurred, 50, 150)
     contours, hierarch = cv2.findContours(edged, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
@@ -144,11 +147,14 @@ vidHeight = cap.get(4)
 outWidth = 4000
 outHeight = 3000
 
+imMask = cv2.imread('Analysis/masks/Q71_1_house.png')
+# imMask = cv2.resize(imMask,(int(vidWidth), int(vidHeight)))
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
-    shapes = detect_shapes(frame)
+    shapes = detect_shapes(frame, imMask)
     bboxes = []
     for contour, shape_type, bbox, X, Y, Angle in shapes:
         x, y, w, h = bbox
