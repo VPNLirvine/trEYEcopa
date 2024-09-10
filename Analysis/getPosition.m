@@ -1,11 +1,13 @@
-function data = getPosition()
+function data = getPosition(movName)
 % Import the XY position data from all TriCOPA videos as a table
 % Reads from a specific CSV file
+% Optional input of video name will just return data for that video
 
 warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
 warning('off', 'MATLAB:table:RowsAddedExistingVars');
 
 tmp = readtable('TriCOPA-animations.csv');
+tmp = sortrows(tmp); % not sure what order this was supposed to be in
 numTrials = height(tmp);
 assert(numTrials == 100, 'Error importing TriCOPA position data - less than the expected 100 entries found!');
 
@@ -78,7 +80,12 @@ for i = 1:numTrials
         data.Y2_Values{i}(1:50) = data.Y2_Values{i}(1);
         data.R2_Values{i}(1:50) = data.R2_Values{i}(1);
     end
-end
+end % for each trial
 warning('on', 'MATLAB:table:RowsAddedExistingVars');
 warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
+
+if nargin > 0
+    % Subset to the selected video
+    m = strcmp(data.StimName, movName);
+    data = data(m,:);
 end % function

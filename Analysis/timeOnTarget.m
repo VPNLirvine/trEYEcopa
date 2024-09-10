@@ -23,11 +23,9 @@ Movy = 504;
 % exp is 674 x 504, new is 676 x 506
 % But since we USED the smaller ones, let's use those values here:
 pos = resizeVideo(Movx, Movy, wRect);
-% Get the position data while rescaling it to fit the display area
-% Be mindful this imports all position data first, then subsets,
-% so you're wasting compute if you do this inside a loop.
-% ...which means I need to re-tool this function
-posDat = interpPosition(stimName);
+% Get the position data, then rescale it to fit the display area
+posDat = getPosition(stimName);
+posDat = interpPosition(posDat);
 posDat = rescalePosition(posDat, pos);
 
 % So now the position data follows the frames of the video,

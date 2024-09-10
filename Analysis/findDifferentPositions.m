@@ -7,7 +7,7 @@ function output = findDifferentPositions(posData, varargin)
 % in both the position data and the video data,
 % we can better align the two data sources.
 %
-% Input 1 is the output of getPosition
+% Input 1 is a single row from getPosition
 % If you did NOT subset this data before sending it here,
 % (i.e. you just passed in the entire structure)
 % then please also include:

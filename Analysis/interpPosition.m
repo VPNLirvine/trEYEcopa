@@ -1,16 +1,16 @@
-function newPosData = interpPosition(movName)
-    % Given the name of a video, preprocesses the position data
-    % The data provided by asgordon does not fit the actual videos:
-    % the videos have a few seconds of freeze-frame added on either end.
-    % Here I rescale the position vectors over time to fit the videos.
-    % Also rescale in size to fit the video resolution.
-    % An optional second input allows you to specify a size to rescale to,
-    % since during the experiment the videos were made fullscreen.
+function newPosData = interpPosition(oldPosData)
+% Given the name of a video, preprocesses the position data
+% The data provided by asgordon does not fit the actual videos:
+% the videos have a few seconds of freeze-frame added on either end.
+% Here I rescale the position vectors over time to fit the videos,
+% which involves some simple motion detection.
 
-    oldPosData = getPosition;
-    m = strcmp(oldPosData.StimName, movName);
+% Ideally you would only pass in a single row of data, but just in case...
+numMovies = height(oldPosData);
+for m = 1:numMovies
+    movName = oldPosData.StimName{m};
 
-    % Now do some temporal rescaling of the position data:
+    % Do some temporal rescaling of the position data:
     % It exists at some unknown framerate that doesn't match the video.
     % It also includes a variable amount of dead air time
     % So find the first and final video frame of motion,
@@ -22,7 +22,7 @@ function newPosData = interpPosition(movName)
     dfFrames = dfFrames.FrameRange;
 
     % Get the start and end POSITIONS
-    dfPosition = findDifferentPositions(oldPosData, m);
+    dfPosition = findDifferentPositions(oldPosData);
     
     % Now use those two variables to line up the videos with the positions
     tlead = dfFrames(1);
@@ -67,3 +67,4 @@ function newPosData = interpPosition(movName)
     newPosData.Y3_Values{1}(tlag:numFrames) = oldPosData.Y3_Values{m}(end);
     newPosData.X4_Values{1}(tlag:numFrames) = oldPosData.X4_Values{m}(end);
     newPosData.Y4_Values{1}(tlag:numFrames) = oldPosData.Y4_Values{m}(end);
+end
