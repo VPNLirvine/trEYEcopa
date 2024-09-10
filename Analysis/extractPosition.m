@@ -7,7 +7,10 @@ try
     warning('off', 'MATLAB:table:RowsAddedExistingVars');
     
     numFrames = height(gTruth.LabelData);
-    
+    % Also need to rescale data to be at 4000x3000 like the rest
+    [vidX, vidY] = getVideoSize(vidName);
+    xrs = 4000 / vidX;
+    yrs = 3000 / vidY;
     % Set up
     vnames = {'StimName', 'C1_Name', 'X1_Values', 'Y1_Values', 'R1_Values', 'C2_Name', 'X2_Values', 'Y2_Values', 'R2_Values', 'C3_Name', 'X3_Values', 'Y3_Values', 'R3_Values', 'C4_Name', 'X4_Values', 'Y4_Values', 'R4_Values'};
     vtypes = repmat({'cell'}, [1 numel(vnames)]);
@@ -29,18 +32,18 @@ try
         doorXY = extractCenter(gTruth.LabelData.door{i});
         littriXY = extractCenter(gTruth.LabelData.littleTriangle{i});
     
-        % Insert each value individually
-        output.X1_Values{1}(i) = bigtriXY(1);
-        output.Y1_Values{1}(i) = bigtriXY(2);
+        % Insert each value individually, rescaling as you go
+        output.X1_Values{1}(i) = bigtriXY(1) .* xrs;
+        output.Y1_Values{1}(i) = bigtriXY(2) .* yrs;
         output.R1_Values{1}(i) = 0;
-        output.X2_Values{1}(i) = circXY(1);
-        output.Y2_Values{1}(i) = circXY(2);
+        output.X2_Values{1}(i) = circXY(1) .* xrs;
+        output.Y2_Values{1}(i) = circXY(2) .* yrs;
         output.R2_Values{1}(i) = 0;
-        output.X3_Values{1}(i) = doorXY(1);
-        output.Y3_Values{1}(i) = doorXY(2);
+        output.X3_Values{1}(i) = doorXY(1) .* xrs;
+        output.Y3_Values{1}(i) = doorXY(2) .* yrs;
         output.R3_Values{1}(i) = 0;
-        output.X4_Values{1}(i) = littriXY(1);
-        output.Y4_Values{1}(i) = littriXY(2);
+        output.X4_Values{1}(i) = littriXY(1) .* xrs;
+        output.Y4_Values{1}(i) = littriXY(2) .* yrs;
         output.R4_Values{1}(i) = 0;
     
     end
