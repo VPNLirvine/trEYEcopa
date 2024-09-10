@@ -27,7 +27,7 @@ pos = resizeVideo(Movx, Movy, wRect);
 % Be mindful this imports all position data first, then subsets,
 % so you're wasting compute if you do this inside a loop.
 % ...which means I need to re-tool this function
-posDat = resizePosition(stimName, pos);
+posDat = interpPosition(stimName, pos);
 
 % So now the position data follows the frames of the video,
 % but the gaze data operates at its own sampling rate.

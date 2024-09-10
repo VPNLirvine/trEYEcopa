@@ -1,4 +1,4 @@
-function frame3movie(movName)
+function varargout = frame3movie(movName)
     % Plays a stimulus video with position data overlaid
     % Requires having run frameGenerator on the corresponding stimulus
     % Input is the name of a video
@@ -25,7 +25,7 @@ function frame3movie(movName)
     pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = resizePosition(movName, pos);
+    posDat = interpPosition(movName, pos);
     
     % Set up image
         figure();
@@ -62,4 +62,10 @@ function frame3movie(movName)
     toc  % Display the elapsed time
     close all  % Close all figures
     clear frames % in case it doesn't automatically
+
+    % Allow export of adjusted position data
+    % Do it from this function since you need to watch to verify it's fixed
+    if nargout > 0
+        varargout{1} = posDat;
+    end
 end

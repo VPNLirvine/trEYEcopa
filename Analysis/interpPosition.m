@@ -1,11 +1,11 @@
-function posDat = resizePosition(movName, varargin)
+function posDat = interpPosition(movName, varargin)
     % Given the name of a video, preprocesses the position data
     % The data provided by asgordon does not fit the actual videos:
     % the videos have a few seconds of freeze-frame added on either end.
     % Here I rescale the position vectors over time to fit the videos.
     % Also rescale in size to fit the video resolution.
-    % You may want to allow a second input to bypass that specific size,
-    % for when you want to analyze fullscreen eyetracking data.
+    % An optional second input allows you to specify a size to rescale to,
+    % since during the experiment the videos were made fullscreen.
     
     if nargin > 1
         % Read in PTB size vector
@@ -32,7 +32,6 @@ function posDat = resizePosition(movName, varargin)
 
     % Get the start and end FRAMES
     [dfFrames, numFrames] = findDifferentFrames(movName);
-    % This gives every video - extract just this one.
     dfFrames = dfFrames.FrameRange;
 
     % Get the start and end POSITIONS
