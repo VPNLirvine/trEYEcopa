@@ -1,4 +1,4 @@
-function posDat = interpPosition(movName, varargin)
+function newPosData = interpPosition(movName)
     % Given the name of a video, preprocesses the position data
     % The data provided by asgordon does not fit the actual videos:
     % the videos have a few seconds of freeze-frame added on either end.
@@ -6,23 +6,10 @@ function posDat = interpPosition(movName, varargin)
     % Also rescale in size to fit the video resolution.
     % An optional second input allows you to specify a size to rescale to,
     % since during the experiment the videos were made fullscreen.
-    
-    if nargin > 1
-        % Read in PTB size vector
-        % This should have the x and y max values you want to rescale to
-        pos = varargin{1};
-    else
-        % Default video size
-        pos = [1 1 508 678];
-    end
-    % For the rescaled videos, during the experiment,
-    % pos = [157.62 0 1762.4 1200];
 
-    posData = getPosition;
-    m = strcmp(posData.StimName, movName);
-    % Rescaling factors (since data is 4000x3000 instead of 678x508)
-    xrs = (pos(3) - pos(1)) / 4000;
-    yrs = (pos(4) - pos(2)) / 3000;
+    oldPosData = getPosition;
+    m = strcmp(oldPosData.StimName, movName);
+
     % Now do some temporal rescaling of the position data:
     % It exists at some unknown framerate that doesn't match the video.
     % It also includes a variable amount of dead air time
@@ -35,7 +22,7 @@ function posDat = interpPosition(movName, varargin)
     dfFrames = dfFrames.FrameRange;
 
     % Get the start and end POSITIONS
-    dfPosition = findDifferentPositions(posData, m, xrs, yrs);
+    dfPosition = findDifferentPositions(oldPosData, m);
     
     % Now use those two variables to line up the videos with the positions
     tlead = dfFrames(1);
@@ -43,7 +30,7 @@ function posDat = interpPosition(movName, varargin)
     plead = dfPosition(1);
     plag = dfPosition(2);
 
-    % Rescale the position data to match the spacing of the video data
+    % Stretch the position data to match the spacing of the video data
     % numCoords = length(posData.X1_Values{m});
     numGoodCoords = length(plead:plag);
     numGoodFrames = length(tlead:tlag);
@@ -51,32 +38,32 @@ function posDat = interpPosition(movName, varargin)
     newspacing = linspace(1,numGoodCoords, numGoodFrames);
     
     % Fill the 'leading' frames with the first position value
-    posDat(1).X(1:tlead) = posData.X1_Values{m}(1) .* xrs;
-    posDat(1).Y(1:tlead) = posData.Y1_Values{m}(1) .* yrs;
-    posDat(2).X(1:tlead) = posData.X2_Values{m}(1) .* xrs;
-    posDat(2).Y(1:tlead) = posData.Y2_Values{m}(1) .* yrs;
-    posDat(3).X(1:tlead) = posData.X3_Values{m}(1) .* xrs;
-    posDat(3).Y(1:tlead) = posData.Y3_Values{m}(1) .* yrs;
-    posDat(4).X(1:tlead) = posData.X4_Values{m}(1) .* xrs;
-    posDat(4).Y(1:tlead) = posData.Y4_Values{m}(1) .* yrs;
+    newPosData.X1_Values{1}(1:tlead) = oldPosData.X1_Values{m}(1);
+    newPosData.Y1_Values{1}(1:tlead) = oldPosData.Y1_Values{m}(1);
+    newPosData.X2_Values{1}(1:tlead) = oldPosData.X2_Values{m}(1);
+    newPosData.Y2_Values{1}(1:tlead) = oldPosData.Y2_Values{m}(1);
+    newPosData.X3_Values{1}(1:tlead) = oldPosData.X3_Values{m}(1);
+    newPosData.Y3_Values{1}(1:tlead) = oldPosData.Y3_Values{m}(1);
+    newPosData.X4_Values{1}(1:tlead) = oldPosData.X4_Values{m}(1);
+    newPosData.Y4_Values{1}(1:tlead) = oldPosData.Y4_Values{m}(1);
     
     % Fill the 'middle' frames with the actual data
     % interpolate values to fit the length, then rescale to fit size
-    posDat(1).X(tlead:tlag) = interp1(oldspacing, posData.X1_Values{m}(plead:plag), newspacing) .* xrs;
-    posDat(1).Y(tlead:tlag) = interp1(oldspacing, posData.Y1_Values{m}(plead:plag), newspacing) .* yrs;
-    posDat(2).X(tlead:tlag) = interp1(oldspacing, posData.X2_Values{m}(plead:plag), newspacing) .* xrs;
-    posDat(2).Y(tlead:tlag) = interp1(oldspacing, posData.Y2_Values{m}(plead:plag), newspacing) .* yrs;
-    posDat(3).X(tlead:tlag) = interp1(oldspacing, posData.X3_Values{m}(plead:plag), newspacing) .* xrs;
-    posDat(3).Y(tlead:tlag) = interp1(oldspacing, posData.Y3_Values{m}(plead:plag), newspacing) .* yrs;
-    posDat(4).X(tlead:tlag) = interp1(oldspacing, posData.X4_Values{m}(plead:plag), newspacing) .* xrs;
-    posDat(4).Y(tlead:tlag) = interp1(oldspacing, posData.Y4_Values{m}(plead:plag), newspacing) .* yrs;
+    newPosData.X1_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.X1_Values{m}(plead:plag), newspacing);
+    newPosData.Y1_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.Y1_Values{m}(plead:plag), newspacing);
+    newPosData.X2_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.X2_Values{m}(plead:plag), newspacing);
+    newPosData.Y2_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.Y2_Values{m}(plead:plag), newspacing);
+    newPosData.X3_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.X3_Values{m}(plead:plag), newspacing);
+    newPosData.Y3_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.Y3_Values{m}(plead:plag), newspacing);
+    newPosData.X4_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.X4_Values{m}(plead:plag), newspacing);
+    newPosData.Y4_Values{1}(tlead:tlag) = interp1(oldspacing, oldPosData.Y4_Values{m}(plead:plag), newspacing);
     
     % Fill the 'lagging' frames with the final position value
-    posDat(1).X(tlag:numFrames) = posData.X1_Values{m}(end) .* xrs;
-    posDat(1).Y(tlag:numFrames) = posData.Y1_Values{m}(end) .* yrs;
-    posDat(2).X(tlag:numFrames) = posData.X2_Values{m}(end) .* xrs;
-    posDat(2).Y(tlag:numFrames) = posData.Y2_Values{m}(end) .* yrs;
-    posDat(3).X(tlag:numFrames) = posData.X3_Values{m}(end) .* xrs;
-    posDat(3).Y(tlag:numFrames) = posData.Y3_Values{m}(end) .* yrs;
-    posDat(4).X(tlag:numFrames) = posData.X4_Values{m}(end) .* xrs;
-    posDat(4).Y(tlag:numFrames) = posData.Y4_Values{m}(end) .* yrs;
+    newPosData.X1_Values{1}(tlag:numFrames) = oldPosData.X1_Values{m}(end);
+    newPosData.Y1_Values{1}(tlag:numFrames) = oldPosData.Y1_Values{m}(end);
+    newPosData.X2_Values{1}(tlag:numFrames) = oldPosData.X2_Values{m}(end);
+    newPosData.Y2_Values{1}(tlag:numFrames) = oldPosData.Y2_Values{m}(end);
+    newPosData.X3_Values{1}(tlag:numFrames) = oldPosData.X3_Values{m}(end);
+    newPosData.Y3_Values{1}(tlag:numFrames) = oldPosData.Y3_Values{m}(end);
+    newPosData.X4_Values{1}(tlag:numFrames) = oldPosData.X4_Values{m}(end);
+    newPosData.Y4_Values{1}(tlag:numFrames) = oldPosData.Y4_Values{m}(end);

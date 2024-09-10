@@ -25,7 +25,8 @@ function varargout = frame3movie(movName)
     pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = interpPosition(movName, pos);
+    posDat = interpPosition(movName);
+    posDat = rescalePosition(posDat, pos);
     
     % Set up image
         figure();

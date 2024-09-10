@@ -24,25 +24,17 @@ else
     m = 1;
 end
 
-if nargin > 2
-    xrs = varargin{2};
-    yrs = varargin{3};
-else
-    xrs = 1;
-    yrs = 1;
-end
-
 % Find the first index with a change in position/rotation
     % diff compares element i to element i+1
     % find the first non-zero element
-    x1 = find(diff(round(posData.X1_Values{m} .* xrs)),1);
-    y1 = find(diff(round(posData.Y1_Values{m} .* yrs)),1);
-    x2 = find(diff(round(posData.X2_Values{m} .* xrs)),1);
-    y2 = find(diff(round(posData.Y2_Values{m} .* yrs)),1);
-    x3 = find(diff(round(posData.X3_Values{m} .* xrs)),1);
-    y3 = find(diff(round(posData.Y3_Values{m} .* yrs)),1);
-    x4 = find(diff(round(posData.X4_Values{m} .* xrs)),1);
-    y4 = find(diff(round(posData.Y4_Values{m} .* yrs)),1);
+    x1 = find(diff(posData.X1_Values{m}),1);
+    y1 = find(diff(posData.Y1_Values{m}),1);
+    x2 = find(diff(posData.X2_Values{m}),1);
+    y2 = find(diff(posData.Y2_Values{m}),1);
+    x3 = find(diff(posData.X3_Values{m}),1);
+    y3 = find(diff(posData.Y3_Values{m}),1);
+    x4 = find(diff(posData.X4_Values{m}),1);
+    y4 = find(diff(posData.Y4_Values{m}),1);
     r1 = find(diff(posData.R1_Values{m}),1);
     r2 = find(diff(posData.R2_Values{m}),1);
     r3 = find(diff(posData.R3_Values{m}),1);
