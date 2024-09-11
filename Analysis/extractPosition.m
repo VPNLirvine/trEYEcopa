@@ -80,7 +80,9 @@ function xycenter = extractCenter(x)
     if isempty(x)
         xycenter = [NaN, NaN];
     else
-        xycenter = [x(1) + round(0.5*x(3)), x(2) + round(0.5*x(4))];
+        % Index as (r,c) instead of just (i) in case there were >1 boxes
+        % bc then you would have an Nx4 and not a 1x4, where x(2)==x(2,1)
+        xycenter = [x(1,1) + round(0.5*x(1,3)), x(1,2) + round(0.5*x(1,4))];
     end
 end
 
