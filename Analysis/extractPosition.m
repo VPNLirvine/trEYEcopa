@@ -93,6 +93,6 @@ function newdat = fixnans(dat)
         newdat = dat;
     else
         x = 1:length(dat);
-        newdat = interp1(x(~nanlist), dat(~nanlist), x(nanlist));
+        newdat = interp1(x(~nanlist), dat(~nanlist), x);
     end
 end
