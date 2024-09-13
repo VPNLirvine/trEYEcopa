@@ -25,9 +25,9 @@ function varargout = frame3movie(movName)
     pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = getPosition(movName);
-    posDat = interpPosition(posDat);
-    posDat = rescalePosition(posDat, pos);
+    posData = getPosition(movName);
+    posData = interpPosition(posData);
+    posDat = rescalePosition(posData, pos);
     
     % Set up image
         figure();
@@ -65,9 +65,10 @@ function varargout = frame3movie(movName)
     close all  % Close all figures
     clear frames % in case it doesn't automatically
 
-    % Allow export of adjusted position data
+    % Allow export of interpolated position data
     % Do it from this function since you need to watch to verify it's fixed
+    % DON'T export the rescaled version! Keep it at standard 4000x3000
     if nargout > 0
-        varargout{1} = posDat;
+        varargout{1} = posData;
     end
 end

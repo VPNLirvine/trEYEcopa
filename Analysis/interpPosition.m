@@ -23,6 +23,9 @@ for m = 1:numMovies
         % find the first and final position frame of motion,
         % line those points up, interpolate between, and pad the ends out.
     
+        % Make a copy of input, then overwrite just the bits we change
+        newPosData = oldPosData;
+
         % Get the start and end FRAMES
         [dfFrames, numFrames] = findDifferentFrames(movName);
         dfFrames = dfFrames.FrameRange;

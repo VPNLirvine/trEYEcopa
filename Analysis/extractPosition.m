@@ -59,13 +59,7 @@ try
     output.Y4_Values{1} = fixnans(output.Y4_Values{1});
     
     % Export to a new subfolder as Analysis/Position/vidName.mat
-    pths = specifyPaths('..');
-    outpath = fullfile(pths.analysis, 'Position');
-    if ~exist(outpath, 'dir')
-        mkdir(outpath);
-    end
-    fout = fullfile(outpath, [vidName '.mat']);
-    save(fout, 'output');
+    savePosition(output);
     warning(q.state, 'MATLAB:table:RowsAddedExistingVars');
 catch
     warning(q.state, 'MATLAB:table:RowsAddedExistingVars');

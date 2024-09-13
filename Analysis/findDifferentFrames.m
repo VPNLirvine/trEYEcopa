@@ -56,7 +56,7 @@ for g = 1:globSize:numFrames-1
         img1e = edge(double(im2gray(img1e)));
         img2e = edge(double(im2gray(img2e)));
         
-        if sum(img1e ~= img2e, 'all') > 100
+        if sum(img1e ~= img2e, 'all') > 10
             frange(1) = i;
             flag = true;
         end

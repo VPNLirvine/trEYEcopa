@@ -20,7 +20,7 @@ function newPosData = rescalePosition(oldPosData, varargin)
     xrs = (pos(3) - pos(1)) / 4000;
     yrs = (pos(4) - pos(2)) / 3000;
 
-    % Fill the 'leading' frames with the first position value
+    % Scale each vector by the respective scaling factor
     newPosData(1).X = oldPosData.X1_Values{1} .* xrs;
     newPosData(1).Y = oldPosData.Y1_Values{1} .* yrs;
     newPosData(2).X = oldPosData.X2_Values{1} .* xrs;
