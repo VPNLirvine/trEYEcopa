@@ -24,7 +24,9 @@ for i = 1:numTrials
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
     % Catch special cases:
     flag = 0;
-    if contains(t, 'Q31')
+    if contains(t, 'Q9')
+        flag = 9;
+    elseif contains(t, 'Q31')
         data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
     elseif contains(t, 'Q33')
         flag = 33;
@@ -35,10 +37,10 @@ for i = 1:numTrials
     elseif contains(t, 'Q60-racing')
         data.StimName{i} = 'Q59_6703_racing'; % Q59 not Q60
     elseif contains(t, 'Q71')
-        data.StimName{i} = 'Q71_6716_knock_and_hide';
+        data.StimName{i} = 'Q72_6717_kidnap';
     elseif contains(t, 'Q72')
         % YO THIS IS TOTALLY THE WRONG VIDEO
-        data.StimName{i} = 'Q72_6717_kidnap';
+        data.StimName{i} = 'Q71_6716_knock_and_hide';
     elseif contains(t, 'Q79')
         data.StimName{i} = 'Q79_6726_jelous_dance'; % video is misspelled
     end
@@ -72,7 +74,11 @@ for i = 1:numTrials
     data.R4_Values{i} = str2num(tmp.R4_Values{i});
 
     % special cases
-    if flag == 33
+    if flag == 9
+        data.X2_Values{i}(1:46) = data.X2_Values{i}(1);
+        data.Y2_Values{i}(1:46) = data.Y2_Values{i}(1);
+        data.R2_Values{i}(1:46) = data.R2_Values{i}(1);
+    elseif flag == 33
         % The video jumps a bit at the beginning,
         % but the positions drift over the same period,
         % so set the positions to jump too.
