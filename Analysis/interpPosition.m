@@ -34,10 +34,15 @@ for m = 1:numMovies
         dfPosition = findDifferentPositions(oldPosData);
         
         % Now use those two variables to line up the videos with the positions
-        tlead = dfFrames(1);
+        tlead0 = dfFrames(1);
         tlag = dfFrames(2);
         plead = dfPosition(1);
         plag = dfPosition(2);
+
+        % offset for videos with skips etc
+        tlead = tlead0;
+        % tlead = 114; % default to tlead0, but manually edit as needed
+        bypass = tlead - tlead0 - 1; % distance bw the two
     
         % Stretch the position data to match the spacing of the video data
         % numCoords = length(posData.X1_Values{m});
@@ -76,5 +81,17 @@ for m = 1:numMovies
         newPosData.Y3_Values{1}(tlag:numFrames) = oldPosData.Y3_Values{m}(end);
         newPosData.X4_Values{1}(tlag:numFrames) = oldPosData.X4_Values{m}(end);
         newPosData.Y4_Values{1}(tlag:numFrames) = oldPosData.Y4_Values{m}(end);
+
+        if bypass > 0
+            % Fill these in-between values with the new interpolated data
+            newPosData.X1_Values{1}(tlead0:tlead0+bypass) = newPosData.X1_Values{m}(tlead:tlead+bypass);
+            newPosData.Y1_Values{1}(tlead0:tlead0+bypass) = newPosData.Y1_Values{m}(tlead:tlead+bypass);
+            newPosData.X2_Values{1}(tlead0:tlead0+bypass) = newPosData.X2_Values{m}(tlead:tlead+bypass);
+            newPosData.Y2_Values{1}(tlead0:tlead0+bypass) = newPosData.Y2_Values{m}(tlead:tlead+bypass);
+            newPosData.X3_Values{1}(tlead0:tlead0+bypass) = newPosData.X3_Values{m}(tlead:tlead+bypass);
+            newPosData.Y3_Values{1}(tlead0:tlead0+bypass) = newPosData.Y3_Values{m}(tlead:tlead+bypass);
+            newPosData.X4_Values{1}(tlead0:tlead0+bypass) = newPosData.X4_Values{m}(tlead:tlead+bypass);
+            newPosData.Y4_Values{1}(tlead0:tlead0+bypass) = newPosData.Y4_Values{m}(tlead:tlead+bypass);
+        end
     end 
 end
