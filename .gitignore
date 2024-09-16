@@ -30,6 +30,7 @@ notes.txt
 test*
 
 # Other assets
+/Analysis/LabelSessions/
 /Analysis/posDat/
 /Analysis/posDatOpenCV/
 /Analysis/masks/

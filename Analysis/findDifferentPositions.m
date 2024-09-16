@@ -7,7 +7,7 @@ function output = findDifferentPositions(posData, varargin)
 % in both the position data and the video data,
 % we can better align the two data sources.
 %
-% Input 1 is the output of getPosition
+% Input 1 is a single row from getPosition
 % If you did NOT subset this data before sending it here,
 % (i.e. you just passed in the entire structure)
 % then please also include:
@@ -24,32 +24,25 @@ else
     m = 1;
 end
 
-if nargin > 2
-    xrs = varargin{2};
-    yrs = varargin{3};
-else
-    xrs = 1;
-    yrs = 1;
-end
-
 % Find the first index with a change in position/rotation
     % diff compares element i to element i+1
     % find the first non-zero element
-    x1 = find(diff(round(posData.X1_Values{m} .* xrs)),1);
-    y1 = find(diff(round(posData.Y1_Values{m} .* yrs)),1);
-    x2 = find(diff(round(posData.X2_Values{m} .* xrs)),1);
-    y2 = find(diff(round(posData.Y2_Values{m} .* yrs)),1);
-    x3 = find(diff(round(posData.X3_Values{m} .* xrs)),1);
-    y3 = find(diff(round(posData.Y3_Values{m} .* yrs)),1);
-    x4 = find(diff(round(posData.X4_Values{m} .* xrs)),1);
-    y4 = find(diff(round(posData.Y4_Values{m} .* yrs)),1);
+    x1 = find(diff(posData.X1_Values{m}),1);
+    y1 = find(diff(posData.Y1_Values{m}),1);
+    x2 = find(diff(posData.X2_Values{m}),1);
+    y2 = find(diff(posData.Y2_Values{m}),1);
+    x3 = find(diff(posData.X3_Values{m}),1);
+    y3 = find(diff(posData.Y3_Values{m}),1);
+    x4 = find(diff(posData.X4_Values{m}),1);
+    y4 = find(diff(posData.Y4_Values{m}),1);
     r1 = find(diff(posData.R1_Values{m}),1);
     r2 = find(diff(posData.R2_Values{m}),1);
     r3 = find(diff(posData.R3_Values{m}),1);
     r4 = find(diff(posData.R4_Values{m}),1);
     % If ANY character has moved or rotated in frame i+1,
     % then frame i is considered the first frame.
-    output(1) = min([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
+    % But ignore the circle's rotation (r2) since it's perfectly circular.
+    output(1) = min([x1 x2 x3 x4 y1 y2 y3 y4 r1 r3 r4]);
 
 % Find the final index with a change in position/rotation
 % diff compares i to i+1
@@ -69,5 +62,6 @@ end
     r4 = find(diff(posData.R4_Values{m}),1, 'last') + 1;
     % If ANY character has moved or rotated in frame i+1,
     % then frame i is considered the final frame.
-    output(2) = max([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
+    % But ignore the circle's rotation since it's perfectly circular.
+    output(2) = max([x1 x2 x3 x4 y1 y2 y3 y4 r1 r3 r4]);
 end
