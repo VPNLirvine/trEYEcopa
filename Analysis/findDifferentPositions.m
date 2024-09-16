@@ -41,7 +41,8 @@ end
     r4 = find(diff(posData.R4_Values{m}),1);
     % If ANY character has moved or rotated in frame i+1,
     % then frame i is considered the first frame.
-    output(1) = min([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
+    % But ignore the circle's rotation (r2) since it's perfectly circular.
+    output(1) = min([x1 x2 x3 x4 y1 y2 y3 y4 r1 r3 r4]);
 
 % Find the final index with a change in position/rotation
 % diff compares i to i+1
@@ -61,5 +62,6 @@ end
     r4 = find(diff(posData.R4_Values{m}),1, 'last') + 1;
     % If ANY character has moved or rotated in frame i+1,
     % then frame i is considered the final frame.
-    output(2) = max([x1 x2 x3 x4 y1 y2 y3 y4 r1 r2 r3 r4]);
+    % But ignore the circle's rotation since it's perfectly circular.
+    output(2) = max([x1 x2 x3 x4 y1 y2 y3 y4 r1 r3 r4]);
 end
