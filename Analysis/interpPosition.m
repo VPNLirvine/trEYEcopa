@@ -7,6 +7,7 @@ function newPosData = interpPosition(oldPosData)
 
 % Ideally you would only pass in a single row of data, but just in case...
 numMovies = height(oldPosData);
+assert(numMovies > 0, 'Cannot operate on an empty input')
 pths = specifyPaths('..');
 for m = 1:numMovies
     movName = oldPosData.StimName{m};
