@@ -19,13 +19,15 @@ function newPosData = rescalePosition(oldPosData, varargin)
     % Rescaling factors (since data is 4000x3000 instead of 678x508)
     xrs = (pos(3) - pos(1)) / 4000;
     yrs = (pos(4) - pos(2)) / 3000;
-
+    
+    % Init output with same format as input
+    newPosData = oldPosData;
     % Scale each vector by the respective scaling factor
-    newPosData(1).X = oldPosData.X1_Values{1} .* xrs;
-    newPosData(1).Y = oldPosData.Y1_Values{1} .* yrs;
-    newPosData(2).X = oldPosData.X2_Values{1} .* xrs;
-    newPosData(2).Y = oldPosData.Y2_Values{1} .* yrs;
-    newPosData(3).X = oldPosData.X3_Values{1} .* xrs;
-    newPosData(3).Y = oldPosData.Y3_Values{1} .* yrs;
-    newPosData(4).X = oldPosData.X4_Values{1} .* xrs;
-    newPosData(4).Y = oldPosData.Y4_Values{1} .* yrs;
+    newPosData.X1_Values{1} = oldPosData.X1_Values{1} .* xrs;
+    newPosData.Y1_Values{1} = oldPosData.Y1_Values{1} .* yrs;
+    newPosData.X2_Values{1} = oldPosData.X2_Values{1} .* xrs;
+    newPosData.Y2_Values{1} = oldPosData.Y2_Values{1} .* yrs;
+    newPosData.X3_Values{1} = oldPosData.X3_Values{1} .* xrs;
+    newPosData.Y3_Values{1} = oldPosData.Y3_Values{1} .* yrs;
+    newPosData.X4_Values{1} = oldPosData.X4_Values{1} .* xrs;
+    newPosData.Y4_Values{1} = oldPosData.Y4_Values{1} .* yrs;

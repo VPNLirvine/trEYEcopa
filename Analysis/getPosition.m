@@ -3,8 +3,8 @@ function data = getPosition(movName)
 % Reads from a specific CSV file
 % Optional input of video name will just return data for that video
 
-warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
-warning('off', 'MATLAB:table:RowsAddedExistingVars');
+q1 = warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
+q2 = warning('off', 'MATLAB:table:RowsAddedExistingVars');
 
 tmp = readtable('TriCOPA-animations.csv');
 tmp = sortrows(tmp); % not sure what order this was supposed to be in
@@ -39,9 +39,10 @@ for i = 1:numTrials
     elseif contains(t, 'Q68')
         flag = 68;
     elseif contains(t, 'Q71')
+        % Actually aligns with the video for Q72
         data.StimName{i} = 'Q72_6717_kidnap';
     elseif contains(t, 'Q72')
-        % YO THIS IS TOTALLY THE WRONG VIDEO
+        % Nothing matches this video, but bc of above, swap Q72 w Q71.
         data.StimName{i} = 'Q71_6716_knock_and_hide';
     elseif contains(t, 'Q79')
         data.StimName{i} = 'Q79_6726_jelous_dance'; % video is misspelled
@@ -93,11 +94,13 @@ for i = 1:numTrials
         data.R4_Values{i}(1:14) = data.R4_Values{i}(1);
     end
 end % for each trial
-warning('on', 'MATLAB:table:RowsAddedExistingVars');
-warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
+warning(q2.state, 'MATLAB:table:RowsAddedExistingVars');
+warning(q1.state, 'MATLAB:table:ModifiedAndSavedVarnames');
 
 if nargin > 0
     % Subset to the selected video
     m = strcmp(data.StimName, movName);
     data = data(m,:);
+end
+
 end % function
