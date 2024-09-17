@@ -1,9 +1,10 @@
-function frame3movie(movName)
+function varargout = frame3movie(movName)
     % Plays a stimulus video with position data overlaid
     % Input is the name of a video, e.g. 'Q100_6751_antisocial.mov'
 
     % Load in the video data
     movFName = findVidPath(movName);
+    [~,movName,~] = fileparts(movFName); % ensure no extension attached
     fprintf(1, 'Loading frames...');
     thisVid = VideoReader(movFName);
     frames = read(thisVid);
@@ -24,7 +25,9 @@ function frame3movie(movName)
     pos = [1 1 imw imh];
     
     % Get the position data and rescale it to fit the plot size
-    posDat = resizePosition(movFName, pos);
+    posData = getPosition(movName);
+    posData = interpPosition(posData);
+    posDat = rescalePosition(posData, pos);
     posDat = postab2struct(posDat);
     
     % Set up image
@@ -63,4 +66,11 @@ function frame3movie(movName)
     toc  % Display the elapsed time
     close all  % Close all figures
     clear frames % in case it doesn't automatically
+
+    % Allow export of interpolated position data
+    % Do it from this function since you need to watch to verify it's fixed
+    % DON'T export the rescaled version! Keep it at standard 4000x3000
+    if nargout > 0
+        varargout{1} = posData;
+    end
 end

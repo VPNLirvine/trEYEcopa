@@ -5,7 +5,6 @@ function QC_WatchPosDat(skip)
 
 % Get list of videos
 data = getPosition;
-vidList = unique(data.StimName);
 numVids = height(data);
 
 if nargin == 0
@@ -16,7 +15,7 @@ end
 % Loop over every video
 for i = skip:numVids
     % Play in frame3movie
-    vidname = vidList{i};
+    vidname = data.StimName{i};
     [~, vidname, ~] = fileparts(vidname); % strip out extension
     frame3movie(vidname);
     
