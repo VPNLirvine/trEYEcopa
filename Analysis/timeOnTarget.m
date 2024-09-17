@@ -13,16 +13,11 @@ if flipFlag
     stimName = erase(stimName, 'f_');
 end
 
-% The 'window' vector defining the location of the video on screen
-% pos = [xLeft xRight yTop yBottom];
-wRect = [0 0 1920 1200]; % the shape of the stim monitor
-Movx = 674;
-Movy = 504;
-% Be aware that the videos we use in the experiment
-% are a slightly different size than the ones I have locally:
-% exp is 674 x 504, new is 676 x 506
-% But since we USED the smaller ones, let's use those values here:
-pos = resizeVideo(Movx, Movy, wRect);
+% Find the 'window' vector defining the location of the video on screen
+% Get from the screen dimensions and video size given in the EDF file:
+% pos = [xLeft yTop xRight yBottom];
+[pos,wRect] = findStimSize(edfDat);
+
 % Get the position data, then rescale it to fit the display area
 posDat = getPosition(stimName);
 posDat = interpPosition(posDat);
@@ -72,6 +67,7 @@ onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
 triTime = nnz(onTarget) / length(onTarget);
 
 % Percentage of time on individual characters (including door)
+% These may sum to >100% if gaze is near two characters at once
 % ...not sure what all to do with this yet.
 % Could compare to percentage of time each character is in motion?
 timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
