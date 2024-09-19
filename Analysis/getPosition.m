@@ -27,7 +27,7 @@ for i = 1:numTrials
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
     % Catch special cases:
     flag = 0;
-    if contains(t, 'Q9_')
+    if contains(t, 'Q9-')
         flag = 9;
     elseif contains(t, 'Q31')
         data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
