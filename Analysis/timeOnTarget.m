@@ -48,7 +48,7 @@ p.C4 = [ posDat(4).X(gaze(3,:)) ; posDat(4).Y(gaze(3,:)) ];
 
 %% COMPARE GAZE AND POSITION
 % Define a radius around each character
-rad = 200; % for now - need to know character size on screen
+rad = 150; % 200 too big, 100 too small
 
 % Define logicals to indicate whether gaze is near each character
 gazeOnC1 = gaze(1,:) >= p.C1(1,:) - rad & gaze(1,:) <= p.C1(1,:) + rad & gaze(2,:) >= p.C1(2,:) - rad & gaze(2,:) <= p.C1(2,:) + rad;
