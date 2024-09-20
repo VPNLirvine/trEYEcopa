@@ -1,4 +1,4 @@
-function output = timeOnTarget(edfDat, i, flipFlag)
+function output = timeOnTarget(edfDat, i, flipFlag, metricName)
 % This is to be a case inside selectMetric,
 % which means it should operate on a SINGLE ROW of an EDF file
 % (i.e. one trial of one subject)
@@ -63,22 +63,23 @@ gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,
 % or 'triangle time' i.e. proportion of time on characters vs not,
 % etc.
 
-% Triangle time: PERCENTAGE of time spent on the characters (but not door)
-onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
-triTime = nnz(onTarget) / length(onTarget);
-
-% Percentage of time on individual characters (including door)
-% These may sum to >100% if gaze is near two characters at once
-% ...not sure what all to do with this yet.
-% Could compare to percentage of time each character is in motion?
-timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
-timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
-timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
-timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
-
-% output = p; % output position data struct, i.e. NOT a summary metric.
-output = triTime; % output percentage of time on any character
-
+if strcmp(metricName, 'tot')
+    % Triangle time: PERCENTAGE of time spent on the characters (but not door)
+    onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
+    output = nnz(onTarget) / length(onTarget);
+elseif strcmp(metricName, 'track')
+    % Percentage of time on individual characters (including door)
+    % These may sum to >100% if gaze is near two characters at once
+    % ...not sure what all to do with this yet.
+    % Could compare to percentage of time each character is in motion?
+    timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
+    timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
+    timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
+    timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
+    output = [timeOnC1, timeOnC2, timeOnC3, timeOnC4];
+else
+    output = p; % output position data struct, i.e. NOT a summary metric.
+end
 
 % To visualize gaze against position, do this:
 % plotGazeChars(p, gaze, gaze(4,:));

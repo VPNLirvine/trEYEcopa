@@ -9,6 +9,10 @@ function [txt, varargout] = getGraphLabel(metricName)
 % This should typically be used as the histogram's title
 
 switch metricName
+    case 'response'
+        txt = 'Understandability rating';
+        yl = [0 6]; % fixed response limit 1-5
+        dist = 'Uniform distribution is ideal';
     case 'coherence'
         txt = 'Average scanpath similarity to group';
         yl = [0 1.1];
@@ -77,10 +81,10 @@ switch metricName
         txt = 'Intersubject correlation with group mean';
         yl = [0 1.1]; % correlation bounded 0:1
         dist = 'Expect a normal distribution';
-    case 'response'
-        txt = 'Understandability rating';
-        yl = [0 6]; % fixed response limit 1-5
-        dist = 'Uniform distribution is ideal';
+    case 'tot'
+        txt = 'Percent time gaze was on any character';
+        yl = [0 1]; % percentage is bounded 0 to 1
+        dist = 'Expect an RT-like distribution';
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end % switch
