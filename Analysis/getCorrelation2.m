@@ -37,11 +37,6 @@ for s = 1:numSubs
     output(s,2) = corr(data.Eyetrack(subset), data.Motion(subset), 'Type', 'Spearman', 'rows', 'complete');
 end
 
-% Try regression instead?
-d = table(data.Subject, data.Motion, data.Eyetrack, 'VariableNames', {'Subject', 'Motion', 'Eyetrack'});
-mdl = fitlm(d);
-
-
 % Get the names of what you're correlating
 var1 = getGraphLabel(metricName);
 var2 = 'Video motion energy';
@@ -81,4 +76,7 @@ figure();
     ylabel('Percent time fixated, averaged across subjects');
     title(sprintf('Correlation = %0.2f', corr(mot, avgE)));
 
-    
+% Try regression instead?
+d = table(data.Subject, data.Motion, data.Eyetrack, 'VariableNames', {'Subject', 'Motion', 'Eyetrack'});
+d.Subject = categorical(d.Subject);
+mdl = fitlm(d);
