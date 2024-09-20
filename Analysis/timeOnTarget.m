@@ -10,7 +10,8 @@ pths = specifyPaths('..');
 stimName = getStimName(edfDat);
 [~,stimName] = fileparts(stimName);
 if flipFlag
-    stimName = erase(stimName, 'f_');
+    % stimName = erase(stimName, 'f_');
+    stimName = stimName(3:end); % erase leading 'f_', but keep later ones
 end
 
 % Find the 'window' vector defining the location of the video on screen
