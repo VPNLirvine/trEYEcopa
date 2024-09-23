@@ -3,6 +3,9 @@ function output = getAQ(pths)
 % Takes the paths struct as input
 % Assumes that you already have a .tsv output from Qualtrics in pths.beh
 
+q1 = warning('query', 'MATLAB:table:ModifiedAndSavedVarnames');
+q2 = warning('query', 'MATLAB:textio:io:UnableToGuessFormat');
+
 warning('off', 'MATLAB:table:ModifiedAndSavedVarnames'); % doesn't impact the data vars
 warning('off', 'MATLAB:textio:io:UnableToGuessFormat'); % don't care about dates
 
@@ -52,6 +55,6 @@ output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to
 % because some subscales are anti-correlated...
 output.AQ = output.SocialSkills + output.Communication + output.AttentionDetail;
 
-warning('on', 'MATLAB:table:ModifiedAndSavedVarnames');
-warning('on', 'MATLAB:textio:io:UnableToGuessFormat');
+warning(q1.state, 'MATLAB:table:ModifiedAndSavedVarnames');
+warning(q2.state, 'MATLAB:textio:io:UnableToGuessFormat');
 end

@@ -3,8 +3,11 @@ function data = getPosition(movName)
 % Reads from a specific CSV file
 % Optional input of video name will just return data for that video
 
-q1 = warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
-q2 = warning('off', 'MATLAB:table:RowsAddedExistingVars');
+q1 = warning('query', 'MATLAB:table:ModifiedAndSavedVarnames');
+q2 = warning('query', 'MATLAB:table:RowsAddedExistingVars');
+
+warning('off', 'MATLAB:table:ModifiedAndSavedVarnames');
+warning('off', 'MATLAB:table:RowsAddedExistingVars');
 
 tmp = readtable('TriCOPA-animations.csv');
 tmp = sortrows(tmp); % not sure what order this was supposed to be in
@@ -24,7 +27,7 @@ for i = 1:numTrials
     data.StimName{i} = replace(t, '-', sprintf('_%i_', tmp.Performance_ID(i)));
     % Catch special cases:
     flag = 0;
-    if contains(t, 'Q9_')
+    if contains(t, 'Q9-')
         flag = 9;
     elseif contains(t, 'Q31')
         data.StimName{i} = 'Q31_6674_talk_hug'; % not talk_and_hug
@@ -94,8 +97,10 @@ for i = 1:numTrials
         data.R4_Values{i}(1:14) = data.R4_Values{i}(1);
     end
 end % for each trial
-warning(q2.state, 'MATLAB:table:RowsAddedExistingVars');
+
+% Put warning back to original state (which may already be off...)
 warning(q1.state, 'MATLAB:table:ModifiedAndSavedVarnames');
+warning(q2.state, 'MATLAB:table:RowsAddedExistingVars');
 
 if nargin > 0
     % Subset to the selected video
