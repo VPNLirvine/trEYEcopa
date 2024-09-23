@@ -23,6 +23,7 @@ end
 posDat = getPosition(stimName);
 posDat = interpPosition(posDat);
 posDat = rescalePosition(posDat, pos);
+posDat = postab2struct(posDat);
 
 % So now the position data follows the frames of the video,
 % but the gaze data operates at its own sampling rate.

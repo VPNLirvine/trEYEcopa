@@ -42,9 +42,10 @@ for i = 1:numTrials
     elseif contains(t, 'Q68')
         flag = 68;
     elseif contains(t, 'Q71')
+        % Actually aligns with the video for Q72
         data.StimName{i} = 'Q72_6717_kidnap';
     elseif contains(t, 'Q72')
-        % YO THIS IS TOTALLY THE WRONG VIDEO
+        % Nothing matches this video, but bc of above, swap Q72 w Q71.
         data.StimName{i} = 'Q71_6716_knock_and_hide';
     elseif contains(t, 'Q79')
         data.StimName{i} = 'Q79_6726_jelous_dance'; % video is misspelled
@@ -105,4 +106,6 @@ if nargin > 0
     % Subset to the selected video
     m = strcmp(data.StimName, movName);
     data = data(m,:);
+end
+
 end % function

@@ -1,10 +1,10 @@
 function varargout = frame3movie(movName)
     % Plays a stimulus video with position data overlaid
-    % Requires having run frameGenerator on the corresponding stimulus
-    % Input is the name of a video
+    % Input is the name of a video, e.g. 'Q100_6751_antisocial.mov'
 
     % Load in the video data
     movFName = findVidPath(movName);
+    [~,movName,~] = fileparts(movFName); % ensure no extension attached
     fprintf(1, 'Loading frames...');
     thisVid = VideoReader(movFName);
     frames = read(thisVid);
@@ -28,6 +28,7 @@ function varargout = frame3movie(movName)
     posData = getPosition(movName);
     posData = interpPosition(posData);
     posDat = rescalePosition(posData, pos);
+    posDat = postab2struct(posDat);
     
     % Set up image
         figure();
@@ -43,7 +44,7 @@ function varargout = frame3movie(movName)
         h3 = plot(posDat(3).X(i), posDat(3).Y(i), '+', 'MarkerFaceColor', 'g', 'MarkerSize', 30);
         h4 = plot(posDat(4).X(i), posDat(4).Y(i), '^', 'MarkerFaceColor', 'c', 'MarkerSize', 30);
         hold off;
-    
+    titxt = strrep(movName, '_', '\_');
     % Now animate in a new loop
     tic
     for i = 2:numFrames
@@ -56,6 +57,7 @@ function varargout = frame3movie(movName)
         h3.YData = posDat(3).Y(i);
         h4.XData = posDat(4).X(i);
         h4.YData = posDat(4).Y(i);
+        title(titxt);
         drawnow;
 %         pause(1/15); % compensate for frame rate
         pause(1/60);
