@@ -212,9 +212,10 @@ switch metricName
         end
         output = [xdat;ydat; tdat];
     case 'tot'
-        % Time on Target
-        % Not fully fleshed out yet
-        output = timeOnTarget(edfDat, i+1, flipFlag);
+        % Time on Target, aka "triangle time"
+        % Percentage of video time spent looking at characters
+        output = timeOnTarget(edfDat, i+1, flipFlag, metricName);
+
     case 'blinkrate'
         % Pretty straightforward.
         % Duration is in msec, so 1000x gives you the rate in Hz
