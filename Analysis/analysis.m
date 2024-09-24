@@ -1,4 +1,4 @@
-function analysis(varargin)
+function varargout = analysis(varargin)
 % Perform statistical analysis on eyetracking data
 % Optional input 1 should be a metric name listed in selectMetric()
 close all;
@@ -113,6 +113,8 @@ if choice == 1
             nrows = sum(subset);
             aqCol = [aqCol; aq(s) * ones(nrows,1)];
         end
+
+        % Calculate correlations
         output = zeros([1,2]); % clear on each loop
         output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
         output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
@@ -224,3 +226,13 @@ elseif choice == 2
         fprintf('\n')
 end
 plotItemwise(data, metricName, mwflag);
+% Export results?
+if nargout > 0
+    % Prepare for regression
+    data.Subject = categorical(data.Subject);
+    data.StimName = categorical(data.StimName);
+    data.AQ = aqCol;
+    % data.duration = ??
+    % data.motion = ??
+    varargout{1} = data;
+end
