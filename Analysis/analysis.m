@@ -226,12 +226,20 @@ elseif choice == 2
         fprintf('\n')
 end
 plotItemwise(data, metricName, mwflag);
-% Export results?
+
+% Export data matrix on request
 if nargout > 0
-    % Prepare for regression
+    % Prepare for regression:
+    % 1. Reset AQ to be Social Skills specifically,
+    % since the other two subscales have a low effect
+    for i = 1:height(aqTable)
+        subID = aqTable.SubID{i};
+        subset = strcmp(data.Subject, subID);
+        data.AQ(subset) = aqTable.SocialSkills(i);
+    end
+    % 2. Convert strings to 'categorical' variables
     data.Subject = categorical(data.Subject);
     data.StimName = categorical(data.StimName);
-    data.AQ = aqCol;
     % data.duration = ??
     % data.motion = ??
     varargout{1} = data;
