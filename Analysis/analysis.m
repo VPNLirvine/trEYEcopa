@@ -157,6 +157,7 @@ if choice == 1
         if ~mwflag
             % Calculate correlations and generate some visualizations
             output = getCorrelations(data, metricName);
+            data = getCorrelation2(data, metricName); % insert motion data
         
             % Now Fischer z-transform your correlation coefficients
             zCorr = zscore(output(:,2));
@@ -240,7 +241,5 @@ if nargout > 0
     % 2. Convert strings to 'categorical' variables
     data.Subject = categorical(data.Subject);
     data.StimName = categorical(data.StimName);
-    % data.duration = ??
-    % data.motion = ??
     varargout{1} = data;
 end

@@ -19,8 +19,9 @@ for s = 1:numStims
 
     motion.StimName{s} = stimName;
     motion.MotionEnergy{s} = motionVec;
+    motion.Duration{s} = getVideoDuration(fname);
 end
 fprintf(1, 'Done.\n');
 
-% Save to disk, since this takes a minute or two to load
+% Save to disk, since this takes ~45 minutes to calculate
 save('motionData.mat', 'motion');
