@@ -211,6 +211,14 @@ switch metricName
             xdat = mirrorX(xdat, scDim(1));
         end
         output = [xdat;ydat; tdat];
+    case 'gazeF'
+        % HIDDEN METRIC
+        % This is just like 'gaze' above,
+        % except then we also insert the video frame numbers.
+        output = addframe2gaze(edfDat, i+1);
+        if flipFlag
+            output(1,:) = mirrorX(output(1,:), scDim(1));
+        end
     case 'tot'
         % Time on Target, aka "triangle time"
         % Percentage of video time spent looking at characters
