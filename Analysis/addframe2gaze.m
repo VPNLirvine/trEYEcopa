@@ -15,12 +15,11 @@ frameNums = cellfun(@(x) str2double(erase(x,stxt)), frames);
 % Use those indices to extract the timestamps of frame updates
 frameTimes = edfDat.Events.sttime(y);
 % Append the final frame's offset time, so you know when to stop
-% Defined as the time the video is removed from screen
-    y2 = cellfun(@(x) contains(x, 'BLANK_SCREEN'), list);
-    assert(sum(y2) > 0, 'No message re video end found!');
-    frameTimes(end+1) = edfDat.Events.sttime(y2);
+frameTimes(end+1) = findStimOffset(edfDat);
 % Use those timestamps to compare to Sample timestamps
 sampleTimes = edfDat.Samples.time;
+    stimOnset = findStimOnset(edfDat);
+    sampleTimes = sampleTimes - stimOnset;
 gaze = NaN([4,numel(edfDat.Samples.time)]); % init to a larger size than needed, then shrink later
 c = 1;
 for f = 1:numel(frameTimes) - 1
@@ -33,10 +32,10 @@ for f = 1:numel(frameTimes) - 1
     gaze(1,c:npos) = edfDat.Samples.gx(i,y3);
     % Get Y
     gaze(2,c:npos) = edfDat.Samples.gy(i,y3);
+    % Get timestamp
+    gaze(3,c:npos) = sampleTimes(y3);
     % Get frame number
-    gaze(3, c:npos) = frameNums(f); % probably same as f
-    % Get timestamp too, why not
-    gaze(4,c:npos) = sampleTimes(y3);
+    gaze(4, c:npos) = frameNums(f); % probably same as f
     % increment
     c = npos+1;
 end

@@ -29,7 +29,6 @@ subList = unique(gazeDat.Subject);
 numSubs = height(subList);
 numVids = height(vidList);
 % Loop through every row of the gaze data
-output = [];
 for v = 1:numVids
     vidName = vidList{v};
     vidMotion = motion.MotionEnergy{strcmp(motion.StimName, vidName)};
@@ -48,7 +47,7 @@ for v = 1:numVids
         X = double(X); % convert from uint32
         Y = double(Y); % convert from uint32
         % Use frame numbers added by addframe2gaze to index motion data
-        submotion = vidMotion(subgaze(3,:) + 1);
+        submotion = vidMotion(subgaze(4,:));
         % Regress out video motion from gaze
         t = table(X, Y, submotion); % make a table with the below variables
         mdl1 = fitlme(t, 'X ~ submotion');
