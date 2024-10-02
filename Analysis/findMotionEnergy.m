@@ -9,28 +9,27 @@ numFrames = thisVid.NumFrames;
 % Initialize motion tracker
 opticFlow = opticalFlowFarneback;
 
-globSize = ceil(thisVid.FrameRate); % read many frames at once to improve performance
+globSize = ceil(thisVid.FrameRate) * 2; % read many frames at once to improve performance
 
 flow = zeros([numFrames, 1]); % column
 % output = flow;
 
-% Read in a glob of frames, then compare each j to j+1
-for g = 1:globSize:numFrames-1
-    fs = read(thisVid, [g, min([numFrames, g + globSize])]);
-    for j = 1:size(fs,4)-1
+% Read in a glob of frames, then compare each i to i-1
+for g = 1:globSize:numFrames
+    fs = read(thisVid, [g, min([numFrames, g + globSize - 1])]);
+    for j = 1:size(fs,4)
         i = g + j - 1; % frame number
         img1 = fs(:,:,:,j);
-        img2 = fs(:,:,:,j+1);
         
-        % % Simple comparison
-        % output(i+1) = mean(abs(img2 - img1), 'all');
-
         % More complicated comparison
-        img3 = im2gray(img2);
-        img3 = imcomplement(img3);
-        x = estimateFlow(opticFlow, img3); % x is a struct with vectors etc
-        flow(i+1) = mean(x.Magnitude, 'all');
+        img2 = im2gray(img1);
+        % img3 = imcomplement(img3); % not sure why this is here
+        x = estimateFlow(opticFlow, img2); % x is a struct with vectors etc
+        flow(i) = mean(x.Magnitude, 'all');
     end
 end
-flow(2) = 0; % This is the difference between no video and first frame
+% i = 1 will have some huge number from comparing frame 1 to frame "0"
+% It's treating the onset of the first frame as motion relative to blank.
+% This ought to instead be 0, to indicate "no change" since it's the first.
+flow(1) = 0;
 end
