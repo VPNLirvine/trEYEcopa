@@ -18,8 +18,7 @@ frameTimes = edfDat.Events.sttime(y);
 frameTimes(end+1) = findStimOffset(edfDat);
 % Use those timestamps to compare to Sample timestamps
 sampleTimes = edfDat.Samples.time;
-    stimOnset = findStimOnset(edfDat);
-    sampleTimes = sampleTimes - stimOnset;
+stimOnset = findStimOnset(edfDat);
 gaze = NaN([4,numel(edfDat.Samples.time)]); % init to a larger size than needed, then shrink later
 c = 1;
 for f = 1:numel(frameTimes) - 1
@@ -33,7 +32,7 @@ for f = 1:numel(frameTimes) - 1
     % Get Y
     gaze(2,c:npos) = edfDat.Samples.gy(i,y3);
     % Get timestamp
-    gaze(3,c:npos) = sampleTimes(y3);
+    gaze(3,c:npos) = sampleTimes(y3) - stimOnset;
     % Get frame number
     gaze(4, c:npos) = frameNums(f); % probably same as f
     % increment
