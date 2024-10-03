@@ -66,6 +66,20 @@ if mwflag
     aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
 end
 
+% Calculate and report any correlations between the AQ subscales
+% They're supposed to be orthogonal, so all should be < 0.3
+% Social Skills vs Communication
+c1 = corr(aqTable.SocialSkills, aqTable.Communication);
+% Social Skills vs Attention to Detail
+c2 = corr(aqTable.SocialSkills, aqTable.AttentionDetail);
+% Communication vs Attention to Detail
+c3 = corr(aqTable.Communication, aqTable.AttentionDetail);
+fprintf(1, '\n\nAQ Subscale validation:\n')
+fprintf(1, 'Social Skills vs Communication: r = %0.2f\n', c1);
+fprintf(1, 'Social Skills vs Attention to Detail: r = %0.2f\n', c2);
+fprintf(1, 'Communication vs Attention to Detail: r = %0.2f\n', c3);
+fprintf(1, '\n');
+
 % Pick which kind of analysis to run
 if choice == 1 % Correlation analysis
 
