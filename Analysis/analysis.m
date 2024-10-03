@@ -45,10 +45,29 @@ elseif choice == 2
     choice = menu('Which analysis method do you want for this Martin & Weisberg data?','correlation', 't-test');
 end
 
-if choice == 1
-    % Correlation analysis
-    subList = unique(data.Subject);
-    numSubs = size(subList, 1);
+% Establish some common variables before diverging analysis paths
+subList = unique(data.Subject);
+numSubs = size(subList, 1);
+aqTable = getAQ(specifyPaths('..')); % Get the AQ scores from Qualtrics
+    % Ensure you have an AQ score for every subject
+    numAQ = height(aqTable);
+    if numSubs > numAQ
+        txt = sprintf(['There are %i EDF files, '...
+            'but Qualtrics data had only %i subjects. '...
+            'Please resolve and try again.\n'...
+            'You likely just need to re-download the Qualtrics data.'] ...
+            , numSubs, numAQ);
+        error(txt)
+    end
+if mwflag
+    % SubIDs indicate which experiment was run,
+    % But the AQ table only says 'TC'.
+    % TC_01 == MW_01. Compensate.
+    aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
+end
+
+% Pick which kind of analysis to run
+if choice == 1 % Correlation analysis
 
     %
     % Compare the eyetracking data to the behavioral data
@@ -64,19 +83,6 @@ if choice == 1
     [var1, yl, distTxt] = getGraphLabel(metricName);
     [var2, yl2, distTxt2] = getGraphLabel('response');
     
-    % Get the AQ scores from the Qualtrics output
-    aqTable = getAQ(specifyPaths('..'));
-        % validate
-        numAQ = height(aqTable);
-        if numSubs > numAQ
-            txt = sprintf(['There are %i EDF files, '...
-                'but Qualtrics data had only %i subjects. '...
-                'Please resolve and try again.\n'...
-                'You likely just need to re-download the Qualtrics data.'] ...
-                , numSubs, numAQ);
-            error(txt)
-        end
-    
     % Get the average gaze metric per subject, to correlate with AQ
     % (since there's only one AQ score per subject)
     eyeCol = zeros([numSubs, 1]); % preallocate as column
@@ -86,12 +92,8 @@ if choice == 1
         eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitmissing');
     end
         
-    if mwflag
-        % SubIDs indicate which experiment was run,
-        % But the AQ table only says 'TC'.
-        % TC_01 == MW_01. Compensate.
-        aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
-    else
+
+    if ~mwflag
         % Calculate correlations and generate some visualizations
         % None of these involve AQ, so do them before the upcoming loop
         eye2rating = getCorrelations(data, metricName); % gaze vs rating
@@ -204,11 +206,8 @@ if choice == 1
             xlabel(var2);
             title(distTxt2);
     end
-elseif choice == 2
-    % Do a mean comparison across groups
-    subList = unique(data.Subject);
-    numSubs = size(subList, 1);
-
+elseif choice == 2 % Do a mean comparison across groups
+    
     % RFX ANOVA accounting for subject-level variance
     % Generates a figure window with statistical table
     ivs = {data.Category, data.Subject};
@@ -253,5 +252,8 @@ if nargout > 0
     % 2. Convert strings to 'categorical' variables
     data.Subject = categorical(data.Subject);
     data.StimName = categorical(data.StimName);
+    if mwflag
+        data.Category = categorical(data.Category);
+    end
     varargout{1} = data;
 end
