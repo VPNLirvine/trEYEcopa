@@ -81,6 +81,11 @@ if choice == 1
         % But the AQ table only says 'TC'.
         % TC_01 == MW_01. Compensate.
         aqTable.SubID = replace(aqTable.SubID, 'TC','MW');
+    else
+        % Calculate correlations and generate some visualizations
+        % None of these involve AQ, so do them before the upcoming loop
+        output = getCorrelations(data, metricName); % gaze vs rating
+        data = getCorrelation2(data, metricName); % gaze vs motion
     end
     for a = 1:3 % AQ subscales
         % Loop over the three AQ subscales
@@ -155,11 +160,7 @@ if choice == 1
                 % Add lines indicating the expected distribution(s)
                 % overlayAQ(gca); % skip this 
         if ~mwflag
-            % Calculate correlations and generate some visualizations
-            output = getCorrelations(data, metricName);
-            data = getCorrelation2(data, metricName); % insert motion data
-        
-            % Now Fischer z-transform your correlation coefficients
+            % Now Fischer z-transform your main correlation coefficients
             zCorr = zscore(output(:,2));
         
             % Plot and analyze relationship between AQ and current metric
