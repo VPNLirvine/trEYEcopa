@@ -76,6 +76,16 @@ if choice == 1
                 , numSubs, numAQ);
             error(txt)
         end
+    
+    % Get the average gaze metric per subject, to correlate with AQ
+    % (since there's only one AQ score per subject)
+    eyeCol = zeros([numSubs, 1]); % preallocate as column
+    for s = 1:numSubs
+        subID = subList{s};
+        subset = strcmp(subID, data.Subject);
+        eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitmissing');
+    end
+        
     if mwflag
         % SubIDs indicate which experiment was run,
         % But the AQ table only says 'TC'.
@@ -84,8 +94,17 @@ if choice == 1
     else
         % Calculate correlations and generate some visualizations
         % None of these involve AQ, so do them before the upcoming loop
-        output = getCorrelations(data, metricName); % gaze vs rating
+        eye2rating = getCorrelations(data, metricName); % gaze vs rating
         data = getCorrelation2(data, metricName); % gaze vs motion
+
+        % Get the average video rating per subject (not collected for MW)
+        respCol = zeros([numSubs, 1]); % preallocate as column
+        for s = 1:numSubs
+            subID = subList{s};
+            subset = strcmp(subID, data.Subject);
+            respCol(s) = mean(data.Response(subset), 'all', 'omitmissing');
+        end
+
     end
     for a = 1:3 % AQ subscales
         % Loop over the three AQ subscales
@@ -110,40 +129,25 @@ if choice == 1
         % Reduce data to an average value per subject,
         % since there's only 1 AQ value per person
         [var3, yl3, distTxt3] = getGraphLabel(aqt);
-    
-        aqCol = [];
-        for s = 1:numSubs
-            subID = subList{s};
-            subset = strcmp(subID, data.Subject);
-            nrows = sum(subset);
-            aqCol = [aqCol; aq(s) * ones(nrows,1)];
-        end
 
         % Calculate correlations
-        output = zeros([1,2]); % clear on each loop
-        output(1,1) = corr(aqCol, data.Eyetrack, 'Type', 'Pearson', 'rows', 'complete');
-        output(1,2) = corr(aqCol, data.Eyetrack, 'Type', 'Spearman', 'rows', 'complete');
+        aq2eye = zeros([1,2]); % clear on each loop
+        aq2eye(1,1) = corr(aq, eyeCol, 'Type', 'Pearson', 'rows', 'complete');
+        aq2eye(1,2) = corr(aq, eyeCol, 'Type', 'Spearman', 'rows', 'complete');
             
             % Plot
             figure();
-            scatter(aqCol, data.Eyetrack);
-                title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, output(1,2)));
+            scatter(aq, eyeCol);
+                title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, aq2eye(1,2)));
                 xlabel(var3);
                 ylabel(var1);
                 ylim(yl);
                 xlim(yl3);
                 
             % Report the correlation score
-            fprintf(1, '\n\nCorrelation between %s and %s:\n', var3, var1)
-            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', output(1,2));
-            fprintf(1, '\tPearson''s r = %0.2f\n', output(1,1));
-    
-            % Report secondary correlation
-            aq2rating(1) = corr(aqCol, data.Response, 'Type', 'Spearman', 'rows', 'complete');
-            aq2rating(2) = corr(aqCol, data.Response, 'Type', 'Pearson', 'rows', 'complete');
-            fprintf(1, '\n\nCorrelation between %s and %s:\n', var3, var2);
-            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
-            fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
+            fprintf(1, '\n\nCorrelation between %s and average %s within subject:\n', var3, var1)
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2eye(1,2));
+            fprintf(1, '\tPearson''s r = %0.2f\n', aq2eye(1,1));
     
             % Histograms
             figure();
@@ -160,8 +164,15 @@ if choice == 1
                 % Add lines indicating the expected distribution(s)
                 % overlayAQ(gca); % skip this 
         if ~mwflag
+            % Report secondary correlation
+            aq2rating(1) = corr(aq, respCol, 'Type', 'Spearman', 'rows', 'complete');
+            aq2rating(2) = corr(aq, respCol, 'Type', 'Pearson', 'rows', 'complete');
+            fprintf(1, '\n\nCorrelation between %s and average %s within subject:\n', var3, var2);
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
+            fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
+
             % Now Fischer z-transform your main correlation coefficients
-            zCorr = zscore(output(:,2));
+            zCorr = zscore(eye2rating(:,2));
         
             % Plot and analyze relationship between AQ and current metric
             secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
@@ -172,7 +183,7 @@ if choice == 1
                 title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f', var3, var1, var2, secondCorr));
                 xlim(yl3);
         
-            fprintf(1, 'Correlation between %s and above correlation:\n', var3)
+            fprintf(1, 'Correlation between %s and (within-subject correlation between %s and %s):\n', var3, var1, var2)
             fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
             
         end % if not MW data
@@ -180,7 +191,7 @@ if choice == 1
 
     if ~mwflag % avoid doing this inside the loop over AQ subscales
         % Plot correlation of gaze and clarity, i.e. not considering AQ
-        plotCorrelation(data, output, metricName);
+        plotCorrelation(data, eye2rating, metricName);
         % Histograms of gaze and clarity
         figure();
         subplot(1,2,1);
