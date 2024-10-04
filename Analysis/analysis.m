@@ -8,6 +8,11 @@ else
     % By default, use percent time spent fixating
     metricName = 'scaledfixation';
 end
+dflag = false;
+if nargin > 1
+    data = varargin{2};
+    dflag = true;
+end
 
 % The exact test depends on which stimulus set we're looking at
 % So force a choice:
@@ -16,31 +21,36 @@ choice = menu('Which data do you want to analyze?','TriCOPA','Martin & Weisberg'
 if choice == 1
     % TriCOPA
     fprintf(1, 'Using metric %s\n\n', metricName);
-    if strcmp(metricName, 'ISC')
-        data = doISC(getTCData('heatmap'));
-        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
-        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
-    elseif strcmp(metricName, 'coherence')
-        [~, data] = doGazePath(getTCData('gaze'));
-        % Compress the timecourse down to a single number
-        for i = 1:height(data)
-            data.Eyetrack{i} = mean(data.Eyetrack{i}(1,:), 'omitnan');
+    if ~dflag
+        if strcmp(metricName, 'ISC')
+            data = doISC(getTCData('heatmap'));
+            fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+            fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+        elseif strcmp(metricName, 'coherence')
+            [~, data] = doGazePath(getTCData('gaze'));
+            % Compress the timecourse down to a single number
+            for i = 1:height(data)
+                data.Eyetrack{i} = mean(data.Eyetrack{i}(1,:), 'omitnan');
+            end
+            % Now that they're not vectors, turn the column into a single mat
+            data.Eyetrack = cell2mat(data.Eyetrack);
+        else
+            data = getTCData(metricName);
         end
-        % Now that they're not vectors, turn the column into a single mat
-        data.Eyetrack = cell2mat(data.Eyetrack);
-    else
-        data = getTCData(metricName);
-    end
+    end % otherwise use the input data
+
     mwflag = 0;
 elseif choice == 2
     % Martin & Weisberg
-    if strcmp(metricName, 'ISC')
-        data = doISC(getMWData('heatmap'));
-        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
-        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
-    else
-        data = getMWData(metricName);
-    end
+    if ~dflag
+        if strcmp(metricName, 'ISC')
+            data = doISC(getMWData('heatmap'));
+            fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+            fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+        else
+            data = getMWData(metricName);
+        end
+    end % otherwise use the input data
     mwflag = 1;
     choice = menu('Which analysis method do you want for this Martin & Weisberg data?','correlation', 't-test');
 end
@@ -264,10 +274,10 @@ if nargout > 0
         data.AQ(subset) = aqTable.SocialSkills(i);
     end
     % 2. Convert strings to 'categorical' variables
-    data.Subject = categorical(data.Subject);
-    data.StimName = categorical(data.StimName);
-    if mwflag
-        data.Category = categorical(data.Category);
-    end
+    % data.Subject = categorical(data.Subject);
+    % data.StimName = categorical(data.StimName);
+    % if mwflag
+    %     data.Category = categorical(data.Category);
+    % end
     varargout{1} = data;
 end
