@@ -3,6 +3,9 @@ function gaze = addframe2gaze(edfDat, i)
 % and the row index of the eye to use (determined by selectMetric),
 % export the XY gaze path WITH the number of the video frame that was up
 
+% First, extract gaze and interpolate over blinks
+gx = censorBlinks(edfDat.Samples.gx(i,:), edfDat);
+gy = censorBlinks(edfDat.Samples.gy(i,:), edfDat);
 
 % Search the Events struct to find messages defining frame changes
 list = edfDat.Events.message;
@@ -28,9 +31,9 @@ for f = 1:numel(frameTimes) - 1
     fend = sum(y3);
     npos = c+fend-1;
     % Get X
-    gaze(1,c:npos) = edfDat.Samples.gx(i,y3);
+    gaze(1,c:npos) = gx(:,y3);
     % Get Y
-    gaze(2,c:npos) = edfDat.Samples.gy(i,y3);
+    gaze(2,c:npos) = gy(:,y3);
     % Get timestamp
     gaze(3,c:npos) = sampleTimes(y3) - stimOnset;
     % Get frame number
@@ -41,6 +44,5 @@ end
 % Strip out the unused columns
 gaze(:,isnan(gaze(1,:))) = [];
 % Now we have every X and Y gaze coordinate during the video, plus frame #
-
 
 end

@@ -15,10 +15,10 @@ end
 
 % Censor blinks, which give coordinates of like 100 million or more
 sz = [1920 1200];
-dropList = xdat > 3*sz(1) | ydat > 3*sz(2);
-xdat(dropList) = [];
-ydat(dropList) = [];
-tdat(dropList) = [];
+% dropList = xdat > 3*sz(1) | ydat > 3*sz(2);
+% xdat(dropList) = [];
+% ydat(dropList) = [];
+% tdat(dropList) = [];
 
 plot3(xdat,tdat,ydat, '-o', 'MarkerSize', 3);
     xlabel('X'); ylabel('Time in ms'); zlabel('Y');
