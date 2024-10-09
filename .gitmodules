@@ -1,0 +1,3 @@
+[submodule "SaliencyToolbox"]
+	path = SaliencyToolbox
+	url = https://github.com/DirkBWalther/SaliencyToolbox.git
