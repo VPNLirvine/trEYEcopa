@@ -1,4 +1,4 @@
-function plotCorrelation(data, output, metricName)
+function plotCorrelation(data, eye2rating, metricName)
 % Given a stack of data from e.g. getTCData,
 % and the pre-calculated correlation coefficients (for labeling),
 % Plot the gaze metric against the clarity ratings.
@@ -59,7 +59,7 @@ for s = 1:numSubs
         boxplot(x, 1:5); % which ignores nans thankfully
         xlabel(var2);
         ylabel(var1);
-        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', output(s,2))]);
+        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
         ylim(yl); % ylimit varies by metric
     % subplot(2,numSubs, s+numSubs)
     set(0,'CurrentFigure',fig2);
@@ -73,7 +73,7 @@ for s = 1:numSubs
         scatter(data.Response(subset), data.Eyetrack(subset));
         xlabel(var2);
         ylabel(var1);
-        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', output(s,2))]);
+        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
         ylim(yl); % varies by metric
         xlim(yl2); % fixed bc it's response 1-5
         xticks([1 2 3 4 5])
@@ -96,7 +96,7 @@ end
 boxplot(x, 1:5); % which ignores nans thankfully
 xlabel(var2);
 ylabel(var1);
-title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, output(s,2)));
+title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, eye2rating(s,2)));
 ylim(yl); % ylimit varies by metric
 
 warning('on','stats:boxplot:BadObjectType'); % toggle

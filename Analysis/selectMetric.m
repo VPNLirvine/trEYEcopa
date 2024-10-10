@@ -196,14 +196,18 @@ switch metricName
         % plus a 3rd row giving the time in ms from onset.
         % Not intended as its own 'metric' per se.
 
+        % First get the XY timeseries, filtering blinks
+        xdat = censorBlinks(edfDat.Samples.gx(i+1,:), edfDat);
+        ydat = censorBlinks(edfDat.Samples.gy(i+1,:), edfDat);
+
         % Only consider timepoints where the stimulus was visible
         stimPeriod = edfDat.Samples.time >= stimStart & edfDat.Samples.time <= stimEnd;
         
         % i is 0 or 1 for left or right eye, so i+1 is 1st or 2nd row.
         % xdat = pickCoordData(edfDat.Samples.gx(:, stimPeriod));
         % ydat = pickCoordData(edfDat.Samples.gy(:, stimPeriod));
-        xdat = edfDat.Samples.gx(i+1, stimPeriod);
-        ydat = edfDat.Samples.gy(i+1, stimPeriod);
+        xdat = xdat(stimPeriod);
+        ydat = ydat(stimPeriod);
         tdat = edfDat.Samples.time(stimPeriod) - stimStart;
 
         % We need to un-flip the gaze for flipped videos
@@ -211,6 +215,14 @@ switch metricName
             xdat = mirrorX(xdat, scDim(1));
         end
         output = [xdat;ydat; tdat];
+    case 'gazeF'
+        % HIDDEN METRIC
+        % This is just like 'gaze' above,
+        % except then we also insert the video frame numbers.
+        output = addframe2gaze(edfDat, i+1);
+        if flipFlag
+            output(1,:) = mirrorX(output(1,:), scDim(1));
+        end
     case 'tot'
         % Time on Target, aka "triangle time"
         % Percentage of video time spent looking at characters

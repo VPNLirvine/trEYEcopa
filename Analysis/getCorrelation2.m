@@ -1,4 +1,4 @@
-function output = getCorrelation2(data, metricName)
+function data = getCorrelation2(data, metricName)
 % Given a stack of data from e.g. getTCData,
 % calculate the correlation with the motion energy of each video.
 
@@ -22,6 +22,7 @@ for v = 1:numVids
     vidName = motion.StimName{v};
     subset = strcmp(data.StimName, vidName);
     data.Motion(subset) = sum(motion.MotionEnergy{v});
+    data.Duration(subset) = motion.Duration{v};
 
     % Also extract the average Eyetrack value for this video, for later
     avgE(v,1) = mean(data.Eyetrack(subset));
@@ -77,6 +78,4 @@ figure();
     title(sprintf('Correlation = %0.2f', corr(mot, avgE)));
 
 % Try regression instead?
-d = table(data.Subject, data.Motion, data.Eyetrack, 'VariableNames', {'Subject', 'Motion', 'Eyetrack'});
-d.Subject = categorical(d.Subject);
-mdl = fitlm(d);
+mdl = fitlme(data, 'Eyetrack ~ Motion + (1 | Subject)')
