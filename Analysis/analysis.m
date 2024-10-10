@@ -193,6 +193,15 @@ if choice == 1 % Correlation analysis
             fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
             fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
 
+            % Plot that
+            figure();
+                scatter(aq, respCol);
+                xlim(yl3);
+                ylim(yl2);
+                xlabel(var3);
+                ylabel(['Average ', var2]);
+                title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, aq2rating(1)));
+
             % Now Fischer z-transform your main correlation coefficients
             zCorr = zscore(eye2rating(:,2));
         
