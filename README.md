@@ -16,3 +16,6 @@ We use [Alexander Pastukhov's edfImport](https://github.com/alexander-pastukhov/
 edfImport further requires you to install [SR Research's EDF API](https://www.sr-research.com/support/thread-13.html).
 
 Some analyses make use of functions from Matlab's `Image Processing Toolbox`.
+
+We also use Christof Koch's [Saliency Toolbox](https://github.com/DirkBWalther/SaliencyToolbox) as a submodule - 
+please run `git submodule update --init --recursive` to download.
