@@ -12,7 +12,7 @@ try
     end
     
     %% adding file extension if necessary
-    if (isempty(regexp(fileName, '.edf$')))
+    if (isempty(regexpi(fileName, '.edf$')))
         fileName= [fileName '.edf'];
     end
     

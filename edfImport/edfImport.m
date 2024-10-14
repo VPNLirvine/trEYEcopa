@@ -57,7 +57,7 @@ if (~ischar(Filename))
 end;
   
 %% adding file extension if necessary 
-if (isempty(regexp(Filename, '.edf$')))
+if (isempty(regexpi(Filename, '.edf$')))
   Filename= [Filename '.edf'];
 end;
 
