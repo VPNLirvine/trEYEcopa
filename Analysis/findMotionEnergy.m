@@ -13,7 +13,7 @@ thisVid = VideoReader(vidPath);
 numFrames = thisVid.NumFrames;
 
 % Initialize motion tracker
-opticFlow = opticalFlowFarneback;
+opticFlow = opticalFlowHS;
 
 globSize = ceil(thisVid.FrameRate) * 2; % read many frames at once to improve performance
 
