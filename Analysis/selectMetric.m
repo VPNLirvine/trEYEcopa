@@ -15,6 +15,7 @@ function output = selectMetric(edfDat, metricName, varargin)
 %   'heatmap' - a 2D heatmap summarizing the scanpath
 %   'gaze' - gives the scanpath as coords over time. Rows are X, Y, and T.
 %   'blinkrate' - number of blinks / duration of video. 
+%   'deviance' - deviation of gaze from a predicted timecourse
 
 % Determine how many eyes were used
 % values of n: 0 = left, 1 = right.
@@ -238,6 +239,11 @@ switch metricName
             numBlinks = length(edfDat.Blinks.sttime);
         end
         output = 1000 * numBlinks / duration;
+    case 'deviance'
+        % Deviation of actual scanpath from a predicted scanpath,
+        % based on the location of highest motion in each video frame.
+        % Built out a separate function to calculate this.
+        output = motionDeviation(edfDat, i+1, flipFlag);
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
