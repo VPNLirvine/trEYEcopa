@@ -9,6 +9,10 @@ function [txt, varargout] = getGraphLabel(metricName)
 % This should typically be used as the histogram's title
 
 switch metricName
+    case 'similarity'
+        txt = 'Similarity of gaze to prediction';
+        yl = [0 1];
+        dist = 'Expect a binomial distribution';
     case 'response'
         txt = 'Understandability rating';
         yl = [0 6]; % fixed response limit 1-5

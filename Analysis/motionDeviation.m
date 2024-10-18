@@ -1,4 +1,4 @@
-function output = motionDeviation(edfDat, i, flipFlag)
+function [gaze, newPos] = motionDeviation(edfDat, i, flipFlag)
 % This follows the same basic concept as "time on target",
 % in that we're comparing a subject's gaze path to a stimulus-derived path,
 % but here we're comparing to a single predicted scanpath, not many.
@@ -50,15 +50,6 @@ end
 % Row 4 is the frame number. Use that to index out of posDat.
 newPos(1,:) = posDat(1,gaze(4,:));
 newPos(2,:) = posDat(2,gaze(4,:));
-
-%% COMPARE GAZE AND PREDICTION
-deviance(1,:) = gaze(1,:) - newPos(1,:);
-deviance(2,:) = gaze(2,:) - newPos(2,:);
-deviance(3,:) = gaze(3,:);
-
-% deviance is a matrix of XY coordinates. Reduce it to 1D distance:
-% Use the Pythagorean theorem to calculate the length of each hypotenuse.
-output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
 
 %% TO VISUALIZE:
 % figure();

@@ -243,7 +243,23 @@ switch metricName
         % Deviation of actual scanpath from a predicted scanpath,
         % based on the location of highest motion in each video frame.
         % Built out a separate function to calculate this.
-        output = motionDeviation(edfDat, i+1, flipFlag);
+        [gaze, newPos] = motionDeviation(edfDat, i+1, flipFlag);
+        % Subtract prediction from measurement to get 'error' timeseries:
+        deviance(1,:) = gaze(1,:) - newPos(1,:);
+        deviance(2,:) = gaze(2,:) - newPos(2,:);
+        deviance(3,:) = gaze(3,:);
+        
+        % This is a matrix of coordinate pairs. Reduce it to 1D distances:
+        % XY coordinates form a right triangle with the origin, so use the
+        % Pythagorean theorem to calculate the length of each hypotenuse.
+        output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
+    case 'similarity'
+        % Correlation of scanpath with predicted scanpath,
+        % based on the location of highest motion in each video frame.
+        % Similar to 'deviance', but this is a correlation, not a vector.
+        [gaze, newPos] = motionDeviation(edfDat, i+1, flipFlag);
+        output = corr2(gaze(1:2,:), newPos);
+
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
