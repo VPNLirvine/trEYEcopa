@@ -74,7 +74,7 @@ figure();
     % Artificially increases correlation by throwing away variance
     scatter(mot, avgE);
     xlabel(var2);
-    ylabel('Percent time fixated, averaged across subjects');
+    ylabel(sprintf('%s, averaged across subjects', var1));
     title(sprintf('Correlation = %0.2f', corr(mot, avgE)));
 
 % Try regression instead?
