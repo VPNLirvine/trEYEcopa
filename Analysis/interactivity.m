@@ -16,9 +16,11 @@ else
     posData = getPosition(); % no input is different than empty input...
 end
 
-% Now loop over all videos in posData
+% Initialize output
 numVids = height(posData);
-output = zeros([numVids, 1]); % init as column
+output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'double'}, 'VariableNames', {'StimName', 'Interactivity'});
+
+% Now loop over all videos in posData
 for v = 1:numVids
     % Subset table to just this video
     stimName = posData.StimName{v};
@@ -65,7 +67,8 @@ for v = 1:numVids
     end
 
     % Final calculation is a proportion: sum non-zero over duration
-    output(v) = nnz(interactivity)/length(interactivity);
+    output.StimName{v} = [stimName '.mov'];
+    output.Interactivity(v) = nnz(interactivity)/length(interactivity);
 
 end % for video
 
