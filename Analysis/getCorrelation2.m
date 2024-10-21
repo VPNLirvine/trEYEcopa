@@ -78,4 +78,4 @@ figure();
     title(sprintf('Correlation = %0.2f', corr(mot, avgE)));
 
 % Try regression instead?
-mdl = fitlme(data, 'Eyetrack ~ Motion + (1 | Subject)')
+% mdl = fitlme(data, 'Eyetrack ~ Motion + (1 | Subject)')

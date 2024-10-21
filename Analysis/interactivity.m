@@ -46,23 +46,47 @@ for v = 1:numVids
     % initialize the tally for this video 
     interactivity = zeros(1, length(posDat(1).X));
     
+    % Check which characters actually move
+    use1 = any(posDat(1).X ~= posDat(1).X(1)) || any(posDat(1).Y ~= posDat(1).Y(1));
+    use2 = any(posDat(2).X ~= posDat(2).X(1)) || any(posDat(2).Y ~= posDat(2).Y(1));
+    use4 = any(posDat(4).X ~= posDat(4).X(1)) || any(posDat(4).Y ~= posDat(4).Y(1));
+
     %calculate pairwise distances
     for i = 1:length(posDat(1).X)%or is there any other way to extract frame length?
-        % Extract positions for each character at each frame
-        p1 = [posDat(1).X(i), posDat(1).Y(i)];
-        p2 = [posDat(2).X(i), posDat(2).Y(i)];
-        p3 = [posDat(4).X(i), posDat(4).Y(i)]; % Ignore C3 (door)
-        
-        d12 = sqrt((p1(1) - p2(1))^2 + (p1(2) - p2(2))^2);
-        d13 = sqrt((p1(1) - p3(1))^2 + (p1(2) - p3(2))^2);
-        d23 = sqrt((p2(1) - p3(1))^2 + (p2(2) - p3(2))^2);
-        mindis = min([d12, d13, d23]);
-        
-        % If the minimum distance is below the threshold, mark as interactions
-        if mindis < threshold
-            interactivity(i) = 1; 
+        if sum([use1, use2, use4]) < 2
+            % If only one character ever moves, then by definition,
+            % there is never a "social" interaction
+            interactivity(i) = 0;
         else
-            interactivity(i) = 0; 
+            % Extract positions for each character at each frame
+            p1 = [posDat(1).X(i), posDat(1).Y(i)];
+            p2 = [posDat(2).X(i), posDat(2).Y(i)];
+            p4 = [posDat(4).X(i), posDat(4).Y(i)]; % Ignore C3 (door)
+            
+            % Calculate pairwise distances
+            d12 = sqrt((p1(1) - p2(1))^2 + (p1(2) - p2(2))^2);
+            d14 = sqrt((p1(1) - p4(1))^2 + (p1(2) - p4(2))^2);
+            d24 = sqrt((p2(1) - p4(1))^2 + (p2(2) - p4(2))^2);
+
+            % Avoid considering distances between unused characters
+            % (All characters were always on screen, but may never move)
+            if ~use1
+                d12 = threshold + 1; d14 = threshold + 1;
+            end
+            if ~use2
+                d12 = threshold + 1; d24 = threshold + 1;
+            end
+            if ~use4
+                d14 = threshold + 1; d24 = threshold + 1;
+            end
+            
+            % If the minimum distance is below the threshold, mark as interactions
+            mindis = min([d12, d14, d24]);
+            if mindis < threshold
+                interactivity(i) = 1; 
+            else
+                interactivity(i) = 0; 
+            end
         end
     end
 

@@ -104,6 +104,7 @@ warning(q2.state, 'MATLAB:table:RowsAddedExistingVars');
 
 if nargin > 0
     % Subset to the selected video
+    [~, movName, ~] = fileparts(movName); % strip out extension etc
     m = strcmp(data.StimName, movName);
     data = data(m,:);
 end
