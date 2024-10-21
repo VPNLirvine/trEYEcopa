@@ -118,6 +118,7 @@ if choice == 1 % Correlation analysis
         % None of these involve AQ, so do them before the upcoming loop
         eye2rating = getCorrelations(data, metricName); % gaze vs rating
         data = getCorrelation2(data, metricName); % gaze vs motion
+        data = getCorrelation3(data, metricName); % gaze vs interactivity
 
         % Get the average video rating per subject (not collected for MW)
         respCol = zeros([numSubs, 1]); % preallocate as column
