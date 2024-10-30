@@ -3,11 +3,22 @@ function output = interactivity(varargin)
 % Defined as the proportion of video time that 
 % any two characters are within a minimum distance of each other.
 % This is a stimulus parameter that does not vary by subject.
+% Input 1 indicates whether to return a proportion, or the full vector.
+% 0 = proportion, 1 = vector
+% Input 2 lets you specify one stimulus by name. If not provided, does all.
 
+% PARSE INPUTS
+% Check whether to return an aggregate or the entire vector
+if nargin > 0
+    flag = varargin{1};
+else
+    % Default behavior is to return the aggregate value per stimulus
+    flag = 0;
+end
 % Get position data for requested video(s)
 % If input is empty, then grab all videos
-if nargin > 0
-    stimName = varargin{1};
+if nargin > 1
+    stimName = varargin{2};
     assert(ischar(stimName) || isstring(stimName), 'Input must be a video name!');
     % strip out extension and/or path:
     [~, stimName, ~] = fileparts(stimName);
@@ -15,10 +26,17 @@ if nargin > 0
 else
     posData = getPosition(); % no input is different than empty input...
 end
-
+    
+% BEGIN SCRIPT
 % Initialize output
 numVids = height(posData);
-output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'double'}, 'VariableNames', {'StimName', 'Interactivity'});
+if ~flag
+    % Use cell and double because final output is one number per stimulus
+    output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'double'}, 'VariableNames', {'StimName', 'Interactivity'});
+else
+    % Use 2 cells so we can export the whole vector of indicators over time
+    output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'cell'}, 'VariableNames', {'StimName', 'Interactivity'});
+end
 
 % Now loop over all videos in posData
 for v = 1:numVids
@@ -90,9 +108,15 @@ for v = 1:numVids
         end
     end
 
-    % Final calculation is a proportion: sum non-zero over duration
+    
     output.StimName{v} = [stimName '.mov'];
-    output.Interactivity(v) = nnz(interactivity)/length(interactivity);
+    if ~flag
+        % Final calculation is a proportion: sum non-zero over duration
+        output.Interactivity(v) = nnz(interactivity)/length(interactivity);
+    else
+        % Output the entire vector for a timeseries-based analysis
+        output.Interactivity{v} = interactivity;
+    end
 
 end % for video
 
