@@ -253,6 +253,20 @@ switch metricName
         % XY coordinates form a right triangle with the origin, so use the
         % Pythagorean theorem to calculate the length of each hypotenuse.
         output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
+    case 'deviance2'
+        % Very similar to above deviance, but downsample the gaze data.
+        % This gives a value per FRAME, not per SAMPLE.
+        % Useful for comparing across subjects because it's per stimulus
+        [newGaze, pos] = motionDeviation2(edfDat, i+1, flipFlag);
+        % Subtract prediction from measurement to get 'error' timeseries:
+        deviance(1,:) = newGaze(1,:) - pos(1,:);
+        deviance(2,:) = newGaze(2,:) - pos(2,:);
+        
+        % This is a matrix of coordinate pairs. Reduce it to 1D distances:
+        % XY coordinates form a right triangle with the origin, so use the
+        % Pythagorean theorem to calculate the length of each hypotenuse.
+        output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
+
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
         % based on the location of highest motion in each video frame.
