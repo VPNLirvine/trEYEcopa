@@ -1,6 +1,6 @@
 function [flow] = findMotionEnergy(vidPath, varargin)
 % For a given video, estimate the amount of motion per frame
-% Uses a Farneback optical flow algorithm
+% Uses a Horn-Schunck optical flow algorithm
 
 if nargin > 1
     mtype = varargin{1};
@@ -39,6 +39,9 @@ for g = 1:globSize:numFrames
         % Determine what to return
         if strcmp(mtype, 'eng')
             % Return motion energy, a la filename
+            % This gives a motion value for each pixel,
+            % in units of pixels per frame.
+            % Reduce to a single number.
             flow(i) = mean(x.Magnitude, 'all');
         elseif strcmp(mtype, 'loc')
             % Return X,Y coordinates of highest energy
