@@ -48,8 +48,8 @@ sigma = std(output(:,2));
 
 fprintf(1, '\n\nRESULTS:\n');
 fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
-fprintf(1, '\tSpearman''s \x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
-fprintf(1, '\tPearson''s r = %0.2f (SD = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
+fprintf(1, '\tSpearman''s \x0304\x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
+fprintf(1, '\tPearson''s \x0304r = %0.2f (SD = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
 fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
 fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
 fprintf(1, '\n');
@@ -65,17 +65,19 @@ figure();
 figure();
     % Raw scatterplot
     % Correlation is expected to be low due to between-subject variance
+    [c1, p1] = corr(data.Eyetrack, data.Motion);
     scatter(data.Motion, data.Eyetrack);
     xlabel(var2); ylabel(var1);
-    title(sprintf('Correlation = %0.2f', corr(data.Eyetrack, data.Motion)));
+    title(sprintf('Correlation = %0.2f, p = %0.4f', c1, p1));
 
 figure();
     % Scatterplot of averaged data
     % Artificially increases correlation by throwing away variance
+    [c2, p2] = corr(mot, avgE);
     scatter(mot, avgE);
     xlabel(var2);
     ylabel(sprintf('%s, averaged across subjects', var1));
-    title(sprintf('Correlation = %0.2f', corr(mot, avgE)));
+    title(sprintf('Correlation = %0.2f, p = %0.4f', c2, p2));
 
 % Try regression instead?
 % mdl = fitlme(data, 'Eyetrack ~ Motion + (1 | Subject)')

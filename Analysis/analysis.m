@@ -75,15 +75,15 @@ end
 % Calculate and report any correlations between the AQ subscales
 % They're supposed to be orthogonal, so all should be < 0.3
 % Social Skills vs Communication
-c1 = corr(aqTable.SocialSkills, aqTable.Communication);
+[c1, p1] = corr(aqTable.SocialSkills, aqTable.Communication);
 % Social Skills vs Attention to Detail
-c2 = corr(aqTable.SocialSkills, aqTable.AttentionDetail);
+[c2, p2] = corr(aqTable.SocialSkills, aqTable.AttentionDetail);
 % Communication vs Attention to Detail
-c3 = corr(aqTable.Communication, aqTable.AttentionDetail);
+[c3, p3] = corr(aqTable.Communication, aqTable.AttentionDetail);
 fprintf(1, '\n\nAQ Subscale validation:\n')
-fprintf(1, 'Social Skills vs Communication: r = %0.2f\n', c1);
-fprintf(1, 'Social Skills vs Attention to Detail: r = %0.2f\n', c2);
-fprintf(1, 'Communication vs Attention to Detail: r = %0.2f\n', c3);
+fprintf(1, 'Social Skills vs Communication: r = %0.2f, p = %0.4f\n', c1, p1);
+fprintf(1, 'Social Skills vs Attention to Detail: r = %0.2f, p = %0.4f\n', c2, p2);
+fprintf(1, 'Communication vs Attention to Detail: r = %0.2f, p = %0.4f\n', c3, p3);
 fprintf(1, '\n');
 
 % Pick which kind of analysis to run
@@ -154,14 +154,14 @@ if choice == 1 % Correlation analysis
         [var3, yl3, distTxt3] = getGraphLabel(aqt);
 
         % Calculate correlations
-        aq2eye = zeros([1,2]); % clear on each loop
-        aq2eye(1,1) = corr(aq, eyeCol, 'Type', 'Pearson', 'rows', 'complete');
-        aq2eye(1,2) = corr(aq, eyeCol, 'Type', 'Spearman', 'rows', 'complete');
+        aq2eye = zeros([2,2]); % clear on each loop
+        [aq2eye(1,1), aq2eye(1,2) ]= corr(aq, eyeCol, 'Type', 'Pearson', 'rows', 'complete');
+        [aq2eye(2,1), aq2eye(2,2)] = corr(aq, eyeCol, 'Type', 'Spearman', 'rows', 'complete');
             
             % Plot
             figure();
             scatter(aq, eyeCol);
-                title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f', numSubs, aq2eye(1,2)));
+                title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f, p = %0.4f', numSubs, aq2eye(2,1), aq2eye(2,2)));
                 xlabel(var3);
                 ylabel(var1);
                 ylim(yl);
@@ -169,8 +169,8 @@ if choice == 1 % Correlation analysis
                 
             % Report the correlation score
             fprintf(1, '\n\nCorrelation between %s and average %s within subject:\n', var3, var1)
-            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2eye(1,2));
-            fprintf(1, '\tPearson''s r = %0.2f\n', aq2eye(1,1));
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f, p = %0.4f\n', aq2eye(2,1), aq2eye(2,2));
+            fprintf(1, '\tPearson''s r = %0.2f, p = %0.4f\n', aq2eye(1,1), aq2eye(1,2));
     
             % Histograms
             figure();
@@ -188,11 +188,11 @@ if choice == 1 % Correlation analysis
                 % overlayAQ(gca); % skip this 
         if ~mwflag
             % Report secondary correlation
-            aq2rating(1) = corr(aq, respCol, 'Type', 'Spearman', 'rows', 'complete');
-            aq2rating(2) = corr(aq, respCol, 'Type', 'Pearson', 'rows', 'complete');
+            [aq2rating(1,1), aq2rating(1,2)] = corr(aq, respCol, 'Type', 'Spearman', 'rows', 'complete');
+            [aq2rating(2,1), aq2rating(2,2)] = corr(aq, respCol, 'Type', 'Pearson', 'rows', 'complete');
             fprintf(1, '\n\nCorrelation between %s and average %s within subject:\n', var3, var2);
-            fprintf(1, '\tSpearman''s \x03C1 = %0.2f\n', aq2rating(1));
-            fprintf(1, '\tPearson''s r = %0.2f\n', aq2rating(2));
+            fprintf(1, '\tSpearman''s \x03C1 = %0.2f, p = %0.4f\n', aq2rating(1,1), aq2rating(1,2));
+            fprintf(1, '\tPearson''s r = %0.2f, p = %0.4f\n', aq2rating(2,1), aq2rating(2,2));
 
             % Plot that
             figure();
@@ -201,13 +201,13 @@ if choice == 1 % Correlation analysis
                 ylim(yl2);
                 xlabel(var3);
                 ylabel(['Average ', var2]);
-                title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, aq2rating(1)));
+                title(sprintf('Across %i subjects, \x03C1 = %0.2f, p = %0.4f', numSubs, aq2rating(1,1), aq2rating(1,2)));
 
             % Now Fischer z-transform your main correlation coefficients
             zCorr = zscore(eye2rating(:,2));
         
             % Plot and analyze relationship between AQ and current metric
-            secondCorr = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
+            [secondCorr, secondP] = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
             figure();
                 scatter(aq, zCorr, 'filled');
                 xlabel(var3);
@@ -216,7 +216,7 @@ if choice == 1 % Correlation analysis
                 xlim(yl3);
         
             fprintf(1, 'Correlation between %s and (within-subject correlation between %s and %s):\n', var3, var1, var2)
-            fprintf(1, '\t\x03C1 = %0.2f\n', secondCorr);
+            fprintf(1, '\t\x03C1 = %0.2f, p = %0.4f\n', secondCorr, secondP);
             
         end % if not MW data
     end % for each AQ subscale

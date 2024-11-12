@@ -32,11 +32,12 @@ end
 
 % Loop over subject to calculate independent correlation coefficients
 output = [];
+p = [];
 for s = 1:numSubs
     subID = subList{s};
     subset = strcmp(data.Subject, subID);
-    output(s,1) = corr(data.Eyetrack(subset), data.Interactivity(subset), 'Type', 'Pearson', 'rows', 'complete');
-    output(s,2) = corr(data.Eyetrack(subset), data.Interactivity(subset), 'Type', 'Spearman', 'rows', 'complete');
+    [output(s,1), p(s,1)] = corr(data.Eyetrack(subset), data.Interactivity(subset), 'Type', 'Pearson', 'rows', 'complete');
+    [output(s,2), p(s,2)] = corr(data.Eyetrack(subset), data.Interactivity(subset), 'Type', 'Spearman', 'rows', 'complete');
 end
 
 % Get the names of what you're correlating
@@ -49,8 +50,8 @@ sigma = std(output(:,2));
 
 fprintf(1, '\n\nRESULTS:\n');
 fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
-fprintf(1, '\tSpearman''s \x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
-fprintf(1, '\tPearson''s r = %0.2f (SD = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
+fprintf(1, '\tSpearman''s \x0304\x03C1 = %0.2f (SD = %0.2f)\n', mu, sigma);
+fprintf(1, '\tPearson''s \x0304r = %0.2f (SD = %0.2f)\n', mean(output(:,1)), std(output(:,1)));
 fprintf(1, 'Average subject-level percent variance explained by this relationship:\n');
 fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*mean(output(:,2) .^2));
 fprintf(1, '\n');
@@ -59,17 +60,19 @@ fprintf(1, '\n');
 figure();
     % Raw scatterplot
     % Correlation is expected to be low due to between-subject variance
+    [c1, p1] = corr(data.Eyetrack, data.Interactivity);
     scatter(data.Interactivity, data.Eyetrack);
     xlabel(var2); ylabel(var1);
-    title(sprintf('Correlation = %0.2f', corr(data.Eyetrack, data.Interactivity)));
+    title(sprintf('Correlation = %0.2f, p = %0.4f', c1, p1));
 
 figure();
     % Scatterplot of averaged data
     % Throws away subject-level variance to evaluate by stimulus
+    [c2, p2] = corr(intr, avgE);
     scatter(intr, avgE);
     xlabel(var2);
     ylabel(sprintf('%s, averaged across subjects', var1));
-    title(sprintf('Correlation = %0.2f', corr(intr, avgE)));
+    title(sprintf('Correlation = %0.2f, p = %0.4f', c2, p2));
 
 % Try regression instead?
 % mdl = fitlme(data, 'Eyetrack ~ Interactivity + (1 | Subject)')
