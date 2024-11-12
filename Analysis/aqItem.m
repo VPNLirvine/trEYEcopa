@@ -7,15 +7,20 @@ function tbl = aqItem(data)
 vidList = unique(data.StimName);
 numVids = height(vidList);
 
-tbl = table('Size', [0,2], 'VariableNames', {'StimName', 'dFactor'}, 'VariableTypes', {'string', 'double'});
+tbl = table('Size', [0,3], 'VariableNames', {'StimName', 'dFactor', 'pValue'}, 'VariableTypes', {'string', 'double', 'double'});
 
 for v = 1:numVids
     vidName = vidList{v};
     subset = strcmp(data.StimName, vidName);
     dv = data.Eyetrack(subset);
     aq = data.AQ(subset);
-    
-    % Fill table
-    tbl(v,:) = {vidName, corr(dv, aq, 'Type', 'Spearman')};
+    [r, p] = corr(dv, aq, 'Type', 'Spearman');
+    % Fill the entire table row at once
+    tbl(v,:) = {vidName, r, p};
     
 end
+
+% Calculate significance
+FDR = fdr_bh(tbl.pValue);
+% Add to table
+tbl.Sig = FDR(:);
