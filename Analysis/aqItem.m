@@ -24,3 +24,15 @@ end
 FDR = fdr_bh(tbl.pValue);
 % Add to table
 tbl.Sig = FDR(:);
+
+% Generate report
+tally = sum(tbl.Sig);
+if tally > 0
+    fprintf(1, '\n%i videos meet significance after FDR adjustment:\n\n', tally)
+    results = tbl(tbl.Sig, :);
+    disp(results);
+else
+    fprintf(1, '\nNo videos survive FDR thresholding at q = 0.05\n\n');
+end
+
+end % function
