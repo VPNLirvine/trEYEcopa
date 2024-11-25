@@ -259,13 +259,16 @@ elseif choice == 2 % Do a mean comparison across groups
         fprintf("\n\n\n")
         fprintf("%d subjects were considered.\n", numSubs)
         fprintf("%s the null hypothesis.\n",hlist{h+1})
-        F = tbl{ci+1,strcmp(tbl(1,:),'F')};
+        F = tbl{ci+1,strcmp(tbl(1,:),'F')}; % +1 due to header
         df = tbl{ci+1,strcmp(tbl(1,:),'d.f.')};
         sse = tbl{ci+1,strcmp(tbl(1,:),'Sum Sq.')};
         fprintf('\tF(%i) = %0.2f\n', df, F)
         fprintf("\tp = %f\n",p1(ci))
         fprintf('\tSSE = %0.2f\n', sse)
         fprintf('\n')
+
+    % Also see if AQ may be suppressing a difference in marginal means
+    mwAQ(data, aqTable);
 end
 plotItemwise(data, metricName, mwflag);
 
