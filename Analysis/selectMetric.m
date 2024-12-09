@@ -254,6 +254,7 @@ switch metricName
         % XY coordinates form a right triangle with the origin, so use the
         % Pythagorean theorem to calculate the length of each hypotenuse.
         output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
+        output = [output; deviance(3,:)]; % add that time vector back in
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
         % based on the location of highest motion in each video frame.
