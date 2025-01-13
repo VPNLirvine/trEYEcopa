@@ -34,4 +34,5 @@ pths.beh = fullfile(pths.base, 'beh'); % behavioral data e.g. RTs
 pths.pos = fullfile(pths.analysis, 'Position'); % adjusted position data
 
 pths.fixcheck = fullfile(pths.base, 'fixation_checks'); % calibration
+pths.audio = fullfile(pths.base, 'audio');
 end

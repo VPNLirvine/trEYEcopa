@@ -25,6 +25,9 @@ __pycache__/
 # Stimuli
 *.mov
 *.avi
+*.wav
+*.mp3
+*.mp4
 
 # Development-related
 notes.txt
@@ -36,3 +39,4 @@ test*
 /Analysis/posDatOpenCV/
 /Analysis/masks/
 /Analysis/motionData/
+/audio/

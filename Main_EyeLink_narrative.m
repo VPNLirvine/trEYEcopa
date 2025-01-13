@@ -322,14 +322,14 @@ try
         end
     end
     %% STEP 5: TRIAL LOOP.
-
+   
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
         
         % Before running trial, see if it's time for a break:
         takeABreak(i,numTrials);
-
+        
         % Open movie file:
         movieName = char(vidList(i));
         % Check if movieName has extension already
@@ -367,6 +367,12 @@ try
         % Optionally provide x y target location, otherwise target is presented on screen centre
         EyelinkDoDriftCorrection(el, round(width/2), round(height/2));
         
+        % start audio recording
+        pahandle = PsychPortAudio('Open', [], 2, 0, 44100, 1);
+        PsychPortAudio('GetAudioData', pahandle, 60);
+    %     PsychPortAudio('Start', pahandle, 0, 0, 1);
+        
+        
         %STEP 5.2: START RECORDING
         
         % Put tracker in idle/offline mode before recording. Eyelink('SetOfflineMode') is recommended 
@@ -375,9 +381,11 @@ try
         % WaitSecs(0.05); % Allow some time for transition           
         Eyelink('SetOfflineMode');% Put tracker in idle/offline mode before recording
         Eyelink('StartRecording'); % Start tracker recording
+        PsychPortAudio('Start', pahandle);
         WaitSecs(0.1); % Allow some time to record a few samples before presenting first stimulus
         
         % STEP 5.3: PRESENT VIDEO; CREATE DATAVIEWER BACKDROP AND INTEREST AREA; STOP RECORDING
+        Snd('Play',sin(0:10000)); % play sound for microphone sync
         
         timeOut = 'yes'; % Variable set to a default value. Changes to 'no' if key pressed to end video early
         % Start playback engine:
@@ -467,6 +475,13 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Simple Drawing
         Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
         
+        % Close the audio recording
+        PsychPortAudio('Stop', pahandle);
+        [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+        [~, movF, ~] = fileparts(movieName);
+        wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
+        audiowrite(wavout, audioData, 44100);
+        
         % Stop recording eye movements at the end of each trial
         WaitSecs(0.1); % Add 100 msec of data to catch final events before stopping 
         
@@ -513,7 +528,7 @@ try
         
 
     end % End trial loop
-    
+
     
     %% STEP 6: CLOSE EDF FILE. TRANSFER EDF COPY TO DISPLAY PC. CLOSE EYELINK CONNECTION. FINISH UP
     
