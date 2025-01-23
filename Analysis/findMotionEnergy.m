@@ -39,7 +39,7 @@ for g = 1:globSize:numFrames
         % Determine what to return
         if strcmp(mtype, 'eng')
             % Return motion energy, a la filename
-            flow(i) = mean(x.Magnitude, 'all');
+            flow(i) = sum(x.Magnitude, 'all');
         elseif strcmp(mtype, 'loc')
             % Return X,Y coordinates of highest energy
             m = max(x.Magnitude, [], 'all');

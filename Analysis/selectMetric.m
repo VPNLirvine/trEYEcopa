@@ -3,10 +3,10 @@ function output = selectMetric(edfDat, metricName, varargin)
 % e.g. input should be edfFile(trialNum), not edfFile itself
 % Given a metric name like 'totfixation', calculate and return that metric
 % Options are as follows:
-%   'fixation' - Total fixation time per trial
+%   'totalfix' - Total fixation time per trial
 %   'scaledfixation' - Percentage of video time spent fixating
 %   'firstfix' - Duration of the initial fixation - like an RT to the video
-%   'duration' - Duration of the video  in sec (a QC metric)
+%   'duration' - Duration of the video in sec (a QC metric)
 %   'meanfix' - Average fixation duration within a trial
 %   'medianfix' - Median fixation duration within a trial
 %   'maxfixOnset' - Onset time of the longest fixation
@@ -14,8 +14,9 @@ function output = selectMetric(edfDat, metricName, varargin)
 %   'meansacdist' - Average distance of all saccades within a trial
 %   'heatmap' - a 2D heatmap summarizing the scanpath
 %   'gaze' - gives the scanpath as coords over time. Rows are X, Y, and T.
-%   'blinkrate' - number of blinks / duration of video. 
-%   'deviance' - deviation of gaze from a predicted timecourse
+%   'blinkrate' - Number of blinks / duration of video (in Hz)
+%   'deviance' - Instantaneous deviation of gaze from a predicted path
+%   'similarity' - Correlation b/w predicted and actual scanpath
 
 % Determine how many eyes were used
 % values of n: 0 = left, 1 = right.
@@ -72,9 +73,15 @@ recDur = stimEnd - recStart;
 
 
 switch metricName
-    case 'fixation'
+    case 'fixations'
+        % Hidden metric that exports a vector of fixations
+        % This helps standardize the outlier rejection etc across metrics
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
-        data = fixOutliers(data);
+        % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
+        data = [data selectMetric(edfDat, 'lastfix', varargin{:})]; % include the cut-off final fixation
+        output = fixOutliers(data);
+    case 'totalfix'
+        data = selectMetric(edfDat, 'fixations', varargin{:});
         output = sum(data);
     case 'gap'
         % This is ultimately meaningless
@@ -82,11 +89,7 @@ switch metricName
         % you've likely got a bug in your pipeline.
         output = recOffset;
     case 'scaledfixation'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
-        % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
-        data = [data selectMetric(edfDat, 'lastfix', varargin{:})]; % include the cut-off final fixation
-        data = fixOutliers(data);
-        data = sum(data);
+        data = selectMetric(edfDat, 'totalfix', varargin{:});
         output = data / duration;
     case 'firstfix'
         data = edfDat.Fixations.entime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recOffset & edfDat.Fixations.entime >= recOffset);
@@ -119,12 +122,10 @@ switch metricName
     case 'duration'
         output = getStimDuration(edfDat);
     case 'meanfix'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
-        data = fixOutliers(data);
+        data = selectMetric(edfDat, 'fixations', varargin{:});
         output = mean(data);
     case 'medianfix'
-        data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
-        data = fixOutliers(data);
+        data = selectMetric(edfDat, 'fixations', varargin{:});
         output = median(data);
     case 'maxfixOnset'
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
@@ -253,6 +254,7 @@ switch metricName
         % XY coordinates form a right triangle with the origin, so use the
         % Pythagorean theorem to calculate the length of each hypotenuse.
         output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
+        output = [output; deviance(3,:)]; % add that time vector back in
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
         % based on the location of highest motion in each video frame.

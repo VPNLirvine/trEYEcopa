@@ -16,3 +16,4 @@ We use [Alexander Pastukhov's edfImport](https://github.com/alexander-pastukhov/
 edfImport further requires you to install [SR Research's EDF API](https://www.sr-research.com/support/thread-13.html).
 
 Some analyses make use of functions from Matlab's `Image Processing Toolbox`.
+We also use [this False-Discovery Rate function](https://www.mathworks.com/matlabcentral/fileexchange/27418-fdr_bh) from the Matlab File Exchange.

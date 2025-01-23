@@ -45,7 +45,7 @@ for sub = 1:numSubs
     end
     efSz = mean(data.Eyetrack(subDat & strcmp(data.Category, 'social'))) - mean(data.Eyetrack(subDat & strcmp(data.Category, 'mechanical')));
     boxplot(data.Eyetrack(subDat), data.Category(subDat), 'GroupOrder',conds);
-        title(sprintf(' %s, diff = %0.2f%%', strrep(subID,'_','\_'), 100 * efSz));
+        title(sprintf(' %s, diff = %0.2f', strrep(subID,'_','\_'), efSz));
         xticklabels(conds);
         ylim(ylimvec);
         ylabel(axistxt);

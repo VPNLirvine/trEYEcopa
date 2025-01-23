@@ -18,7 +18,7 @@ end
 
 % Initialize output
 numVids = height(posData);
-output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'double'}, 'VariableNames', {'StimName', 'Interactivity'});
+output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'cell'}, 'VariableNames', {'StimName', 'Interactivity'});
 
 % Now loop over all videos in posData
 for v = 1:numVids
@@ -41,7 +41,8 @@ for v = 1:numVids
     % Now we're ready to rock:
     % Interactivity is the proportion of time ANY two characters are
     % within some pixel-distance threshold
-    threshold = 500;
+    % threshold = 500;
+    threshold = deg2pix(5);
     
     % initialize the tally for this video 
     interactivity = zeros(1, length(posDat(1).X));
@@ -92,7 +93,8 @@ for v = 1:numVids
 
     % Final calculation is a proportion: sum non-zero over duration
     output.StimName{v} = [stimName '.mov'];
-    output.Interactivity(v) = nnz(interactivity)/length(interactivity);
+    % output.Interactivity(v) = nnz(interactivity)/length(interactivity);
+    output.Interactivity{v} = interactivity;
 
 end % for video
 
