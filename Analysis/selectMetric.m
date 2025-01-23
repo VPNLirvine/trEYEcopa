@@ -193,42 +193,48 @@ switch metricName
         output = getHeatmap(xdat, ydat, scDim, binRes);
         
     case 'gaze'
-        % This is a 2-row matrix of X-Y coordinate pairs
+        % This is a 4*n matrix covering n timepoints:
+        % The first 2 rows are X-Y coordinate pairs
         % that represents gaze position on screen over time,
-        % plus a 3rd row giving the time in ms from onset.
-        % Not intended as its own 'metric' per se.
+        % the 3rd row gives the time in ms from onset,
+        % and the 4th row gives the video frame number that was active.
+        % Not intended as its own metric per se,
+        % but gives a consistent way to extract frequently-used data.
 
-        % First get the XY timeseries, filtering blinks
-        xdat = censorBlinks(edfDat.Samples.gx(i+1,:), edfDat);
-        ydat = censorBlinks(edfDat.Samples.gy(i+1,:), edfDat);
+        % Get the XY timeseries and convert from uint32 for precision
+        xdat = single(edfDat.Samples.gx(i+1,:));
+        ydat = single(edfDat.Samples.gy(i+1,:));
+        % Do some preprocessing
+        xdat = censorBlinks(xdat, edfDat);
+        ydat = censorBlinks(ydat, edfDat);
+
+        % Clip any values that remain beyond the screen's dimensions,
+        % as they must be artifacts (e.g. poor blink filtering)
+        xdat(xdat > scDim(1)) = scDim(1);
+        xdat(xdat < 0) = 0;
+        ydat(ydat > scDim(2)) = scDim(2);
+        ydat(ydat < 0) = 0;
 
         % Only consider timepoints where the stimulus was visible
-        stimPeriod = edfDat.Samples.time >= stimStart & edfDat.Samples.time <= stimEnd;
+        stimPeriod = edfDat.Samples.time >= stimStart & edfDat.Samples.time < stimEnd;
         
         % i is 0 or 1 for left or right eye, so i+1 is 1st or 2nd row.
         % xdat = pickCoordData(edfDat.Samples.gx(:, stimPeriod));
         % ydat = pickCoordData(edfDat.Samples.gy(:, stimPeriod));
         xdat = xdat(stimPeriod);
         ydat = ydat(stimPeriod);
-        tdat = edfDat.Samples.time(stimPeriod) - stimStart;
+        tdat = single(edfDat.Samples.time(stimPeriod)) - stimStart;
 
         % We need to un-flip the gaze for flipped videos
         if flipFlag
             xdat = mirrorX(xdat, scDim(1));
         end
         output = [xdat;ydat; tdat];
-    case 'gazeF'
-        % HIDDEN METRIC
-        % This is just like 'gaze' above,
-        % except then we also insert the video frame numbers.
-        output = addframe2gaze(edfDat, i+1);
-        if flipFlag
-            output(1,:) = mirrorX(output(1,:), scDim(1));
-        end
+        output = addframe2gaze(output, edfDat);
     case 'tot'
         % Time on Target, aka "triangle time"
         % Percentage of video time spent looking at characters
-        output = timeOnTarget(edfDat, i+1, flipFlag, metricName);
+        output = timeOnTarget(edfDat, flipFlag, metricName);
 
     case 'blinkrate'
         % Pretty straightforward.
@@ -243,11 +249,27 @@ switch metricName
     case 'deviance'
         % Deviation of actual scanpath from a predicted scanpath,
         % based on the location of highest motion in each video frame.
-        % Built out a separate function to calculate this.
-        [gaze, newPos] = motionDeviation(edfDat, i+1, flipFlag);
+        % First, get the scanpath:
+        gaze = selectMetric(edfDat, 'gaze', varargin{:});
+        
+        % Now get the predicted scanpath for this stimulus
+        % We can extract the stim name from edfDat,
+        % but it may have a path attached that we should remove first
+        stimName = getStimName(edfDat);
+        [~,stimName] = fileparts(stimName);
+        if flipFlag
+            % stimName = erase(stimName, 'f_');
+            stimName = stimName(3:end); % erase leading 'f_', but keep later ones
+        end
+        if ~strcmp(stimName(4:end), '.mov')
+            stimName = [stimName '.mov'];
+        end
+
+        predGaze = motionDeviation(gaze, stimName);
+
         % Subtract prediction from measurement to get 'error' timeseries:
-        deviance(1,:) = gaze(1,:) - newPos(1,:);
-        deviance(2,:) = gaze(2,:) - newPos(2,:);
+        deviance(1,:) = gaze(1,:) - predGaze(1,:);
+        deviance(2,:) = gaze(2,:) - predGaze(2,:);
         deviance(3,:) = gaze(3,:);
         
         % This is a matrix of coordinate pairs. Reduce it to 1D distances:
@@ -258,9 +280,28 @@ switch metricName
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
         % based on the location of highest motion in each video frame.
-        % Similar to 'deviance', but this is a correlation, not a vector.
-        [gaze, newPos] = motionDeviation(edfDat, i+1, flipFlag);
-        output = corr2(gaze(1:2,:), newPos);
+        % Duplicates a lot of the code used in 'deviance',
+        % but here return a single correlation coefficient, not a vector.
+        
+        % First, get the scanpath:
+        gaze = selectMetric(edfDat, 'gaze', varargin{:});
+        
+        % Now get the predicted scanpath for this stimulus
+        % We can extract the stim name from edfDat,
+        % but it may have a path attached that we should remove first
+        stimName = getStimName(edfDat);
+        [~,stimName] = fileparts(stimName);
+        if flipFlag
+            % stimName = erase(stimName, 'f_');
+            stimName = stimName(3:end); % erase leading 'f_', but keep later ones
+        end
+        if ~strcmp(stimName(4:end), '.mov')
+            stimName = [stimName '.mov'];
+        end
+
+        predGaze = motionDeviation(gaze, stimName);
+
+        output = corr2(gaze(1:2,:), predGaze);
 
     otherwise
         error('Unknown metric name %s! aborting', metricName);

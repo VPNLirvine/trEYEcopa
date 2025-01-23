@@ -1,9 +1,8 @@
-function output = timeOnTarget(edfDat, i, flipFlag, metricName)
+function output = timeOnTarget(edfDat, flipFlag, metricName)
 % This is to be a case inside selectMetric,
 % which means it should operate on a SINGLE ROW of an EDF file
 % (i.e. one trial of one subject)
 % So we DON'T want to load in frames or positions of anything extraneous
-pths = specifyPaths('..');
 
 % We can extract the stim name from edfDat
 % ...but it may have a path attached that we should remove
@@ -37,7 +36,8 @@ posDat = postab2struct(posDat);
 % so it's not as simple as just e.g. playing each frame twice
 % Need to know what frame was up for each gaze sample,
 % then resample the position data to follow that pattern.
-gaze = addframe2gaze(edfDat, i);
+gaze = selectMetric(edfDat, 'gaze', flipFlag);
+
 % We also need to un-flip the gaze for flipped videos
 if flipFlag
     gaze(1,:) = mirrorX(gaze(1,:), wRect(3));
