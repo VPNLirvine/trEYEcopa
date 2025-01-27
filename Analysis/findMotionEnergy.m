@@ -76,7 +76,9 @@ elseif strcmp(mtype, 'loc')
     flow(2,:) = flow(2,:) .* yrs;
 
     % Lowpass filter the timeseries
-    flow = lowpass(flow', 2, 60)';
+    filtCutoff = 2; % Hz
+    sr = 60; % sampling rate, also in Hz
+    flow = lowpass(flow', filtCutoff, sr)';
 
     % Also add a time vector?
     flow(3,:) = round(1:1000/thisVid.FrameRate:1000*(width(flow))/thisVid.FrameRate);
