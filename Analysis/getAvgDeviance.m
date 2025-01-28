@@ -1,12 +1,14 @@
-function output = getAvgDeviance()
+function output = getAvgDeviance(dat)
 % Deviance is a measure of how far any subject deviates from prediction.
 % Here, we're averaging across subjects, preserving the time dimension,
 % in order to get a group-average (or "expected") deviance vector.
 % (...which is sort of ironic: you've got a stimulus-derived prediction,
 % but then also a behavior-derived predicted deviance from the prediction)
 
-% Get all subs all trials
-dat = getTCData('deviance');
+if nargin < 1
+    % Get all subs all trials
+    dat = getTCData('deviance');
+end
 
 % Get a list of stims (though out of order)
 stimList = unique(dat.StimName);
