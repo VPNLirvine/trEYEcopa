@@ -38,35 +38,51 @@ for g = 1:globSize:numFrames
 
         % Determine what to return
         if strcmp(mtype, 'eng')
-            % Return motion energy, a la filename
-            flow(i) = sum(x.Magnitude, 'all');
-        elseif strcmp(mtype, 'loc')
-            % Return X,Y coordinates of highest energy
-            m = max(x.Magnitude, [], 'all');
-            [Y, X] = find(ismember(x.Magnitude, m));
-            if m < .1 && i > 1
-                % If no motion, expect to stay at the previous location
-                flow(1,i) = flow(1,i-1);
-                flow(2,i) = flow(2, i-1);
+            if i == 1
+            % i = 1 will have some huge number from comparing frame 1 to frame "0"
+            % It's treating the onset of the first frame as motion relative to blank.
+            % This ought to instead be 0, to indicate "no change" since it's the first.
+                flow(i) = 0;
             else
-                flow(1,i) = X(1); % in case multiple exist
-                flow(2,i) = Y(1); % in case multiple exist
+                % Return motion energy, a la filename
+                flow(i) = sum(x.Magnitude, 'all');
             end
-        end
-    end
-end
-% Fix output re first frame
-if strcmp(mtype, 'eng')
-    % i = 1 will have some huge number from comparing frame 1 to frame "0"
-    % It's treating the onset of the first frame as motion relative to blank.
-    % This ought to instead be 0, to indicate "no change" since it's the first.
-    flow(1) = 0;
-elseif strcmp(mtype, 'loc')
-    % Similar to above, since the first frame should have no motion,
-    % replace whatever is detected with the center of the video.
-    flow(1,1) = round(thisVid.Width/2);
-    flow(2,1) = round(thisVid.Height/2);
-    
+        elseif strcmp(mtype, 'loc')
+            if i == 1
+                % Similar to above, the first frame is compared to blank.
+                % Any "motion" it detects is meaningless, so
+                % replace those coordinates with the center of the video.
+                flow(1,1) = round(thisVid.Width/2);
+                flow(2,1) = round(thisVid.Height/2);
+            else
+                % Return X,Y coordinates of highest energy
+                m = max(x.Magnitude, [], 'all');
+                [Y, X] = find(ismember(x.Magnitude, m));
+                thresh = eps;
+                if m < thresh
+                    % If no motion, expect to stay at the previous location
+                    flow(1,i) = flow(1,i-1);
+                    flow(2,i) = flow(2, i-1);
+                else
+                    % See if multiple options exist with the same magnitude
+                    if isscalar(X)
+                        s = 1;
+                    else
+                        % Pick the one closest to the previous location
+                        testVal = flow(:,i-1)';
+                        distances = norm(testVal - [X, Y]);
+                        s = find(min(distances));
+                    end
+                    flow(1,i) = X(s); % in case multiple exist
+                    flow(2,i) = Y(s); % in case multiple exist
+                end
+            end
+        end % mtype
+    end % for frame j
+end % for glob
+
+% Make final adjustments to output
+if strcmp(mtype, 'loc')  
     % Rescale from video resolution to monitor resolution
     newSc = resizeVideo(thisVid.Width, thisVid.Height, [1 1 1920 1200]);
     newW = newSc(3) - newSc(1);
@@ -75,10 +91,19 @@ elseif strcmp(mtype, 'loc')
     flow(1,:) = flow(1,:) .* xrs + newSc(1);
     flow(2,:) = flow(2,:) .* yrs;
 
+    % Prepend some values before smoothing, which will be dropped after.
+    % This helps ensure the first point remains the center of the screen,
+    % so in case there is an immediate discontinuity, it gets discounted.
+    nPrepend = 10;
+    flow = [repmat(flow(:,1), 1, nPrepend), flow];
+
     % Lowpass filter the timeseries
-    filtCutoff = 2; % Hz
+    filtCutoff = 1; % Hz
     sr = 60; % sampling rate, also in Hz
     flow = lowpass(flow', filtCutoff, sr)';
+
+    % Drop the prepended values so that we're back to the original size
+    flow = flow(:, nPrepend+1:end);
 
     % Also add a time vector?
     flow(3,:) = round(1:1000/thisVid.FrameRate:1000*(width(flow))/thisVid.FrameRate);
