@@ -202,8 +202,8 @@ switch metricName
         % but gives a consistent way to extract frequently-used data.
 
         % Get the XY timeseries and convert from uint32 for precision
-        xdat = single(edfDat.Samples.gx(i+1,:));
-        ydat = single(edfDat.Samples.gy(i+1,:));
+        xdat = double(edfDat.Samples.gx(i+1,:));
+        ydat = double(edfDat.Samples.gy(i+1,:));
         % Do some preprocessing
         xdat = censorBlinks(xdat, edfDat);
         ydat = censorBlinks(ydat, edfDat);
@@ -223,7 +223,10 @@ switch metricName
         % ydat = pickCoordData(edfDat.Samples.gy(:, stimPeriod));
         xdat = xdat(stimPeriod);
         ydat = ydat(stimPeriod);
-        tdat = single(edfDat.Samples.time(stimPeriod)) - stimStart;
+        tdat = double(edfDat.Samples.time(stimPeriod)) - stimStart;
+        if any(~diff(tdat))
+            fprintf(1, 'help');
+        end
 
         % We need to un-flip the gaze for flipped videos
         if flipFlag
