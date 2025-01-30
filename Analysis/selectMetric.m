@@ -224,9 +224,6 @@ switch metricName
         xdat = xdat(stimPeriod);
         ydat = ydat(stimPeriod);
         tdat = double(edfDat.Samples.time(stimPeriod)) - stimStart;
-        if any(~diff(tdat))
-            fprintf(1, 'help');
-        end
 
         % We need to un-flip the gaze for flipped videos
         if flipFlag
