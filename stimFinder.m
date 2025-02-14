@@ -9,7 +9,9 @@ switch in
         outputPath = pths.TCdat; 
         prefix = 'TC_';
         
-        stimList = RandomTC(subID);
+        % 2nd input will force subset to a predefined list of ~31 videos
+        % to use the standard list, just do RandomTC(subID)
+        stimList = RandomTC(subID, 1);
     case '2'
         % Martin & Weisberg
         stimPath = pths.MWstim;

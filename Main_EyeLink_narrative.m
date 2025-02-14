@@ -1,4 +1,4 @@
- function Main_EyeLink(screenNumber, debugmode)
+ function Main_EyeLink_narrative(screenNumber, debugmode)
 % Video playback with EyeLink integration and animated calibration / drift-check/correction targets.
 % In each trial eye movements are recorded while a video stimulus is presented on the screen.
 % Each trial ends when the space bar is pressed or the video stops playing.
@@ -293,15 +293,7 @@ try
     if debugmode
         numTrials = 4;
     else
-        switch taskID
-            case 'MartinWeisberg'
-                % Use all 16 videos
-                numTrials = length(vidList);
-            case 'TriCOPA'
-                % Use a subset
-                % This lets us run both experiments within an hour
-                numTrials = 70;
-        end
+        numTrials = length(vidList);
     end
     
     
@@ -323,6 +315,7 @@ try
     end
     %% STEP 5: TRIAL LOOP.
    
+    
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
@@ -370,7 +363,6 @@ try
         % start audio recording
         pahandle = PsychPortAudio('Open', [], 2, 0, 44100, 1);
         PsychPortAudio('GetAudioData', pahandle, 60);
-    %     PsychPortAudio('Start', pahandle, 0, 0, 1);
         
         
         %STEP 5.2: START RECORDING
@@ -475,13 +467,7 @@ try
         % See DataViewer manual section: Protocol for EyeLink Data to Viewer Integration > Simple Drawing
         Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
         
-        % Close the audio recording
-        PsychPortAudio('Stop', pahandle);
-        [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
-        [~, movF, ~] = fileparts(movieName);
-        wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
-        audiowrite(wavout, audioData, 44100);
-        
+         
         % Stop recording eye movements at the end of each trial
         WaitSecs(0.1); % Add 100 msec of data to catch final events before stopping 
         
@@ -501,6 +487,12 @@ try
         Eyelink('SetOfflineMode');% Put tracker in idle/offline mode
 
         if panic
+            % Close the audio recording
+            PsychPortAudio('Stop', pahandle);
+            [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+            [~, movF, ~] = fileparts(movieName);
+            wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
+            audiowrite(wavout, audioData, 44100);
             % Exit trial loop, but still export files
             break
         else
@@ -519,13 +511,26 @@ try
                     RT = getResp;
             end
             if panic
+                % Close the audio recording
+                PsychPortAudio('Stop', pahandle);
+                [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+                [~, movF, ~] = fileparts(movieName);
+                wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
+                audiowrite(wavout, audioData, 44100);
+                
                 break
             end
+            % Close the audio recording
+            PsychPortAudio('Stop', pahandle);
+            [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+            [~, movF, ~] = fileparts(movieName);
+            wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
+            audiowrite(wavout, audioData, 44100);
+            
             % Output trial data to file
             % 'Trial \tResponse \RT \tTime \tStimName\n'
             fprintf(fid, '%i\t %i\t %1.6f\t %4.3f\t %s\n', i, response, RT, trialStart - ExptStart, movieName);
         end
-        
 
     end % End trial loop
 

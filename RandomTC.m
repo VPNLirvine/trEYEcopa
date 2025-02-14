@@ -1,17 +1,30 @@
-function NewOrd = RandomTC(subID)
+function NewOrd = RandomTC(subID, varargin)
 % NOT FULLY ADAPTED from RandomMS
 % Idea is to output a list of filenames in randomized order
 % But the randomization is controlled somehow
 % For Martin & Weisberg, it alternates social and mechanical conditions
 % For TriCOPA, it should RANDOMLY(?) alternate mirroring
 % Need to leave a breadcrumb that tells you what was mirrored
+
 rng('default')
 
 pths = specifyPaths();
 csvPath = fullfile(pths.TCstim, 'normal', 'stimData.csv');
 T = readtable(csvPath);
 
-stimNames = T.movie(:);
+if nargin > 1
+    stimList = importdata('stimList_byAQ.mat');
+    % use col 2 to find the filenames from T.movie(:)
+    % I'm sure there's a more efficient method but...
+    sl = false(height(T), 1);
+    for i = 1:size(stimList,1)
+        sl = sl + contains(T.movie, num2str(stimList(i,2)));
+    end
+    sl = logical(sl);
+    stimNames = T.movie(sl);
+else
+    stimNames = T.movie(:);
+end
 numStims = length(stimNames);
 numFlipped = floor(numStims / 2);
 
