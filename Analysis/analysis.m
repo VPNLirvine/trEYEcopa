@@ -98,6 +98,15 @@ if choice == 1 % Correlation analysis
     % Do a correlation instead.
     % Calculate individually per subject to make it RFX.
     % mdl = fitlm(data, 'Eyetrack ~ Response');
+
+    % Subset data to the videos most impacted by AQ
+    if ~exist('sigVids.mat')
+        % This function ought to generate this file
+        rankAQperVid(insertAQ(data));
+    end
+    sigVidNames = importdata('sigVids.mat');
+    data = data(ismember(data.StimName, sigVidNames), :);
+ 
     
     % Get axis labels for later
     [var1, yl, distTxt] = getGraphLabel(metricName);
