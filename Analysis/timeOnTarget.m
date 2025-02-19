@@ -39,14 +39,12 @@ posDat = postab2struct(posDat);
 gaze = selectMetric(edfDat, 'gaze', flipFlag);
 
 % We also need to un-flip the gaze for flipped videos
-if flipFlag
-    gaze(1,:) = mirrorX(gaze(1,:), wRect(3));
-end
+
 % Row 4 is the frame number. Use that to index out of posDat.
-p.C1 = [ posDat(1).X(gaze(4,:)) ; posDat(1).Y(gaze(4,:)) ];
-p.C2 = [ posDat(2).X(gaze(4,:)) ; posDat(2).Y(gaze(4,:)) ];
-p.C3 = [ posDat(3).X(gaze(4,:)) ; posDat(3).Y(gaze(4,:)) ];
-p.C4 = [ posDat(4).X(gaze(4,:)) ; posDat(4).Y(gaze(4,:)) ];
+p.C1 = [ posDat(1).X(gaze(4,:)) ; posDat(1).Y(gaze(4,:)); gaze(3,:) ];
+p.C2 = [ posDat(2).X(gaze(4,:)) ; posDat(2).Y(gaze(4,:)) ; gaze(3,:) ];
+p.C3 = [ posDat(3).X(gaze(4,:)) ; posDat(3).Y(gaze(4,:)) ; gaze(3,:)];
+p.C4 = [ posDat(4).X(gaze(4,:)) ; posDat(4).Y(gaze(4,:)) ; gaze(3,:) ];
 
 %% COMPARE GAZE AND POSITION
 % Define a radius around each character
