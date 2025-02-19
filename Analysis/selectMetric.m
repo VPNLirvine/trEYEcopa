@@ -303,6 +303,20 @@ switch metricName
 
         output = corr2(gaze(1:2,:), predGaze);
 
+    case 'topdown'
+        % The proportion of time gaze deviated from the predicted scanpath.
+        % Gaze is considered deviated if it exceeds a preordained threshold
+        gaze = selectMetric(edfDat, 'deviance', varargin{:});
+        thresh = deg2pix(3);
+        isDeviated = gaze(1,:) >= thresh;
+        % gaze(3,:) has timestamps; their differences = sample durations
+        % e.g. time of sample 2 - time of sample 1 = duration of sample 1
+        sampleDurs = diff(gaze(2,:));
+        % diff will not give an estimated length of the final sample,
+        % so duplicate the length of the second-to-last sample.
+        sampleDurs(end+1) = sampleDurs(end);
+        timeDeviated = sum(sampleDurs(isDeviated));
+        output = timeDeviated / duration;
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
