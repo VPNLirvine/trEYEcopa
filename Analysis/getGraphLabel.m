@@ -89,6 +89,10 @@ switch metricName
         txt = 'Percent time gaze was on any character';
         yl = [0 1]; % percentage is bounded 0 to 1
         dist = 'Expect an RT-like distribution';
+    case 'topdown'
+        txt = 'Percent time gaze was deviated from prediction';
+        yl = [0 1];
+        dist = 'Expect an RT-like distribution';
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end % switch

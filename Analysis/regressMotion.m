@@ -13,7 +13,7 @@ function gazeDat = regressMotion(gazeDat, motion)
 
 % Load data to compare, if not provided
 if nargin < 1
-    gazeDat = getTCData('gazeF');
+    gazeDat = getTCData('gaze');
 end
 if nargin < 2
     if exist('motionData.mat', 'file')
