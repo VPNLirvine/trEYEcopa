@@ -15,7 +15,9 @@ numFrames = thisVid.NumFrames;
 % Initialize motion tracker
 opticFlow = opticalFlowHS;
 
+% Define constants
 globSize = ceil(thisVid.FrameRate) * 2; % read many frames at once to improve performance
+thresh = .01; % noise threshold on motion magnitude
 
 % Preallocate output
 if strcmp(mtype, 'eng')
@@ -33,7 +35,9 @@ for g = 1:globSize:numFrames
         
         % More complicated comparison
         img2 = im2gray(img1);
-        % img3 = imcomplement(img3); % not sure why this is here
+        % Smooth out popcorn noise
+        img2 = imgaussfilt(img2, 2);
+        % img2 = imcomplement(img2); % not sure why this is here
         x = estimateFlow(opticFlow, img2); % x is a struct with vectors etc
 
         % Determine what to return
@@ -56,9 +60,9 @@ for g = 1:globSize:numFrames
                 flow(2,1) = round(thisVid.Height/2);
             else
                 % Return X,Y coordinates of highest energy
-                m = max(x.Magnitude, [], 'all');
+                % m = max(x.Magnitude, [], 'all');
+                m = max(maxk(x.Magnitude, 5),[],2);
                 [Y, X] = find(ismember(x.Magnitude, m));
-                thresh = eps;
                 if m < thresh
                     % If no motion, expect to stay at the previous location
                     flow(1,i) = flow(1,i-1);
@@ -70,8 +74,9 @@ for g = 1:globSize:numFrames
                     else
                         % Pick the one closest to the previous location
                         testVal = flow(:,i-1)';
-                        distances = norm(testVal - [X, Y]);
-                        s = find(min(distances));
+                        % distances = norm(testVal - [X, Y]);
+                        distances = sqrt((X - testVal(1)).^2 + (Y - testVal(2)).^2);
+                        s = find(min(distances) == distances, 1);
                     end
                     flow(1,i) = X(s); % in case multiple exist
                     flow(2,i) = Y(s); % in case multiple exist
@@ -98,7 +103,7 @@ if strcmp(mtype, 'loc')
     flow = [repmat(flow(:,1), 1, nPrepend), flow];
 
     % Lowpass filter the timeseries
-    filtCutoff = 1; % Hz
+    filtCutoff = 3; % Hz
     sr = 60; % sampling rate, also in Hz
     flow = lowpass(flow', filtCutoff, sr)';
 
@@ -109,3 +114,4 @@ if strcmp(mtype, 'loc')
     flow(3,:) = round(1:1000/thisVid.FrameRate:1000*(width(flow))/thisVid.FrameRate);
 
 end
+clear thisVid % explicitly clear to ensure no memory leaks
