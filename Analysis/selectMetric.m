@@ -247,14 +247,13 @@ switch metricName
         end
         output = 1000 * numBlinks / duration;
     case 'deviance'
-        % Deviation of actual scanpath from a predicted scanpath,
-        % based on the location of highest motion in each video frame.
+        % Deviation of actual scanpath from a heatmap based on motion,
+        % based on the locations of highest motion in each video frame.
         % First, get the scanpath:
         gaze = selectMetric(edfDat, 'gaze', varargin{:});
         
-        % Now get the predicted scanpath for this stimulus
-        % We can extract the stim name from edfDat,
-        % but it may have a path attached that we should remove first
+        % Get the stim name from edfDat,
+        % and isolate the filename of the video
         stimName = getStimName(edfDat);
         [~,stimName] = fileparts(stimName);
         if flipFlag
@@ -264,19 +263,46 @@ switch metricName
         if ~strcmp(stimName(4:end), '.mov')
             stimName = [stimName '.mov'];
         end
-
-        predGaze = motionDeviation(gaze, stimName);
-
-        % Subtract prediction from measurement to get 'error' timeseries:
-        deviance(1,:) = gaze(1,:) - predGaze(1,:);
-        deviance(2,:) = gaze(2,:) - predGaze(2,:);
-        deviance(3,:) = gaze(3,:);
         
-        % This is a matrix of coordinate pairs. Reduce it to 1D distances:
-        % XY coordinates form a right triangle with the origin, so use the
-        % Pythagorean theorem to calculate the length of each hypotenuse.
-        output = sqrt(deviance(1,:).^2 + deviance(2,:).^2);
-        output = [output; deviance(3,:)]; % add that time vector back in
+        % Use stimName to get the predicted scanpath for this stimulus
+        predGaze = motionDeviation(stimName);
+
+        % This will be a set of 2D heatmaps over time.
+        % See if the gaze data is within a given threshold of the map.
+        % The heatmap is at 60Hz while gaze is around 250 Hz;
+        % Use gaze(4,:) (frame index) to temporally align.
+        thresh = deg2pix(3);
+        % deviance = zeros([size(gaze,2), 1]);
+        % for f = 1:size(gaze, 2)
+        %     f1 = gaze(4,f);
+        %     tmp = predGaze(:,:,f1);
+        %     mask = circularMask(size(tmp, [1 2]), gaze(1,f), gaze(2,f), thresh);
+        %     % Logic: the mask is centered on the gaze location,
+        %     % and the frame contains motion magnitudes,
+        %     % so if everything inside the mask is 0,
+        %     % gaze is not near motion.
+        %     deviance(f) = all(tmp(mask) == 0);
+        %     % Tally the number of frames with no motion at all,
+        %     % which we will discount from the end result.
+        %     if all(tmp == 0); skipTally = skipTally + 1; end
+        % end
+        % output = nnz(deviance) / (size(gaze, 2) - skipTally);
+
+        % Improve performance by using a "k-d tree search"
+        [nonZeroY, nonZeroX, frameIdx] = ind2sub(size(predGaze), find(predGaze > 0));
+        nonZeroPoints = [nonZeroX, nonZeroY, frameIdx];  % Store (x, y, frame) locations
+
+        % KD-tree for fast nearest-neighbor lookup
+        motionTree = KDTreeSearcher(nonZeroPoints(:,1:2)); % Only use X, Y
+        
+        % Query each gaze point
+        gazeXY = gaze(1:2, :)';  % Convert gaze to [X, Y] pairs
+        [~, dists] = knnsearch(motionTree, gazeXY);  % Find nearest motion pixel
+        
+        % Check if the distance is within the threshold
+        deviance = dists > thresh;
+        output = nnz(deviance) / (size(gaze, 2) - sum(all(predGaze == 0, [1,2])));
+
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
         % based on the location of highest motion in each video frame.
@@ -302,21 +328,6 @@ switch metricName
         predGaze = motionDeviation(gaze, stimName);
 
         output = corr2(gaze(1:2,:), predGaze);
-
-    case 'topdown'
-        % The proportion of time gaze deviated from the predicted scanpath.
-        % Gaze is considered deviated if it exceeds a preordained threshold
-        gaze = selectMetric(edfDat, 'deviance', varargin{:});
-        thresh = deg2pix(3);
-        isDeviated = gaze(1,:) >= thresh;
-        % gaze(3,:) has timestamps; their differences = sample durations
-        % e.g. time of sample 2 - time of sample 1 = duration of sample 1
-        sampleDurs = diff(gaze(2,:));
-        % diff will not give an estimated length of the final sample,
-        % so duplicate the length of the second-to-last sample.
-        sampleDurs(end+1) = sampleDurs(end);
-        timeDeviated = sum(sampleDurs(isDeviated));
-        output = timeDeviated / duration;
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end

@@ -24,6 +24,15 @@ if strcmp(mtype, 'eng')
     flow = zeros([numFrames, 1]); % single column
 elseif strcmp(mtype, 'loc')
     flow = zeros([2, numFrames]); % wide matrix
+elseif strcmp(mtype, 'map')
+    flow = zeros([1200,1920,numFrames]); % yowza that's big
+    flow = single(flow); % reduce memory demands
+    % Resize that map to be centered fullscreen in a 1920x1200 window
+    newSc = resizeVideo(thisVid.Width, thisVid.Height, [0 0 1920 1200]);
+    % avoid non-integers, since we will be indexing
+    newSc = round(newSc);
+    newW = newSc(3) - newSc(1);
+    newH = newSc(4) - newSc(2);
 end
 
 % Read in a glob of frames, then compare each i to i-1
@@ -39,7 +48,7 @@ for g = 1:globSize:numFrames
         img2 = imgaussfilt(img2, 2);
         % img2 = imcomplement(img2); % not sure why this is here
         x = estimateFlow(opticFlow, img2); % x is a struct with vectors etc
-
+        
         % Determine what to return
         if strcmp(mtype, 'eng')
             if i == 1
@@ -50,6 +59,21 @@ for g = 1:globSize:numFrames
             else
                 % Return motion energy, a la filename
                 flow(i) = sum(x.Magnitude, 'all');
+            end
+        elseif strcmp(mtype, 'map')
+            tmp = x.Magnitude;
+            tmp(tmp < thresh) = 0;
+            % flow(:,:,i) = tmp;
+            % Process the map
+            tmp2 = imresize(tmp, [newH, newW], 'nearest');
+            flow(1:1200, newSc(1)+1:newSc(1) + newW,i) = tmp2;
+            if i == 1
+                % Similar to above, the first frame is compared to blank,
+                % So treat it as if there is no motion anywhere.
+                flow(:,:,i) = 0;
+            % else
+            %     % Only return the top 5% of pixels?
+            %     flow(flow < prctile(flow, 95, 'all')) = 0;
             end
         elseif strcmp(mtype, 'loc')
             if i == 1
@@ -112,6 +136,5 @@ if strcmp(mtype, 'loc')
 
     % Also add a time vector?
     flow(3,:) = round(1:1000/thisVid.FrameRate:1000*(width(flow))/thisVid.FrameRate);
-
 end
 clear thisVid % explicitly clear to ensure no memory leaks

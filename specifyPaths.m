@@ -32,6 +32,7 @@ pths.edfalt = fullfile(pths.base, 'edf_alt');
 
 pths.beh = fullfile(pths.base, 'beh'); % behavioral data e.g. RTs
 pths.pos = fullfile(pths.analysis, 'Position'); % adjusted position data
+pths.map = fullfile(pths.analysis, 'motionMaps'); % stim motion heatmaps
 
 pths.fixcheck = fullfile(pths.base, 'fixation_checks'); % calibration
 end

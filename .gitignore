@@ -21,6 +21,7 @@ __pycache__/
 /beh/pilot/
 /ExpOutputs/TCoutput/*.mat
 /Analysis/allData.mat
+/Analysis/motionMaps/
 
 # Stimuli
 *.mov
