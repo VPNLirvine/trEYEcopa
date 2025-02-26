@@ -20,8 +20,9 @@ mu = mean(output(:,2));
 sigma = std(output(:,2));
 
 % Calculate p values by performing a t-test against 0
-[~,pval1] = ttest(output(:,1)); % Pearson
-[~,pval2] = ttest(output(:,2)); % Spearman
+% Use atanh() as a Fischer r-to-z transform 
+[~,pval1] = ttest(atanh(output(:,1))); % Pearson
+[~,pval2] = ttest(atanh(output(:,2))); % Spearman
 
 fprintf(1, '\n\nRESULTS:\n');
 fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
