@@ -17,7 +17,7 @@ opticFlow = opticalFlowHS;
 
 % Define constants
 globSize = ceil(thisVid.FrameRate) * 2; % read many frames at once to improve performance
-thresh = .01; % noise threshold on motion magnitude
+thresh = .07; % noise threshold on motion magnitude
 
 % Preallocate output
 if strcmp(mtype, 'eng')
