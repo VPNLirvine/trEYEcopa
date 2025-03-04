@@ -59,7 +59,10 @@ try
     if sum(contains(mfg, 'Empirisoft Research Software')) > 0
         % use other
         keyList(1) = KbName('3#');
-        keyList(2) = KbName('7&');
+        keyList(2) = KbName('4$');
+        keyList(3) = KbName('5%');
+        keyList(4) = KbName('6^');
+        keyList(5) = KbName('7&');
         
         % Response keys
         spaceBar = KbName('9(');
@@ -69,6 +72,9 @@ try
     else
         keyList(1) = KbName('1!');
         keyList(2) = KbName('2@');
+        keyList(3) = KbName('3#');
+        keyList(4) = KbName('4$');
+        keyList(5) = KbName('5%');
         
         % Some response keys
         spaceBar = KbName('space');% Identify keyboard key code for space bar to end each trial later on    
@@ -78,10 +84,8 @@ try
     end
 %         escKey = KbName('ESCAPE');
 
-    qText = 'Thinking about what you just saw, the narrative was:';
-    respChoices = {'unclear', 'clear'};
-        
-%     respChoices = {'1', '2', '3', '4', '5'}; % used by getResp
+    qText = 'How understandable was the action in that video?';
+    respChoices = {'1', '2', '3', '4', '5'}; % used by getResp
     numResps = length(respChoices);
     
     %% STEP 1: INITIALIZE EYELINK CONNECTION; OPEN EDF FILE; GET EYELINK TRACKER VERSION
@@ -114,8 +118,8 @@ try
         case '1'
             % TriCOPA
             rText = ['After each video, \n' ...
-            'please indicate whether the animation had a clear narrative\n'...
-            'Left finger = no clear narrative     Right finger = yes a clear narrative\n'...
+            'you will be asked how well you understood the interaction\n'...
+            'on a scale of 1 (low) to 5 (high).\n'...
             'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
         case '2'
             % Martin & Weisberg     
@@ -253,13 +257,17 @@ try
     
     %% STEP 4B: some final setup before main trial loop
     
+    % Turn off drift-correction beeps, since we have our own beep now
+    el.targetbeep = 0;
+    EyelinkUpdateDefaults(el);
+    
     % Screen settings for PTB
     ScreenBkgd = el.backgroundcolour; % mid gray
     TextColor = el.msgfontcolour; % black
     ChoiceColor = [255 255 255]; % white
     % Calculate a gap size: come in 10% on both ends (or 80% of total width),
     % then if you have e.g. 3 items, you need the size of 2 gaps. So n-1. 
-    respOffset = round((.6 * width) / (numResps - 1)); %round((.8 * width) / (numResps - 1));
+    respOffset = round((.8 * width) / (numResps - 1));
     qHeight = .25 * height;
     wRect = [0 0 width height];
     
@@ -373,7 +381,7 @@ try
         WaitSecs(0.1); % Allow some time to record a few samples before presenting first stimulus
         
         % STEP 5.3: PRESENT VIDEO; CREATE DATAVIEWER BACKDROP AND INTEREST AREA; STOP RECORDING
-        Snd('Play',sin(0:10000)); % play sound for microphone sync
+        Snd('Play',sin(0:200), 4000); % play sound for microphone sync
         
         timeOut = 'yes'; % Variable set to a default value. Changes to 'no' if key pressed to end video early
         % Start playback engine:
@@ -483,7 +491,7 @@ try
         Eyelink('SetOfflineMode');% Put tracker in idle/offline mode
 
         if panic
-            % Immediately close the audio recording
+            % Close the audio recording
             PsychPortAudio('Stop', pahandle);
             [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
             [~, movF, ~] = fileparts(movieName);
@@ -492,18 +500,6 @@ try
             % Exit trial loop, but still export files
             break
         else
-            % Wait for any button press to proceed
-            keyIsDown = 0;
-            FlushEvents('keyDown'); %get rid of any old keypresses
-            while keyIsDown == 0
-                [keyIsDown, ~, ~] = KbCheck();
-            end
-            % Close the audio recording
-            PsychPortAudio('Stop', pahandle);
-            [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
-            [~, movF, ~] = fileparts(movieName);
-            wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
-            audiowrite(wavout, audioData, 44100);
             switch taskID
                 case 'MartinWeisberg'
                 % Don't bother collecting a rating of "understandability"
@@ -528,6 +524,12 @@ try
                 
                 break
             end
+            % Close the audio recording
+            PsychPortAudio('Stop', pahandle);
+            [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+            [~, movF, ~] = fileparts(movieName);
+            wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
+            audiowrite(wavout, audioData, 44100);
             
             % Output trial data to file
             % 'Trial \tResponse \RT \tTime \tStimName\n'
@@ -614,7 +616,7 @@ end
         % Dynamically place a certain number of response options
         for c = 1:numResps
             % NOT PERFECT - debug
-            offset = (.2 * width) + (respOffset * (c-1));
+            offset = (.1 * width) + (respOffset * (c-1)); % 
             if c == response
                 DrawFormattedText(window, respChoices{c},  offset, 'center', ChoiceColor);
             else
