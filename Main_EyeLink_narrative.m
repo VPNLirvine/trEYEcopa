@@ -253,10 +253,6 @@ try
     
     %% STEP 4B: some final setup before main trial loop
     
-    % Turn off drift-correction beeps, since we have our own beep now
-    el.targetbeep = 0;
-    EyelinkUpdateDefaults(el);
-    
     % Screen settings for PTB
     ScreenBkgd = el.backgroundcolour; % mid gray
     TextColor = el.msgfontcolour; % black
@@ -377,7 +373,7 @@ try
         WaitSecs(0.1); % Allow some time to record a few samples before presenting first stimulus
         
         % STEP 5.3: PRESENT VIDEO; CREATE DATAVIEWER BACKDROP AND INTEREST AREA; STOP RECORDING
-        Snd('Play',sin(0:200), 4000); % play sound for microphone sync
+        Snd('Play',sin(0:10000)); % play sound for microphone sync
         
         timeOut = 'yes'; % Variable set to a default value. Changes to 'no' if key pressed to end video early
         % Start playback engine:
