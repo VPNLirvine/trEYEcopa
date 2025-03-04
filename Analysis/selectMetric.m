@@ -1,4 +1,4 @@
-function output = selectMetric(edfDat, metricName, varargin)
+function [output, varargout] = selectMetric(edfDat, metricName, varargin)
 % Takes in a single row of an edf file (ie already indexed by trial number)
 % e.g. input should be edfFile(trialNum), not edfFile itself
 % Given a metric name like 'totfixation', calculate and return that metric
@@ -246,9 +246,12 @@ switch metricName
             numBlinks = length(edfDat.Blinks.sttime);
         end
         output = 1000 * numBlinks / duration;
-    case 'deviance'
+    case 'devvec'
         % Deviation of actual scanpath from a heatmap based on motion,
         % based on the locations of highest motion in each video frame.
+        % This (hidden) metric returns a vector of binary values over time
+        % indicating whether gaze was deviated or not.
+
         % First, get the scanpath:
         gaze = selectMetric(edfDat, 'gaze', varargin{:});
         
@@ -300,8 +303,18 @@ switch metricName
         [~, dists] = knnsearch(motionTree, gazeXY);  % Find nearest motion pixel
         
         % Check if the distance is within the threshold
-        deviance = dists > thresh;
-        output = nnz(deviance) / (size(gaze, 2) - sum(all(predGaze == 0, [1,2])));
+        output = dists > thresh;
+        % Insert timestamps - for compatibility w/ getAvgDeviance()
+        output = single(output)';
+        output(2,:) = gaze(3,:);
+        if nargout > 1
+            varargout{1} = predGaze;
+        end
+    case 'deviance'
+        % Get the proportion of timepoints deviated from motion energy,
+        % discounting any samples where motion was absent.
+        [deviance, predGaze] = selectMetric(edfDat, 'devvec', varargin{:});
+        output = nnz(deviance(1,:)) / (size(deviance, 2) - sum(all(predGaze == 0, [1,2])));
 
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
