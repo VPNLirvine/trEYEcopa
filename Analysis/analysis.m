@@ -163,7 +163,7 @@ if choice == 1 % Correlation analysis
             scatter(aq, eyeCol);
                 title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f, p = %0.4f', numSubs, aq2eye(2,1), aq2eye(2,2)));
                 xlabel(var3);
-                ylabel(var1);
+                ylabel(['Average ' var1]);
                 ylim(yl);
                 xlim(yl3);
                 
@@ -212,7 +212,7 @@ if choice == 1 % Correlation analysis
                 scatter(aq, zCorr, 'filled');
                 xlabel(var3);
                 ylabel('Z-Transformed Spearman correlation');
-                title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f', var3, var1, var2, secondCorr));
+                title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f, p = %0.4f', var3, var1, var2, secondCorr, secondP));
                 xlim(yl3);
         
             fprintf(1, 'Correlation between %s and (within-subject correlation between %s and %s):\n', var3, var1, var2)
