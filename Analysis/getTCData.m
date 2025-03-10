@@ -8,7 +8,7 @@ function data = getTCData(metricName)
     
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
-    useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'deviance'}));
+    useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec'}));
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
     if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
@@ -54,7 +54,12 @@ function data = getTCData(metricName)
         edf = osfImport(edfName);
         eyetrack = []; % init per sub
         badList = [];
+        
+        % Give feedback on progress
+        fprintf(1, 'Processing trial 000')
+
         for t = 1:numTrials
+            fprintf(1, '\b\b\b%03.f', t);
             if isempty(edf(t).Saccades) || behav.Response(t) == -1
                 % Either eyetracking data is missing, or no response
                 % Don't attempt to extract data that isn't there
@@ -70,7 +75,7 @@ function data = getTCData(metricName)
                 end
             end
         end
-        
+        fprintf(1, '\n')
         % Drop trials on the bad list
         behav(badList, :) = [];
         numTrials = height(behav);

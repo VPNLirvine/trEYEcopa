@@ -89,8 +89,8 @@ switch metricName
         txt = 'Percent time gaze was on any character';
         yl = [0 1]; % percentage is bounded 0 to 1
         dist = 'Expect an RT-like distribution';
-    case 'topdown'
-        txt = 'Percent time gaze was deviated from prediction';
+    case 'deviance'
+        txt = 'Percent time gaze was away from motion';
         yl = [0 1];
         dist = 'Expect an RT-like distribution';
     otherwise

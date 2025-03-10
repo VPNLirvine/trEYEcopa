@@ -16,11 +16,13 @@ __pycache__/
 ## Project-specific exclusions
 # Subject data
 *.edf
+*.EDF
 /beh/*.txt
 /beh/*.tsv
 /beh/pilot/
 /ExpOutputs/TCoutput/*.mat
 /Analysis/allData.mat
+/Analysis/motionMaps/
 
 # Stimuli
 *.mov

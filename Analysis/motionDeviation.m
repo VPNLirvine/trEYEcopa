@@ -1,17 +1,28 @@
-function predGaze = motionDeviation(gaze, stimName)
+function motionMap = motionDeviation(stimName)
 % This follows the same basic concept as "time on target",
-% in that we're comparing a subject's gaze path to a stimulus-derived path,
-% but here we're comparing to a single predicted scanpath, not many.
+% in that we're comparing a subject's gaze path to stimulus-derived data,
+% but here we're comparing to a heatmap of motion, which will:
+% 1. include the door swinging open, and 
+% 2. ignore times when no character is in motion.
+% This is most closely equivalent to the "pursuit duration" metric 
+% given by Roux, Passerieux, & Ramus (2013).
+
+pths = specifyPaths('..');
+fname = strrep(stimName, '.mov', '.mat');
+fpath = fullfile(pths.map, fname);
 
 %% EXTRACT DATA TO BE COMPARED
-% Load the motion-predicted timecourses and pick the one for this video.
-if ~exist("motionLocation.mat", 'file')
-    motion = getMotionEnergy('loc');
+if exist(fpath, 'file')
+    % Load the motion-predicted timecourses and pick the one for this video.
+    motionMap = importdata(fpath);
+    % subset = strcmp(motion.StimName, stimName);
+    % motionMap = motion.MotionEnergy{subset};
 else
-    motion = importdata("motionLocation.mat");
+    % Detect the motion energy for this video
+    fprintf(1, '\nDetecting motion energy for %s\n', stimName);
+    fprintf(1, 'This data will not be saved; please run getMotionEnergy(''map'') to do so.\n\n')
+    motionMap = findMotionEnergy(findVidPath(stimName), 'map');
 end
-subset = strcmp(motion.StimName, stimName);
-posDat = motion.MotionEnergy{subset};
 % This data has already been rescaled to the stim monitor size,
 % and gaze was inherently sampled at the stim monitor size,
 % so the two are spatially aligned, but still need to be temporally aligned.
@@ -25,18 +36,6 @@ posDat = motion.MotionEnergy{subset};
 % Need to know what frame was up for each gaze sample,
 % then resample the position data to follow that pattern.
 % Row 4 of gaze is the frame number. Use that to index out of posDat.
-predGaze(1,:) = posDat(1,gaze(4,:));
-predGaze(2,:) = posDat(2,gaze(4,:));
-
-%% TO VISUALIZE:
-% figure();
-% subplot(1,3,1)
-% plotGaze(gaze, 'Gaze');
-% subplot(1,3,2)
-% plotGaze(posDat, 'Predicted');
-% subplot(1,3,3)
-% plotGaze(deviance, 'Deviance');
-% xlim([-1920/2, 1920/2]);
-% zlim([-1200/2, 1200/2]);
+% motionMap = posDat(:,:,gaze(4,:));
 
 end
