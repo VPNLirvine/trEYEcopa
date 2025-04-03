@@ -23,6 +23,7 @@ __pycache__/
 /ExpOutputs/TCoutput/*.mat
 /Analysis/allData.mat
 /Analysis/motionMaps/
+/Analysis/Results/
 
 # Stimuli
 *.mov
