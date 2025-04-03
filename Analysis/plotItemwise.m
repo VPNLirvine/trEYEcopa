@@ -33,6 +33,7 @@ for i = 1:length(stimList)
     if ~mwflag
         ratCol(i) = mean(plotData.Response(ind));
     end
+    eyeCol(i) = mean(plotData.Eyetrack(ind));
 end
 [~,o] = sort(d); % sort the durations and get the reordering indices
 plotOrder = stimList(o); % use the new order to index from stim list
@@ -42,10 +43,11 @@ tit = 'Videos sorted by duration, variance is across subjects';
 % tit = 'Videos sorted alphabetically, variance is across subjects';
 
 % Also calculate a correlation between metric and video duration
-c = corr(plotData.Eyetrack, durCol', 'rows', 'complete');
+% c = corr(plotData.Eyetrack, durCol', 'rows', 'complete');
+c = corr(eyeCol', d', 'rows', 'complete');
 % c2 = corr(plotData.Response, durCol', 'rows', 'complete');
 if ~mwflag
-    c2 = corr(ratCol', d', 'rows', 'complete');
+    c2 = corr(ratCol', d', 'rows', 'complete', 'Type', 'Spearman');
 end
 
 % Now make the plot
@@ -54,6 +56,9 @@ figure();
     ylim(yl);
     ylabel(axistxt);
     title(sprintf([tit '\nPearson''s r = %0.2f'],c));
+    hold on
+        scatter(1:100, eyeCol(o), "filled", "MarkerFaceColor", "#D95319");
+    hold off
 
 % Make another for ratings
 if ~mwflag
@@ -63,7 +68,7 @@ if ~mwflag
         ylim(yl2);
         yticks(yl2(1)+1 : yl2(2) - 1); % 1:5
         ylabel(ax2);
-        title(sprintf([tit '\nPearson''s r = %0.2f'],c2));
+        title(sprintf([tit '\nSpearman''s rho = %0.2f'],c2));
         hold on
         scatter(1:100, ratCol(o), "filled", "MarkerFaceColor", "#D95319");
         hold off

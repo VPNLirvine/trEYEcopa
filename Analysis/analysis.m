@@ -204,14 +204,17 @@ if choice == 1 % Correlation analysis
                 title(sprintf('Across %i subjects, \x03C1 = %0.2f, p = %0.4f', numSubs, aq2rating(1,1), aq2rating(1,2)));
 
             % Now Fischer z-transform your main correlation coefficients
-            zCorr = zscore(eye2rating(:,2));
+            % zCorr = zscore(eye2rating(:,2));
+            % zCorr = atanh(eye2rating(:,2));
+            zCorr = eye2rating(:,2); % Spearman correlation doesn't assume normality, so no need to transform
         
             % Plot and analyze relationship between AQ and current metric
             [secondCorr, secondP] = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
             figure();
-                scatter(aq, zCorr, 'filled');
+                % scatter(aq, zCorr, 'filled');
+                scatterhist(aq, zCorr, 'NBins', 10, 'Marker', '.', 'MarkerSize', 18, 'Direction', 'out');
                 xlabel(var3);
-                ylabel('Z-Transformed Spearman correlation');
+                ylabel('Within-Subject Spearman correlation');
                 title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f, p = %0.4f', var3, var1, var2, secondCorr, secondP));
                 xlim(yl3);
         
