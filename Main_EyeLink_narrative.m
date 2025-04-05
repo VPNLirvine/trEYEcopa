@@ -118,7 +118,7 @@ try
         case '1'
             % TriCOPA
             rText = ['After each video, you will be asked\n' ...
-            'how difficult it was to understand the interaction\n'...
+            'how difficult it was to understand the narrative\n'...
             'on a scale of 1 (low) to 5 (high).\n'...
             'Press the corresponding button on the keyboard as fast as you can.\n\n\n'];
         case '2'
@@ -304,7 +304,7 @@ try
     %% STEP 4C: Display instructions before experiment starts
     
     iText = sprintf(['You are about to watch a series of %i short video clips,\n'...
-    'depicting some interacting shapes. %s' ...
+    'depicting some moving shapes. %s' ...
     'Please press the %s when you are ready to begin.'], numTrials, rText, indicator);
     Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
     DrawFormattedText(window, iText, 'center', 'center', TextColor);
@@ -317,8 +317,96 @@ try
             begin = true;
         end
     end
-    %% STEP 5: TRIAL LOOP.
+    %% STEP 5A: PRACTICE TRIAL LOOP.
    
+    % Start with some practice trials
+    % If you assume we're using a subset of just 26 "discriminative" stims,
+    % then pick a set of 4 vids outside that list to illustrate the task
+    stimList = {'normal/Q51_6694_attack.mov', 'normal/Q4_6643_slam_door.mov', 'normal/Q24_6665_wave_greet.mov'};
+    for i = 1:length(stimList)
+        %
+        response = -1;
+        movieName = char(stimList(i));
+        % Check if movieName has extension already
+        if ~strcmpi(movieName(end-3:end), '.MOV')
+            movieName = strcat(movieName, '.MOV');
+        end
+        moviePath = fullfile(stimPath, movieName);
+        [movie, ~, ~, Movx, Movy] = Screen('OpenMovie', window, moviePath, [], [], spcf1); % spcf1 required to disable audio on macOS Catalina and avoid playback freezing issues
+        
+        % Calculate new size for video
+        newRect = resizeVideo(Movx, Movy, wRect);
+        Movx = newRect(3); Movy = newRect(4); % Send to Eyelink
+        timeOut = 'yes'; % Variable set to a default value. Changes to 'no' if key pressed to end video early
+        % Start playback engine:
+        Screen('PlayMovie', movie, 1);
+        frameNum = 0;        
+        % Wait until user releases keys on keyboard:
+        KbReleaseWait;       
+        % Playback loop: Runs until end of movie or keypress:
+        while 1
+            % Wait for next movie frame, retrieve texture handle to it
+            tex = Screen('GetMovieImage', window, movie);
+            if tex<=0 % Valid texture returned? A negative value means end of movie reached
+                break;
+            end
+            % Draw the new texture immediately to screen:
+            Screen('DrawTexture', window, tex, [], newRect);            
+            % Update display:
+            frameOn = Screen('Flip', window);
+            frameNum = frameNum + 1;
+            if frameNum == 1
+                vidStart = GetSecs;  % Start a timer
+            end
+            % End trial if space bar is pressed
+            [~, kbSecs, keyCode] = KbCheck;
+            if keyCode(spaceBar) || keyCode(deleteKey)
+                % Write message to EDF file to mark the space bar press time
+                timeOut = 'no';
+                % Release texture:
+                Screen('Close', tex);
+                if keyCode(deleteKey)
+                    % Finish calculating things for this trial,
+                    % then terminate the whole experiment
+                    panic = true;
+                end
+                break;
+            end
+            Screen('Close', tex); % Release texture if no key is pressed
+        end  % End while loop
+        Screen('PlayMovie', movie, 0); % Stop playback
+        Screen('CloseMovie', movie); % Close movie
+        
+        % Draw blank screen at end of trial
+        Screen('FillRect', window, el.backgroundcolour);
+        [~, vidEnd] = Screen('Flip', window); % Present blank screen
+        
+        WaitSecs(1.5);
+        if panic
+            % Exit trial loop, but still export files
+            break
+        else
+            switch taskID
+                case 'MartinWeisberg'
+                % Don't bother collecting a rating of "understandability"
+                % The videos are so simple, they'll all be 4 or 5
+                % Ideally you'd avoid opening a response file at all,
+                % but I don't want to retool all the code. Just do this.
+                    RT = -1; response = -1;
+                case 'TriCOPA'
+                % Invoke subroutine for collecting response.
+                % Keep in mind that this happens AFTER the video,
+                % so the RT is kind of useless at the moment.
+                % But it also sets a global 'response' variable we need.
+                    RT = getResp;
+            end
+            if panic
+                break
+            end
+        end % if panic
+    end % for 4 practice trials
+    
+    %% STEP 5B: MAIN TRIAL LOOP
     
     for i = 1:numTrials
         trialStart = GetSecs;
@@ -489,6 +577,7 @@ try
         WaitSecs(0.01); % Allow some time before ending the trial
         
         Eyelink('SetOfflineMode');% Put tracker in idle/offline mode
+        WaitSecs(1.5); % Let people keep talking a bit before question
 
         if panic
             % Close the audio recording
