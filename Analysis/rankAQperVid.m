@@ -83,3 +83,32 @@ if isempty(SigForAll)
 else
     fprintf(1, '\t%s\n', SigForAll{:});
 end
+
+% PAIRWISE COMPARISONS
+% You probably only want to keep videos that are UNIQUELY predictive
+sp1 = s1 & s2;
+vlist = vidList(sp1);
+fprintf(1, 'Videos impacted by both Social Skills & Communication Skills:\n');
+if isempty(vlist)
+    fprintf(1,'\t(none)\n');
+else
+    fprintf(1, '\t%s\n', vlist{:});
+end
+
+sp2 = s1 & s3;
+vlist = vidList(sp2);
+fprintf(1, 'Videos impacted by both Social Skills & Attention to Detail:\n');
+if isempty(vlist)
+    fprintf(1,'\t(none)\n');
+else
+    fprintf(1, '\t%s\n', vlist{:});
+end
+
+sp3 = s2 & s3;
+vlist = vidList(sp3);
+fprintf(1, 'Videos impacted by both Communication Skills & Attention to Detail:\n');
+if isempty(vlist)
+    fprintf(1,'\t(none)\n');
+else
+    fprintf(1, '\t%s\n', vlist{:});
+end
