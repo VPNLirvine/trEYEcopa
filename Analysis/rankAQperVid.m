@@ -9,6 +9,10 @@ function [x, vidList] = rankAQperVid(data)
 % Since we have 3, it's more complicated
 % Peruse Walker 2021 for better methods?
 
+if ~sum(ismember(data.Properties.VariableNames,'SocialSkills'))
+    data = insertAQ(data);
+end
+
 vidList = unique(data.StimName);
 numVids = length(vidList); % ought to be 100
 nvar = 4;
@@ -41,6 +45,17 @@ sigVidNames = vidList(sigVids);
 unSigVidNames = vidList(lowOrder);
 unSigVidNames = unSigVidNames(1:25);
 % save('unSigVids.mat', 'unSigVidNames');
+
+% Export the results and an indicator per video
+output = table;
+output.StimName = vidList;
+output.Significant = sigVids(:);
+output.CommBeta = squeeze(x(3,1,:));
+output.CommPVal = squeeze(x(3,5,:));
+output.SocBeta = squeeze(x(2,1,:));
+output.SocPVal = squeeze(x(2,5,:));
+output.AttBeta = squeeze(x(4,1,:));
+output.AttPVal = squeeze(x(4,5,:));
 
 
 % WHICH subscales are significant?
