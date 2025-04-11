@@ -70,6 +70,6 @@ if ~mwflag
         ylabel(ax2);
         title(sprintf([tit '\nSpearman''s rho = %0.2f'],c2));
         hold on
-        scatter(1:100, ratCol(o), "filled", "MarkerFaceColor", "#D95319");
+        scatter(1:length(stimList), ratCol(o), "filled", "MarkerFaceColor", "#D95319");
         hold off
 end
