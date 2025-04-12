@@ -52,6 +52,8 @@ try
     lastPressed = -1;
     maxWait = 4; % max duration to wait for a response
     
+    InitializePsychSound;
+    
     clear PsychHID; % re-scan for devices
     devices = PsychHID('Devices');
     mfg = {devices(:).manufacturer}; % i hate structs
@@ -247,13 +249,14 @@ try
    if ~debugmode
         HideCursor(screenNumber);
    end
-    % Start listening for keyboard input. Suppress keypresses to Matlab windows.
+    % Suppress keypresses to Matlab windows.
     ListenChar(-1);
     % Clear Host PC display from any previus drawing
     Eyelink('Command', 'clear_screen 0');
-    % Put EyeLink Host PC in Camera Setup mode for participant setup/calibration
-    EyelinkDoTrackerSetup(el);
-    
+    if dummymode == 0
+        % Put EyeLink Host PC in Camera Setup mode for participant setup/calibration
+        EyelinkDoTrackerSetup(el);
+    end
     
     %% STEP 4B: some final setup before main trial loop
     
@@ -323,6 +326,25 @@ try
     % If you assume we're using a subset of just 26 "discriminative" stims,
     % then pick a set of 4 vids outside that list to illustrate the task
     stimList = {'normal/Q51_6694_attack.mov', 'normal/Q4_6643_slam_door.mov', 'normal/Q24_6665_wave_greet.mov'};
+    
+    % Display some warning text
+    Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+    pText = sprintf('The first three trials will be for practice.\nPush the %s again to begin.', indicator);
+    DrawFormattedText(window, pText, 'center', 'center', TextColor);
+    Screen('Flip', window);
+    
+    % Wait for button press
+    WaitSecs(.5);
+    begin = false;
+    FlushEvents('keyDown'); %get rid of any old keypresses
+    while ~begin
+        [~,ExptStart,buttonPress] = KbCheck();
+        if ismember(spaceBar, find(buttonPress))
+            begin = true;
+        end
+    end
+    
+    % Begin practice trials
     for i = 1:length(stimList)
         %
         response = -1;
@@ -406,8 +428,27 @@ try
         end % if panic
     end % for 4 practice trials
     
-    %% STEP 5B: MAIN TRIAL LOOP
     
+    % Display some end text
+    Screen('FillRect', window, ScreenBkgd, wRect); % fill bkgd with mid-gray
+    pText = sprintf('This ends the practice phase.\nPush the %s to continue.', indicator);
+    DrawFormattedText(window, pText, 'center', 'center', TextColor);
+    Screen('Flip', window);
+    
+    % Wait for button press
+    begin = false;
+    FlushEvents('keyDown'); %get rid of any old keypresses
+    while ~begin
+        [~,ExptStart,buttonPress] = KbCheck();
+        if ismember(spaceBar, find(buttonPress))
+            begin = true;
+        end
+    end
+    
+    %% STEP 5B: MAIN TRIAL LOOP
+    % Initialize audio device
+    pahandle = PsychPortAudio('Open', [], 2, 0, 44100, 1);
+    PsychPortAudio('GetAudioData', pahandle, 60);
     for i = 1:numTrials
         trialStart = GetSecs;
         response = -1; % reset on each trial
@@ -452,9 +493,9 @@ try
         % Optionally provide x y target location, otherwise target is presented on screen centre
         EyelinkDoDriftCorrection(el, round(width/2), round(height/2));
         
-        % start audio recording
-        pahandle = PsychPortAudio('Open', [], 2, 0, 44100, 1);
-        PsychPortAudio('GetAudioData', pahandle, 60);
+%         % Initialize audio device
+%         pahandle = PsychPortAudio('Open', [], 2, 0, 44100, 1);
+%         PsychPortAudio('GetAudioData', pahandle, 60);
         
         
         %STEP 5.2: START RECORDING
@@ -465,7 +506,7 @@ try
         % WaitSecs(0.05); % Allow some time for transition           
         Eyelink('SetOfflineMode');% Put tracker in idle/offline mode before recording
         Eyelink('StartRecording'); % Start tracker recording
-        PsychPortAudio('Start', pahandle);
+        PsychPortAudio('Start', pahandle); % Start audio recording
         WaitSecs(0.1); % Allow some time to record a few samples before presenting first stimulus
         
         % STEP 5.3: PRESENT VIDEO; CREATE DATAVIEWER BACKDROP AND INTEREST AREA; STOP RECORDING
@@ -616,6 +657,11 @@ try
             % Close the audio recording
             PsychPortAudio('Stop', pahandle);
             [audioData, ~, ~] = PsychPortAudio('GetAudioData', pahandle);
+                if isempty(audioData)
+                    % do SOMETHING
+                    audioData = 0;
+                    fprintf(1, '\nEnd of trial %i, GetAudioData returned an empty audioData\n', i);
+                end
             [~, movF, ~] = fileparts(movieName);
             wavout = fullfile(pths.audio, [subID,'-', num2str(i), '-', movF,'.wav']);
             audiowrite(wavout, audioData, 44100);
