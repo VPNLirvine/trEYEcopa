@@ -275,46 +275,61 @@ switch metricName
         % The heatmap is at 60Hz while gaze is around 250 Hz;
         % Use gaze(4,:) (frame index) to temporally align.
         thresh = deg2pix(3);
-        % deviance = zeros([size(gaze,2), 1]);
-        % for f = 1:size(gaze, 2)
-        %     f1 = gaze(4,f);
-        %     tmp = predGaze(:,:,f1);
-        %     mask = circularMask(size(tmp, [1 2]), gaze(1,f), gaze(2,f), thresh);
-        %     % Logic: the mask is centered on the gaze location,
-        %     % and the frame contains motion magnitudes,
-        %     % so if everything inside the mask is 0,
-        %     % gaze is not near motion.
-        %     deviance(f) = all(tmp(mask) == 0);
-        %     % Tally the number of frames with no motion at all,
-        %     % which we will discount from the end result.
-        %     if all(tmp == 0); skipTally = skipTally + 1; end
-        % end
-        % output = nnz(deviance) / (size(gaze, 2) - skipTally);
-
-        % Improve performance by using a "k-d tree search"
+        
+        % predGaze is a huge 3D matrix representing each pixel over time,
+        % with 1s saying "this pixel had motion" but mostly 0s for none.
+        % We're saving compute by stripping out all those 0s:
+        % nonZeroPoints gives the X,Y,frame of the pixels WITH motion
+        % so you have a more compact vector with only the relevant data.
+        % Likewise, gaze has lots of irrelevant data because we only care
+        % about the timepoints when there WAS motion to begin with.
+        % So we can also skip any cols from gaze where predGaze is all 0s.
+        
+        
         [nonZeroY, nonZeroX, frameIdx] = ind2sub(size(predGaze), find(predGaze > 0));
         nonZeroPoints = [nonZeroX, nonZeroY, frameIdx];  % Store (x, y, frame) locations
-
-        % KD-tree for fast nearest-neighbor lookup
-        motionTree = KDTreeSearcher(nonZeroPoints(:,1:2)); % Only use X, Y
+        motionFrames = unique(frameIdx);
+        clear predGaze nonZeroX nonZeroY frameIdx % free memory
         
-        % Query each gaze point
-        gazeXY = gaze(1:2, :)';  % Convert gaze to [X, Y] pairs
-        [~, dists] = knnsearch(motionTree, gazeXY);  % Find nearest motion pixel
+        % Preallocate output so we can quickly slice results in
+        output = single(zeros(1,width(gaze)));
         
-        % Check if the distance is within the threshold
-        output = dists > thresh;
+        % Check all relevant gaze data for each relevant frame
+        for k = 1:numel(motionFrames)
+            % Extract the relevant locations in this frame
+            frameID = motionFrames(k);
+            l = nonZeroPoints(:,3) == frameID;
+            XY = nonZeroPoints(l,1:2);
+            
+            % Extract the relevant gaze points
+            l = gaze(4,:) == frameID;
+            gazeSub = gaze(1:2,l)';
+            
+            % Instead of looping over every pixel location,
+            % Improve performance by using a "k-d tree search",
+            % which finds the nearest motion location to every gaze sample.
+            motionTree = KDTreeSearcher(XY);
+            [~, dists] = knnsearch(motionTree, gazeSub);
+            
+            % Now we have the distance of every gaze point from motion.
+            % If the NEAREST motion location is too far from gaze,
+            % then gaze is deviated from ALL other motion points, too.
+            % Index those logicals into your output variable.
+            output(l) = dists > thresh;
+            
+        end
+        numGoodGaze = nnz(ismember(gaze(4,:), motionFrames));
         % Insert timestamps - for compatibility w/ getAvgDeviance()
-        output = single(output)';
+%         output = single(output)';
         output(2,:) = gaze(3,:);
         if nargout > 1
-            varargout{1} = predGaze;
+            varargout{1} = numGoodGaze;
         end
     case 'deviance'
         % Get the proportion of timepoints deviated from motion energy,
         % discounting any samples where motion was absent.
-        [deviance, predGaze] = selectMetric(edfDat, 'devvec', varargin{:});
-        output = nnz(deviance(1,:)) / (size(deviance, 2) - sum(all(predGaze == 0, [1,2])));
+        [deviance, numGoodGaze] = selectMetric(edfDat, 'devvec', varargin{:});
+        output = nnz(deviance(1,:)) / numGoodGaze;
 
     case 'similarity'
         % Correlation of scanpath with predicted scanpath,
