@@ -20,7 +20,11 @@ pths = specifyPaths('..');
 outputPath = pths.MWdat;
 
 % Collect references to all edf files that exist in the outputPath
-edfList = dir(fullfile(outputPath, '*.edf')); 
+fileList = dir(outputPath);
+    fnames = {fileList.name};
+    subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
+    subset = cell2mat(subset);
+    edfList = fileList(subset); clear fileList
 numSubs = length(edfList);
 
 % Initialize an empty dataframe

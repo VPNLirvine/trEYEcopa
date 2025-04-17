@@ -3,7 +3,12 @@ function data = getTCData(metricName)
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
     outputPath = pths.TCdat;
-    edfList = dir(fullfile(outputPath, '*.edf'));
+    fileList = dir(outputPath);
+        % String-insensitive compare, in case file extension is uppercase
+        fnames = {fileList.name};
+        subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
+        subset = cell2mat(subset);
+        edfList = fileList(subset); clear fileList
     numSubs = length(edfList); % Count the number of subjects to process
     
     % Initialize an empty dataframe
