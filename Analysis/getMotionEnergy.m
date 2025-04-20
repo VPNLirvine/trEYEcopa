@@ -22,7 +22,7 @@ fprintf(1, 'Getting motion data for %i videos.\n', numStims)
 for s = 1:numStims
     fprintf(1, '\t%i\n', s);
     stimName = stimList(s).name;
-    fname = fullfile(stimDir, stimName);
+    fname = findVidPath(stimName);
     motionVec = findMotionEnergy(fname, mtype);
     if strcmp(mtype, 'map')
         % Save each map as an individual file,
