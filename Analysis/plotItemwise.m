@@ -12,9 +12,10 @@ pths = specifyPaths('..');
 % First get some axis labels etc
 [axistxt, yl] = getGraphLabel(metricName);
 stimList = unique(plotData.StimName); % Theoretically alphabetical order
+numStims = length(stimList);
 
 % Let's try sorting by video duration instead of video name
-for i = 1:length(stimList)
+for i = 1:numStims
     stim = stimList{i};
     % Find video, accounting for different locations etc.
     if mwflag
@@ -57,7 +58,7 @@ figure();
     ylabel(axistxt);
     title(sprintf([tit '\nPearson''s r = %0.2f'],c));
     hold on
-        scatter(1:100, eyeCol(o), "filled", "MarkerFaceColor", "#D95319");
+        scatter(1:numStims, eyeCol(o), "filled", "MarkerFaceColor", "#D95319");
     hold off
 
 % Make another for ratings
