@@ -18,7 +18,7 @@ function watchData(movName, gaze, prediction)
         prediction = prediction <= deg2pix(3);
     end
 
-    numSamples = width(gaze);
+    numSamples = size(gaze, 2); % width() doesn't work prior to 2020b
     frameIdx = gaze(4,:);
     sr = diff(gaze(3,1:2)) / 1000;
     % Load in the video data
@@ -33,7 +33,8 @@ function watchData(movName, gaze, prediction)
     imh = thisVid.Height;
     imw = thisVid.Width;
     % numFrames = size(frames,4);
-    numFrames = thisVid.NumFrames;
+%     numFrames = thisVid.NumFrames;
+    numFrames = thisVid.FrameRate * thisVid.Duration; % NumFrames property introduced in 2019b
     % clear thisVid % release memory
 
 %     scVec = get(0, 'ScreenSize');  % Get the screen size
@@ -67,6 +68,7 @@ function watchData(movName, gaze, prediction)
     titxt = strrep(movName, '_', '\_');
     % Now animate in a new loop
     t = tic;
+    t2 = t;
     lastFrame = i;
     for i = 2:numSamples
         f = frameIdx(i);
@@ -86,9 +88,9 @@ function watchData(movName, gaze, prediction)
         title(titxt);
         
         % Compensate for framerate
-        if toc > sr
+        if toc(t2) > sr
             drawnow;
-            tic;
+            t2 = tic;
         end
         % drawnow limitrate;
         % pause(sr);
