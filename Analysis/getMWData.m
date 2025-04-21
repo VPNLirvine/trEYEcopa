@@ -25,6 +25,14 @@ fileList = dir(outputPath);
     subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
     subset = cell2mat(subset);
     edfList = fileList(subset); clear fileList
+
+    if nargin > 1
+        subList = varargin{2};
+        % subset edfList to just the subjects asked for
+        subIDs = arrayfun(@(x) sprintf('MW_%02.f', x), subList, 'UniformOutput', false);
+        subset = contains({edfList.name}, subIDs);
+        edfList = edfList(subset);
+    end
 numSubs = length(edfList);
 
 % Initialize an empty dataframe

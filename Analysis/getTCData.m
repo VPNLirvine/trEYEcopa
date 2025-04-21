@@ -1,4 +1,4 @@
-function data = getTCData(metricName)
+function data = getTCData(metricName, subList)
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
@@ -9,6 +9,13 @@ function data = getTCData(metricName)
         subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
         subset = cell2mat(subset);
         edfList = fileList(subset); clear fileList
+    if nargin > 1
+        % subset edfList to just the subjects asked for
+        subIDs = arrayfun(@(x) sprintf('TC_%02.f', x), subList, 'UniformOutput', false);
+        subset = contains({edfList.name}, subIDs);
+        edfList = edfList(subset);
+    end
+    
     numSubs = length(edfList); % Count the number of subjects to process
     
     % Initialize an empty dataframe
