@@ -15,7 +15,7 @@ if any(frameMsgs)
     % Extract frame numbers and times
     frames = list(frameMsgs);
     frameNums = cellfun(@(x) str2double(erase(x, stxt)), frames);
-    frameTimes = edfDat.Events.sttime(frameMsgs);
+    frameTimes = double(edfDat.Events.sttime(frameMsgs));
     frameTimes(end + 1) = stimEnd;  % Append end of stimulus
 
     % Initialize frame output
