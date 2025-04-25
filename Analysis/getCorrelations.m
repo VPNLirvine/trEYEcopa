@@ -11,6 +11,9 @@ for s = 1:numSubs
     output(s,2) = corr(data.Response(subset), data.Eyetrack(subset), 'Type', 'Spearman', 'rows', 'complete');
 end
 
+% Also look at the overall correlation, since these are both DVs
+[c1, p1] = corr(data.Response, data.Eyetrack, 'type', 'Spearman', 'rows', 'complete');
+
 % Get the names of what you're correlating
 var1 = getGraphLabel(metricName);
 var2 = 'Understandability rating';
@@ -25,6 +28,8 @@ sigma = std(output(:,2));
 [~,pval2] = ttest(atanh(output(:,2))); % Spearman
 
 fprintf(1, '\n\nRESULTS:\n');
+fprintf(1, 'Overall correlation between %s and %s:\n', var1, var2);
+fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', c1, p1);
 fprintf(1, 'Average correlation between %s and %s:\n', var1, var2);
 fprintf(1, '\tSpearman''s \x0304\x03C1 = %0.2f (SD = %0.2f), p = %0.3f\n', mu, sigma, pval2);
 fprintf(1, '\tPearson''s \x0304r = %0.2f (SD = %0.2f), p = %0.3f\n', mean(output(:,1)), std(output(:,1)), pval1);
