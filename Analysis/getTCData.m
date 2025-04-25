@@ -17,6 +17,9 @@ function data = getTCData(metricName, subList)
     end
     
     numSubs = length(edfList); % Count the number of subjects to process
+
+    % Get some stimulus parameters that are relevant for synchronization
+    params = importdata('TCstimParams.mat', 'stimParams');
     
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
@@ -78,7 +81,16 @@ function data = getTCData(metricName, subList)
                 % Remember to drop this trial from the behavioral data
                 badList = [badList, t];
             else
-                opts = logical(behav.Flipped(t));
+                opts.flip = logical(behav.Flipped(t));
+                % Subset the big stim table to just this trial's data
+                stimName = getStimName(edf(t));
+                [~,stimName,e] = fileparts(stimName); % strip any path
+                if opts.flip
+                    stimName = stimName(3:end); % strip the 'f_' part
+                end
+                stimName = strcat(stimName, e);
+                opts.params = params(strcmp(params.StimName, stimName),:);
+                
                 if useCell
                     eyetrack{t} = selectMetric(edf(t), metricName, opts);
                     % Note above is cell, not double like below

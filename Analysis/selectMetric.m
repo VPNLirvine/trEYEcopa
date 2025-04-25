@@ -42,10 +42,13 @@ end
 
 % See if the data needs to be flipped or not
 if nargin > 2 && ~isempty(varargin{1})
-    flipFlag = varargin{1};
-    assert(islogical(flipFlag), '3rd input must be a boolean indicating whether the stimulus was flipped or not');
+    opts = varargin{1};
+    flipFlag = opts.flip;
+    assert(islogical(flipFlag), 'flipFlag must be logical');
+    stimParams = opts.params;
 else
     flipFlag = false;
+    % hope for the best re stimParams
 end
 
 % Account for differences between TRIAL duration and STIMULUS duration
@@ -230,11 +233,11 @@ switch metricName
             xdat = mirrorX(xdat, scDim(1));
         end
         output = [xdat;ydat; tdat];
-        output = addframe2gaze(output, edfDat);
+        output = addframe2gaze(output, edfDat, stimParams);
     case 'tot'
         % Time on Target, aka "triangle time"
         % Percentage of video time spent looking at characters
-        output = timeOnTarget(edfDat, flipFlag, metricName);
+        output = timeOnTarget(edfDat, metricName, varargin{:});
 
     case 'blinkrate'
         % Pretty straightforward.

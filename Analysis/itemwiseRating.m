@@ -26,8 +26,8 @@ xticklabels(stimList);
 ylim([0.9 5.1]);
 
 % Get some descriptives
-vidMeans = mean(vidMeanRat, 1, 'omitmissing');
-vidSDs = std(vidMeanRat, 0, 1, 'omitmissing');
+vidMeans = mean(vidMeanRat, 1, 'omitnan');
+vidSDs = std(vidMeanRat, 0, 1, 'omitnan');
 
 [vMaxMean, vMaxMeanI] = max(vidMeans);
 [vMaxSD, vMaxSDI] = max(vidSDs);

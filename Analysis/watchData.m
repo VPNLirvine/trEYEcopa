@@ -20,7 +20,7 @@ function watchData(movName, gaze, prediction)
 
     numSamples = size(gaze, 2); % width() doesn't work prior to 2020b
     frameIdx = gaze(4,:);
-    sr = diff(gaze(3,1:2)) / 1000;
+    sr = diff(gaze(3,1:2)) / 2000;
     % Load in the video data
     movFName = findVidPath(movName);
     [~,movName,~] = fileparts(movFName); % ensure no extension attached

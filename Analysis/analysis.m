@@ -118,7 +118,7 @@ if choice == 1 % Correlation analysis
     for s = 1:numSubs
         subID = subList{s};
         subset = strcmp(subID, data.Subject);
-        eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitmissing');
+        eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitnan');
     end
         
 
@@ -134,7 +134,7 @@ if choice == 1 % Correlation analysis
         for s = 1:numSubs
             subID = subList{s};
             subset = strcmp(subID, data.Subject);
-            respCol(s) = mean(data.Response(subset), 'all', 'omitmissing');
+            respCol(s) = mean(data.Response(subset), 'all', 'omitnan');
         end
 
     end
