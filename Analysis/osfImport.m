@@ -19,22 +19,26 @@ try
     %%
     if contains(fileName,'MW')
         fileLoc = pths.MWdat;
+        matLoc = pths.MWmat;
     elseif contains(fileName,'TC')
         fileLoc = pths.TCdat;
+        matLoc = pths.TCmat;
     elseif contains(fileName,'fix')
         fileLoc = pths.fixdat;
+        matLoc = pths.fixmat;
     else
         fileLoc = pths.data;
+        matLoc = pths.data;
     end
 
     addpath(pths.edf);
 
     % Check for .mat file, in case bad subject (or just to be lazy)
     fileName2 = [fileName(1:end-3) 'mat'];
-    fp = [fileLoc filesep fileName2];
+    fp = fullfile(matLoc, fileName2);
     if exist(fp, 'file')
         % Import existing data
-        fprintf(1, 'Importing data from .mat file.\n');
+        fprintf(1, 'Importing data from %s\n', fp);
         Trials = importdata(fp);
         if isfield(Trials, 'FILENAME')
             % Convert to look like edfImport output
@@ -43,6 +47,9 @@ try
     else
         % Perform standard import via mex
         [Trials, Preamble] = edfImport([fileLoc filesep fileName], [1 1 1], '');
+        % Export to mat file, to save time on future imports
+        save(fp, 'Trials');
+        fprintf(1, 'Data exported to %s\n', fp);
     end
     Trials = edfExtractInterestingEvents(Trials);
 
