@@ -195,6 +195,20 @@ switch metricName
         % Get the data
         output = getHeatmap(xdat, ydat, scDim, binRes);
         
+    case 'interp'
+        % A QC metric to see what proportion of gaze gets interpolated
+        % Since X and Y coordinates are interpolated separately,
+        % we take the intexing vector of both, sum them, then average.
+
+        % Get the XY timeseries and convert from uint32 for precision
+        xdat = double(edfDat.Samples.gx(i+1,:));
+        ydat = double(edfDat.Samples.gy(i+1,:));
+        % Interpolate over blinks
+        [xdat, blinkx] = censorBlinks(xdat, edfDat);
+        [~, blinky] = censorBlinks(ydat, edfDat);
+        % Calculate the proportion of gaze samples that were interpolated.
+        output = sum(blinkx | blinky) / length(xdat);
+
     case 'gaze'
         % This is a 4*n matrix covering n timepoints:
         % The first 2 rows are X-Y coordinate pairs

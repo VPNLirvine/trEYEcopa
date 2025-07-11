@@ -21,11 +21,11 @@ nRows = ceil(numSubs/numPerRow);
 % Open figures
 fig1 = figure();
     if ok
-        tiledlayout(nRows, 10);
+        tiledlayout(nRows, numPerRow);
     end
 fig2 = figure();
     if ok
-        tiledlayout(nRows, 10);
+        tiledlayout(nRows, numPerRow);
     end
 % Get axis titles
 [var1, yl] = getGraphLabel(metricName);

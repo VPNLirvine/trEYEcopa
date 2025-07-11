@@ -17,10 +17,15 @@ else
 end
 
 pths.analysis = fullfile(pths.base, 'Analysis');
-pths.data = fullfile(pths.base, 'ExpOutputs'); % but rename to 'data'
-    pths.MWdat = fullfile(pths.data, 'MWoutput');
-    pths.TCdat = fullfile(pths.data, 'TCoutput');
+pths.data = fullfile(pths.base, 'data', 'source');
+    pths.MWdat = fullfile(pths.data, 'MW');
+    pths.TCdat = fullfile(pths.data, 'TC');
+    pths.NARdat = fullfile(pths.data, 'NAR');
     pths.fixdat = fullfile(pths.data, 'fixation_checks');
+pths.matdata = fullfile(pths.base, 'data', 'derivatives');
+    pths.MWmat = fullfile(pths.matdata, 'MW');
+    pths.TCmat = fullfile(pths.matdata, 'TC');
+    pths.NARmat = fullfile(pths.matdata, 'NAR');
 
 pths.stimuli = fullfile(pths.base, 'stims');
     pths.MWstim = fullfile(pths.stimuli, 'MartinWeisberg');

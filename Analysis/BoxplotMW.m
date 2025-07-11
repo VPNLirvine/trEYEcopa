@@ -17,7 +17,7 @@ nRows = ceil(numSubs/numPerRow);
 
 [axistxt, ylimvec] = getGraphLabel(metricName); % variable axis label text
 %% Split by condition
-close all
+% close all
 for i = 1:numConds
     thisCond = conds{i};
     figure();

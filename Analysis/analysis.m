@@ -226,6 +226,7 @@ if choice == 1 % Correlation analysis
                 ylabel('Within-Subject Spearman correlation');
                 title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f, p = %0.4f', var3, var1, var2, secondCorr, secondP));
                 xlim(yl3);
+                ylim([-1 1]);
         
             fprintf(1, 'Correlation between %s and (within-subject correlation between %s and %s):\n', var3, var1, var2)
             fprintf(1, '\t\x03C1 = %0.2f, p = %0.4f\n', secondCorr, secondP);

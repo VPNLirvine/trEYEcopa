@@ -1,15 +1,32 @@
-function data = getTCData(metricName, subList)
+function data = getTCData(metricName, taskFlag, subList)
+% Returns a table of data for all subjects with eyetracking, trial num, etc
+% Input 1: metric name, as used in selectMetric. e.g. 'tot', 'blinkrate'
+% Input 2: task type. Options are 'nar' for narrative or 'tri' for all 100
+% Input 3: list of subjects
+
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
-    outputPath = pths.TCdat;
+    if nargin < 2
+        % Default to the original method
+        taskFlag = 'tri';
+    end
+    % Check which task you want data for - original TriCOPA, or narrative
+    if strcmp(taskFlag, 'nar')
+        outputPath = pths.NARdat;
+    elseif strcmp(taskFlag, 'tri')
+        outputPath = pths.TCdat;
+    else
+        error('Incorrect task flag! Options are ''tri'' or ''nar''');
+    end
+
     fileList = dir(outputPath);
         % String-insensitive compare, in case file extension is uppercase
         fnames = {fileList.name};
         subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
         subset = cell2mat(subset);
         edfList = fileList(subset); clear fileList
-    if nargin > 1
+    if nargin > 2
         % subset edfList to just the subjects asked for
         subIDs = arrayfun(@(x) sprintf('TC_%02.f', x), subList, 'UniformOutput', false);
         subset = contains({edfList.name}, subIDs);
@@ -66,7 +83,8 @@ function data = getTCData(metricName, subList)
         
         % Get eyetracking data
         fprintf(1, '%s: ', subID);
-        edf = osfImport(edfName);
+        fpath = fullfile(outputPath, edfName);
+        edf = osfImport(fpath);
         eyetrack = []; % init per sub
         badList = [];
         
