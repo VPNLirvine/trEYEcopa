@@ -58,7 +58,9 @@ for subject = 1:numSubs
     fprintf(1, 'Reading from %s...\n', edfList(subject).name);
     
     subID = erase(edfList(subject).name, '.edf');
-    Trials = osfImport(edfList(subject).name);
+    edfName = edfList(subject).name;
+    fpath = fullfile(outputPath, edfName);
+    Trials = osfImport(fpath);
     
     eyetrack = []; % init per sub
     badList = [];

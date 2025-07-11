@@ -7,7 +7,7 @@ function data = getTCData(metricName, taskFlag, subList)
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
-    if nargin > 1
+    if nargin < 2
         % Default to the original method
         taskFlag = 'tri';
     end
@@ -83,7 +83,8 @@ function data = getTCData(metricName, taskFlag, subList)
         
         % Get eyetracking data
         fprintf(1, '%s: ', subID);
-        edf = osfImport(edfName);
+        fpath = fullfile(outputPath, edfName);
+        edf = osfImport(fpath);
         eyetrack = []; % init per sub
         badList = [];
         
