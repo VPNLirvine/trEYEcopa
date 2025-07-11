@@ -1,4 +1,4 @@
-function [x, vidList] = rankAQperVid(data)
+function [output, vidList] = rankAQperVid(data)
 % Given a stack of eyetracking data, rank each AQ subscale per video
 % Calculate an LME per video and extract the Coefficients structure
 % Output is a 4*n*100 matrix stacking them in the 3rd dimension
