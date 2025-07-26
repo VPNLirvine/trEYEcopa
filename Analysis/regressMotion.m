@@ -10,16 +10,23 @@ function gazeDat = regressMotion(gazeDat, motion)
 % you ought to be left with just the top-down cognitive influence.
 % Now, whether the AMOUNT of motion alone is the ideal predictor...
 
-
+pths = specifyPaths('..');
 % Load data to compare, if not provided
 if nargin < 1
     gazeDat = getTCData('gaze');
+    stype = 'TC';
+else
+    % Determine which kind of gaze data was sent
+    stype = gazeDat.Subject{1}(1:2);
 end
 if nargin < 2
-    if exist('motionData.mat', 'file')
-    motion = importdata('motionData.mat');
-else
-    motion = getMotionEnergy;
+    % If 2nd input (motion) not provided, load from disk
+    % or calculate if not on disk already
+    fin = fullfile(pths.mot, [stype, '_motionData.mat']);
+    if exist(fin, 'file')
+        motion = importdata(fin);
+    else
+        motion = getMotionEnergy('eng', stype);
     end
 end
 

@@ -1,7 +1,13 @@
+% Plots the timeseries of motion energy against similar gaze "energy"
+% Intended as a quick visual check of how closely subjects track motion
+% Hardcodes for TC and a specific row to index out of the full data table
+% Could certainly be made more flexible in the future.
+
 %% Setup
 pths = specifyPaths('..');
 gazeDat = getTCData('gaze');
-motionDat = importdata('motionData.mat');
+fin = fullfile(pths.mot, 'TC_motionData.mat');
+motionDat = importdata(fin);
 
 %% Specifics
 i = 274; % Which sub+video in gaze?
