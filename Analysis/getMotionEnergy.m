@@ -48,7 +48,7 @@ for s = 1:numStims
         fout = strrep(stimName, '.mov', '.mat');
         save(fullfile(pths.map, fout), 'motionVec', '-v7.3');
     else
-        motion.StimName{s} = stimName;
+        [~,motion.StimName{s},~] = fileparts(stimName); % drop file extension
         motion.MotionEnergy{s} = motionVec;
         motion.Duration{s} = getVideoDuration(fname);
     end

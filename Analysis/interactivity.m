@@ -92,7 +92,7 @@ for v = 1:numVids
     end
 
     % Final calculation is a proportion: sum non-zero over duration
-    output.StimName{v} = [stimName '.mov'];
+    output.StimName{v} = stimName;
     % output.Interactivity(v) = nnz(interactivity)/length(interactivity);
     output.Interactivity{v} = interactivity;
 

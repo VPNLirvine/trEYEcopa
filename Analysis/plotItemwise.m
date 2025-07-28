@@ -7,7 +7,6 @@ else
     % Default assume TriCOPA
     mwflag = 0;
 end
-pths = specifyPaths('..');
 
 % First get some axis labels etc
 [axistxt, yl] = getGraphLabel(metricName);
@@ -18,14 +17,7 @@ numStims = length(stimList);
 for i = 1:numStims
     stim = stimList{i};
     % Find video, accounting for different locations etc.
-    if mwflag
-        % This loop is pointless for MW since they're all 16 sec
-        % But do it for compatibility
-        fpath = fullfile(pths.MWstim, [stim '.mov']);
-    else
-        % TC vids are all variable duration
-        fpath = fullfile(pths.TCstim, 'normal', stim);
-    end
+    fpath = findVidPath(stim);
     dur = getVideoDuration(fpath);
     s{i} = stim;
     d(i) = dur;
