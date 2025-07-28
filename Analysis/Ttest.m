@@ -15,7 +15,7 @@ end
 fprintf(1, 'Using metric %s\n\n', metricName);
 
 % Declare constants
-T = readtable('condition list - Sheet1.csv');
+T = readtable('MWConditionList.csv');
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');
 addpath('..'); % to allow specifyPaths to run

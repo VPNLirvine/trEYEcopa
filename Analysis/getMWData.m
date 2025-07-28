@@ -14,7 +14,7 @@ end
 fprintf(1, 'Using metric %s\n\n', metricName);
 
 % Declare constants
-condList = readtable('condition list - Sheet1.csv');
+condList = readtable('MWConditionList.csv');
 addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 outputPath = pths.MWdat;
