@@ -35,6 +35,9 @@ fileList = dir(outputPath);
     end
 numSubs = length(edfList);
 
+% Get some stimulus parameters that are relevant for synchronization
+params = importdata('MWstimParams.mat', 'stimParams');
+
 % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Category', 'StimName'};
@@ -72,12 +75,15 @@ for subject = 1:numSubs
         end
         i = i + 1;
         stimName = getStimName(Trials(trial));
+        opts.params = params(strcmp(params.StimName, stimName),:);
+        % No MW video was ever flipped, but some functions expect a value
+        opts.flip = false;
 
         if useCell
-            eyetrack{1} = selectMetric(Trials(trial), metricName);
+            eyetrack{1} = selectMetric(Trials(trial), metricName, opts);
             % Note above is cell, not double like below
         else
-            eyetrack(1) = selectMetric(Trials(trial), metricName);
+            eyetrack(1) = selectMetric(Trials(trial), metricName, opts);
         end
         % Output data
         data.Subject{i} = subID;
