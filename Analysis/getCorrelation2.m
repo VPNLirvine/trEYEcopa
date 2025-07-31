@@ -14,7 +14,7 @@ function data = getCorrelation2(data, metricName)
 subList = unique(data.Subject);
 numSubs = length(subList);
 
-stype = data.Subject{1}(1:2); % should be either 'TC' or 'MW'
+stype = detectStimType(data); % should be either 'TC' or 'MW'
 pths = specifyPaths('..');
 if strcmp(stype, 'TC')
     fname = fullfile(pths.mot, 'TC_motionData.mat');

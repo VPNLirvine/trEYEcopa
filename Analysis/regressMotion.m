@@ -17,7 +17,7 @@ if nargin < 1
     stype = 'TC';
 else
     % Determine which kind of gaze data was sent
-    stype = gazeDat.Subject{1}(1:2);
+    stype = detectStimType(gazeDat);
 end
 if nargin < 2
     % If 2nd input (motion) not provided, load from disk
