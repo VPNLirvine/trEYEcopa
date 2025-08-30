@@ -121,12 +121,12 @@ if choice == 1 % Correlation analysis
         eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitnan');
     end
         
-
+    data = getCorrelation2(data, metricName); % gaze vs motion
     if ~mwflag
         % Calculate correlations and generate some visualizations
         % None of these involve AQ, so do them before the upcoming loop
         eye2rating = getCorrelations(data, metricName); % gaze vs rating
-        data = getCorrelation2(data, metricName); % gaze vs motion
+        
         data = getCorrelation3(data, metricName); % gaze vs interactivity
 
         % Get the average video rating per subject (not collected for MW)
