@@ -26,9 +26,12 @@ function varargout = frame3movie(movName)
     
     % Get the position data and rescale it to fit the plot size
     posData = getPosition(movName);
-    posData = interpPosition(posData);
+    posData = posData(1).Data;
     posDat = rescalePosition(posData, pos);
-    posDat = postab2struct(posDat);
+    numChars = length(posDat);
+
+    % Define character colors
+    colors = lines;
     
     % Set up image
         figure();
@@ -39,24 +42,19 @@ function varargout = frame3movie(movName)
         title(movName);
         h0 = image([pos(1), pos(3)], [pos(2), pos(4)], frames(:,:,:,i));
         hold on;
-        h1 = plot(posDat(1).X(i), posDat(1).Y(i), '^', 'MarkerFaceColor', 'r', 'MarkerSize', 40);
-        h2 = plot(posDat(2).X(i), posDat(2).Y(i), 'o', 'MarkerFaceColor', 'b', 'MarkerSize', 30);
-        h3 = plot(posDat(3).X(i), posDat(3).Y(i), '+', 'MarkerFaceColor', 'g', 'MarkerSize', 30);
-        h4 = plot(posDat(4).X(i), posDat(4).Y(i), '^', 'MarkerFaceColor', 'c', 'MarkerSize', 30);
+        for j = 1:numChars
+            h(j) = plot(posDat(j).X(i), posDat(j).Y(i), '^', 'MarkerFaceColor', colors(j,:), 'MarkerSize', 40);
+        end
         hold off;
     titxt = strrep(movName, '_', '\_');
     % Now animate in a new loop
     tic
     for i = 2:numFrames
         h0.CData = frames(:,:,:,i);
-        h1.XData = posDat(1).X(i);
-        h1.YData = posDat(1).Y(i);
-        h2.XData = posDat(2).X(i);
-        h2.YData = posDat(2).Y(i);
-        h3.XData = posDat(3).X(i);
-        h3.YData = posDat(3).Y(i);
-        h4.XData = posDat(4).X(i);
-        h4.YData = posDat(4).Y(i);
+        for j = 1:numChars
+            h(j).XData = posDat(j).X(i);
+            h(j).YData = posDat(j).Y(i);
+        end
         title(titxt);
         drawnow;
 %         pause(1/15); % compensate for frame rate
