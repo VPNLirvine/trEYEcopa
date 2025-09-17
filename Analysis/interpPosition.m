@@ -1,4 +1,4 @@
-function newPosData = interpPosition(oldPosData)
+function output = interpPosition(oldPosData)
 % Given the name of a video, preprocesses the position data
 % The data provided by asgordon does not fit the actual videos:
 % the videos have a few seconds of freeze-frame added on either end.
@@ -9,6 +9,7 @@ function newPosData = interpPosition(oldPosData)
 numMovies = height(oldPosData);
 assert(numMovies > 0, 'Cannot operate on an empty input')
 pths = specifyPaths('..');
+output = [];
 for m = 1:numMovies
     movName = oldPosData.StimName{m};
 
@@ -95,4 +96,5 @@ for m = 1:numMovies
             newPosData.Y4_Values{1}(tlead0:tlead0+bypass) = newPosData.Y4_Values{m}(tlead:tlead+bypass);
         end
     end 
+    output = [output; newPosData];
 end

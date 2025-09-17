@@ -57,10 +57,10 @@ var1 = getGraphLabel(metricName);
 var2 = 'Video motion energy';
 var3 = getGraphLabel('response');
 
-[output(1,1), pval1] = corr(avgE, mot, 'type', 'Pearson');
-[output(1,2), pval2] = corr(avgE, mot, 'type', 'Spearman');
+[output(1,1), pval1] = corr(avgE, mot, 'type', 'Pearson', 'rows', 'complete');
+[output(1,2), pval2] = corr(avgE, mot, 'type', 'Spearman', 'rows', 'complete');
 if ~strcmp(stype, 'MW')
-    [output(1,3), pval3] = corr(rat, mot, 'type', 'Spearman');
+    [output(1,3), pval3] = corr(rat, mot, 'type', 'Spearman', 'rows', 'complete');
 end
 
 % Calculate p values by performing a t-test against 0

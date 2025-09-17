@@ -26,9 +26,8 @@ end
 
 % Get the position data, then rescale it to fit the display area
 posDat = getPosition(stimName);
-posDat = interpPosition(posDat);
-posDat = rescalePosition(posDat, pos);
-posDat = postab2struct(posDat);
+posDat = rescalePosition(posDat(1).Data, pos);
+numChars = height(posDat);
 
 % So now the position data follows the frames of the video,
 % but the gaze data operates at its own sampling rate.
@@ -47,20 +46,19 @@ gaze = selectMetric(edfDat, 'gaze', opts);
 % Above will un-flip the gaze for flipped videos
 
 % Row 4 is the frame number. Use that to index out of posDat.
-p.C1 = [ posDat(1).X(gaze(4,:)) ; posDat(1).Y(gaze(4,:)); gaze(3,:) ];
-p.C2 = [ posDat(2).X(gaze(4,:)) ; posDat(2).Y(gaze(4,:)) ; gaze(3,:) ];
-p.C3 = [ posDat(3).X(gaze(4,:)) ; posDat(3).Y(gaze(4,:)) ; gaze(3,:)];
-p.C4 = [ posDat(4).X(gaze(4,:)) ; posDat(4).Y(gaze(4,:)) ; gaze(3,:) ];
+p = struct;
+for i = 1:numChars
+    p(i).C = [ posDat(i).X(gaze(4,:)) ; posDat(i).Y(gaze(4,:)); gaze(3,:) ];
+end
 
 %% COMPARE GAZE AND POSITION
 % Define a radius around each character
 rad = 150; % 200 too big, 100 too small
 
 % Define logicals to indicate whether gaze is near each character
-gazeOnC1 = gaze(1,:) >= p.C1(1,:) - rad & gaze(1,:) <= p.C1(1,:) + rad & gaze(2,:) >= p.C1(2,:) - rad & gaze(2,:) <= p.C1(2,:) + rad;
-gazeOnC2 = gaze(1,:) >= p.C2(1,:) - rad & gaze(1,:) <= p.C2(1,:) + rad & gaze(2,:) >= p.C2(2,:) - rad & gaze(2,:) <= p.C2(2,:) + rad;
-gazeOnC3 = gaze(1,:) >= p.C3(1,:) - rad & gaze(1,:) <= p.C3(1,:) + rad & gaze(2,:) >= p.C3(2,:) - rad & gaze(2,:) <= p.C3(2,:) + rad;
-gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,:) >= p.C4(2,:) - rad & gaze(2,:) <= p.C4(2,:) + rad;
+for i = 1:numChars
+    p(i).gazeOn = gaze(1,:) >= p(i).C(1,:) - rad & gaze(1,:) <= p(i).C(1,:) + rad & gaze(2,:) >= p(i).C(2,:) - rad & gaze(2,:) <= p(i).C(2,:) + rad;
+end
 
 % From here, you can do multiple things,
 % like calculate the time spent on one specific character,
@@ -70,18 +68,26 @@ gazeOnC4 = gaze(1,:) >= p.C4(1,:) - rad & gaze(1,:) <= p.C4(1,:) + rad & gaze(2,
 
 if strcmp(metricName, 'tot')
     % Triangle time: PERCENTAGE of time spent on the characters (but not door)
-    onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
+    % Stack all those gazeOn vectors into a matrix, then sum characters
+    % Any non-zero element means gaze near at least one character then
+    % Convert to a percentage
+    gazeOn = zeros(numChars, length(p(1).gazeOn));
+    for i = 1:numChars
+        gazeOn(i,:) = p(i).gazeOn;
+    end
+    onTarget = sum(gazeOn,1);
+    % onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
     output = nnz(onTarget) / length(onTarget);
-elseif strcmp(metricName, 'track')
-    % Percentage of time on individual characters (including door)
-    % These may sum to >100% if gaze is near two characters at once
-    % ...not sure what all to do with this yet.
-    % Could compare to percentage of time each character is in motion?
-    timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
-    timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
-    timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
-    timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
-    output = [timeOnC1, timeOnC2, timeOnC3, timeOnC4];
+% elseif strcmp(metricName, 'track')
+%     % Percentage of time on individual characters (including door)
+%     % These may sum to >100% if gaze is near two characters at once
+%     % ...not sure what all to do with this yet.
+%     % Could compare to percentage of time each character is in motion?
+%     timeOnC1 = nnz(gazeOnC1) / length(gazeOnC1); % big triangle
+%     timeOnC2 = nnz(gazeOnC2) / length(gazeOnC2); % circle
+%     timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
+%     timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
+%     output = [timeOnC1, timeOnC2, timeOnC3, timeOnC4];
 else
     output = p; % output position data struct, i.e. NOT a summary metric.
 end

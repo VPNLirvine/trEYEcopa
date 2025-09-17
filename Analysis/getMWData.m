@@ -73,11 +73,20 @@ for subject = 1:numSubs
             % Don't attempt to extract data that isn't there
             badList = [badList, trial];
         end
-        i = i + 1;
+        
         stimName = getStimName(Trials(trial));
         opts.params = params(strcmp(params.StimName, stimName),:);
         % No MW video was ever flipped, but some functions expect a value
         opts.flip = false;
+
+        % Ignore the mechanical videos for time on target
+        % Then please only ever analyze as a correlation
+        isMec = skipThisVideo(stimName, 'MW');
+        if strcmp(metricName, 'tot') && isMec
+            continue
+        end
+        
+        i = i + 1;
 
         if useCell
             eyetrack{1} = selectMetric(Trials(trial), metricName, opts);

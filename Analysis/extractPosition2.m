@@ -5,10 +5,6 @@ function output = extractPosition2(gTruth)
 % We're going to take that and separate the X and Y coords into columns,
 % which makes it easier to work with later.
 
-% fname = 'BASEBALL.mat';
-% fpath = fullfile('LabelSessionExports', fname);
-% gTruth = importdata(fpath);
-
 % Get count of labels to iterate through
 numLabels = height(gTruth.LabelDefinitions);
 numFrames = height(gTruth.LabelData);
@@ -21,7 +17,7 @@ yrs = 3000 / vidY;
 
 output = struct('Name',{},'X',[],'Y',[],'t',[]);
 
-t = gTruth.LabelData.Time;
+t = gTruth.LabelData.Time';
 for i = 1:numLabels
     % Get all the pertinent info as temp vars first
     labelName = gTruth.LabelDefinitions.Name{i};
@@ -33,16 +29,16 @@ for i = 1:numLabels
     % So we loop to preserve the structure and handle the empties later
     for j = 1:numFrames
         pos = extractCenter(gTruth.LabelData.(labelName){j});
-        X(j) = pos(1);
-        Y(j) = pos(2);
+        X(1,j) = pos(1);
+        Y(1,j) = pos(2);
     end
     X = fixnans(X);
     Y = fixnans(Y);
 
     % Now dole out into your output struct in one go
     output(i).Name = labelName;
-    output(i).X = X' .* xrs;
-    output(i).Y = Y' .* yrs;
+    output(i).X = X .* xrs;
+    output(i).Y = Y .* yrs;
     output(i).t = seconds(t);
 end
 end % main function

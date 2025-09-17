@@ -23,8 +23,8 @@ output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'cell'}, 'Variabl
 % Now loop over all videos in posData
 for v = 1:numVids
     % Subset table to just this video
-    stimName = posData.StimName{v};
-    posDat = posData(v,:);
+    stimName = posData(v).StimName;
+    posDat = posData(v).Data;
     % Get some stimulus parameters
     x = VideoReader(findVidPath(stimName));
     wRect = [0 0 1920 1200];
@@ -34,9 +34,8 @@ for v = 1:numVids
     clear x
     
     % Run some processing on the position data for the characters
-    posDat = interpPosition(posDat); %new position data
     posDat = rescalePosition(posDat, pos);
-    posDat = postab2struct(posDat); %stucture format
+    numChars = length(posDat);
     
     % Now we're ready to rock:
     % Interactivity is the proportion of time ANY two characters are
@@ -48,42 +47,31 @@ for v = 1:numVids
     interactivity = zeros(1, length(posDat(1).X));
     
     % Check which characters actually move
-    use1 = any(posDat(1).X ~= posDat(1).X(1)) || any(posDat(1).Y ~= posDat(1).Y(1));
-    use2 = any(posDat(2).X ~= posDat(2).X(1)) || any(posDat(2).Y ~= posDat(2).Y(1));
-    use4 = any(posDat(4).X ~= posDat(4).X(1)) || any(posDat(4).Y ~= posDat(4).Y(1));
+    for i = 1:numChars
+        use(i) = any(posDat(i).X ~= posDat(i).X(1)) || any(posDat(i).Y ~= posDat(i).Y(1));
+    end
 
     %calculate pairwise distances
     for i = 1:length(posDat(1).X)%or is there any other way to extract frame length?
-        if sum([use1, use2, use4]) < 2
+        if sum(use) < 2
             % If only one character ever moves, then by definition,
             % there is never a "social" interaction
             interactivity(i) = 0;
         else
-            % Extract positions for each character at each frame
-            p1 = [posDat(1).X(i), posDat(1).Y(i)];
-            p2 = [posDat(2).X(i), posDat(2).Y(i)];
-            p4 = [posDat(4).X(i), posDat(4).Y(i)]; % Ignore C3 (door)
-            
-            % Calculate pairwise distances
-            d12 = sqrt((p1(1) - p2(1))^2 + (p1(2) - p2(2))^2);
-            d14 = sqrt((p1(1) - p4(1))^2 + (p1(2) - p4(2))^2);
-            d24 = sqrt((p2(1) - p4(1))^2 + (p2(2) - p4(2))^2);
+            % Do pairwise distance comparisons between characters,
+            % but exclude any "unused" characters
+            validC = find(use);
+            X = []; Y = [];
+            for j = 1:length(validC)
+                X(j) = posDat(validC(j)).X(i);
+                Y(j) = posDat(validC(j)).Y(i);
+            end
+            coords = [X(:), Y(:)];
+            dist = pdist(coords, 'euclidean');
 
-            % Avoid considering distances between unused characters
-            % (All characters were always on screen, but may never move)
-            if ~use1
-                d12 = threshold + 1; d14 = threshold + 1;
-            end
-            if ~use2
-                d12 = threshold + 1; d24 = threshold + 1;
-            end
-            if ~use4
-                d14 = threshold + 1; d24 = threshold + 1;
-            end
-            
-            % If the minimum distance is below the threshold, mark as interactions
-            mindis = min([d12, d14, d24]);
-            if mindis < threshold
+            % If the minimum distance is below the threshold,
+            % mark as an interaction
+            if min(dist) < threshold
                 interactivity(i) = 1; 
             else
                 interactivity(i) = 0; 

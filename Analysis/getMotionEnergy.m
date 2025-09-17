@@ -45,7 +45,8 @@ for s = 1:numStims
         % Save each map as an individual file,
         % since they are each several GB uncompressed
         % Requires an argument specifying a newer format (c. R2006b)
-        fout = strrep(stimName, '.mov', '.mat');
+        [~,x,~] = fileparts(stimName);
+        fout = [x, '.mat'];
         save(fullfile(pths.map, fout), 'motionVec', '-v7.3');
     else
         [~,motion.StimName{s},~] = fileparts(stimName); % drop file extension
