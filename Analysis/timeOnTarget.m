@@ -27,7 +27,7 @@ end
 % Get the position data, then rescale it to fit the display area
 posDat = getPosition(stimName);
 posDat = rescalePosition(posDat(1).Data, pos);
-numChars = height(posDat);
+numChars = length(posDat);
 
 % So now the position data follows the frames of the video,
 % but the gaze data operates at its own sampling rate.
