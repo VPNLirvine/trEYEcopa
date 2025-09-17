@@ -23,7 +23,7 @@ function newPosData = rescalePosition(oldPosData, varargin)
     % Init output with same format as input
     newPosData = oldPosData;
     % Scale each vector by the respective scaling factor
-    for i = 1:height(newPosData)
+    for i = 1:length(newPosData)
         newPosData(i).X = oldPosData(i).X .* xrs;
         newPosData(i).Y = oldPosData(i).Y .* yrs;
     end
