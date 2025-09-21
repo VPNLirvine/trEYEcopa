@@ -14,7 +14,7 @@ end
 fprintf(1, 'Using metric %s\n\n', metricName);
 
 % Declare constants
-condList = readtable('condition list - Sheet1.csv');
+condList = readtable('MWConditionList.csv');
 addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 outputPath = pths.MWdat;
@@ -34,6 +34,9 @@ fileList = dir(outputPath);
         edfList = edfList(subset);
     end
 numSubs = length(edfList);
+
+% Get some stimulus parameters that are relevant for synchronization
+params = importdata('MWstimParams.mat', 'stimParams');
 
 % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
@@ -70,14 +73,26 @@ for subject = 1:numSubs
             % Don't attempt to extract data that isn't there
             badList = [badList, trial];
         end
-        i = i + 1;
+        
         stimName = getStimName(Trials(trial));
+        opts.params = params(strcmp(params.StimName, stimName),:);
+        % No MW video was ever flipped, but some functions expect a value
+        opts.flip = false;
+
+        % Ignore the mechanical videos for time on target
+        % Then please only ever analyze as a correlation
+        isMec = skipThisVideo(stimName, 'MW');
+        if strcmp(metricName, 'tot') && isMec
+            continue
+        end
+        
+        i = i + 1;
 
         if useCell
-            eyetrack{1} = selectMetric(Trials(trial), metricName);
+            eyetrack{1} = selectMetric(Trials(trial), metricName, opts);
             % Note above is cell, not double like below
         else
-            eyetrack(1) = selectMetric(Trials(trial), metricName);
+            eyetrack(1) = selectMetric(Trials(trial), metricName, opts);
         end
         % Output data
         data.Subject{i} = subID;

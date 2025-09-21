@@ -1,7 +1,7 @@
 function NewOrd = RandomMS(subID)
 rng('default')
 pths = specifyPaths();
-csvPath = fullfile(pths.analysis, 'condition list - Sheet1.csv');
+csvPath = fullfile(pths.analysis, 'MWConditionList.csv');
 T = readtable(csvPath);
 socCellArr = T.NAME(string(T.CONDITION) == 'social');
 mecCellArr = T.NAME(string(T.CONDITION) == 'mechanical');

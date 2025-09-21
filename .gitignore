@@ -36,6 +36,7 @@ test*
 
 # Other assets
 /Analysis/LabelSessions/
+/Analysis/LabelSessionExports/
 /Analysis/posDat/
 /Analysis/posDatOpenCV/
 /Analysis/masks/

@@ -1,19 +1,27 @@
-%% Setup
-pths = specifyPaths('..');
-gazeDat = getTCData('gaze');
-motionDat = importdata('motionData.mat');
-
-%% Specifics
-i = 274; % Which sub+video in gaze?
+function plotMotionE(gazeDat)
+% Plots the timeseries of motion energy against similar gaze "energy"
+% i.e. calculates gaze velocity and plots against motion magnitude
+% Intended as a quick visual check of how closely subjects track motion.
+% A few example rows to check from the TriCOPA data:
 % Q11 is just one character moving:         try i = 2251 or 246
 % Q13 is two characters moving together:    try i = 274
 % Q57 has dynamics between all three:       try i = 292
 
-% Subset data
+assert(height(gazeDat) == 1, 'Expected only a single row of input data, but received %i. Please index the desired row first.', height(gazeDat));
+i = 1;
+% Load appropriate motion data
+stype = detectStimType(gazeDat);
+pths = specifyPaths('..');
+fin = fullfile(pths.mot, [stype, '_motionData.mat']);
+motionDat = importdata(fin);
+
+% Select motion data associated with input eyetracking data
 stimName = gazeDat.StimName{i};
 x = strcmp(motionDat.StimName, stimName); % find corresponding motion row
 motion = motionDat.MotionEnergy{x};
 gaze = gazeDat.Eyetrack{i};
+fr = length(motion) / motionDat.Duration{x}; % num frames per second
+
 
 % Compute successive distances between each gaze position,
 % which is the hypotenuse of two coordinate pairs and the origin.
@@ -31,7 +39,7 @@ gdiff = gdiff / 50; % rescale by some extreme value
 
 % Now plot this against the motion data to see how well it compares
 figure();
-t = (0:length(motion)-1) * (1000/60);
+t = (0:length(motion)-1) * (1000/fr);
 plot(t',motion);
 hold on;
 plot(gaze(3,:)',gdiff);
@@ -39,3 +47,5 @@ hold off;
 ylim([0 1]);
 title(strrep(stimName, '_', '\_'));
 legend('Motion energy', 'Eye gaze energy');
+xlabel('Time (sec)');
+ylabel('Energy (a.u.)');

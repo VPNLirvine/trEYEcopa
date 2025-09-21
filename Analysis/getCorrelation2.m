@@ -13,10 +13,17 @@ function data = getCorrelation2(data, metricName)
 
 subList = unique(data.Subject);
 numSubs = length(subList);
+
+stype = detectStimType(data); % should be either 'TC' or 'MW'
+pths = specifyPaths('..');
+if strcmp(stype, 'TC')
+    fname = fullfile(pths.mot, 'TC_motionData.mat');
+elseif strcmp(stype, 'MW')
+    fname = fullfile(pths.mot, 'MW_motionData.mat');
+end
 % Get the motion data
-fname = 'motionData.mat';
 if ~exist(fname, 'file')
-    getMotionEnergy();
+    getMotionEnergy('eng', stype);
 end
 motion = importdata(fname);
 numVids = height(motion);
@@ -31,7 +38,9 @@ for v = 1:numVids
     % Also extract the average Eyetrack value for this video, for later
     avgE(v,1) = mean(data.Eyetrack(subset));
     mot(v,1) = sum(motion.MotionEnergy{v});
-    rat(v,1) = mean(data.Response(subset));
+    if ~strcmp(stype, 'MW')
+        rat(v,1) = mean(data.Response(subset));
+    end
 end
 
 % Loop over subject to calculate independent correlation coefficients
@@ -48,9 +57,11 @@ var1 = getGraphLabel(metricName);
 var2 = 'Video motion energy';
 var3 = getGraphLabel('response');
 
-[output(1,1), pval1] = corr(avgE, mot, 'type', 'Pearson');
-[output(1,2), pval2] = corr(avgE, mot, 'type', 'Spearman');
-[output(1,3), pval3] = corr(rat, mot, 'type', 'Spearman');
+[output(1,1), pval1] = corr(avgE, mot, 'type', 'Pearson', 'rows', 'complete');
+[output(1,2), pval2] = corr(avgE, mot, 'type', 'Spearman', 'rows', 'complete');
+if ~strcmp(stype, 'MW')
+    [output(1,3), pval3] = corr(rat, mot, 'type', 'Spearman', 'rows', 'complete');
+end
 
 % Calculate p values by performing a t-test against 0
 % Use atanh() as a Fischer r-to-z transform 
@@ -63,8 +74,10 @@ fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,2), pval2);
 fprintf(1, '\tPearson''s r = %0.2f , p = %0.3f\n', output(1,1), pval1);
 fprintf(1, 'Percent variance explained by this relationship:\n');
 fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*(output(:,2) .^2));
-fprintf(1, 'Correlation between average %s and %s:\n', var3, var2);
-fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,3), pval3);
+if ~strcmp(stype, 'MW')
+    fprintf(1, 'Correlation between average %s and %s:\n', var3, var2);
+    fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,3), pval3);
+end
 fprintf(1, '\n');
 
 % Plots
@@ -91,9 +104,12 @@ figure();
     ylabel(sprintf('%s, averaged across subjects', var1));
     title(sprintf('r = %0.2f, p = %0.4f', output(1,1), pval1));
 
-figure();
+if ~strcmp(stype, 'MW')
+    % We didn't collect ratings for MW videos, so skip this.
+    figure();
     % Scatterplot of rating data
     scatter(mot, rat);
     xlabel(var2);
     ylabel(sprintf('%s, averaged across subjects', var3));
     title(sprintf('\x03C1 = %0.2f, p = %0.4f', output(1,3), pval3));
+end

@@ -13,11 +13,19 @@ function data = getCorrelation3(data, metricName)
 
 subList = unique(data.Subject);
 numSubs = length(subList);
+
+stype = detectStimType(data); % should be either 'TC' or 'MW'
+pths = specifyPaths('..');
+if strcmp(stype, 'TC')
+    fname = fullfile(pths.int, 'TC_interactData.mat');
+elseif strcmp(stype, 'MW')
+    fname = fullfile(pths.int, 'MW_interactData.mat');
+end
+
 % Get the interactivity score data
-fname = 'interactData.mat';
 if ~exist(fname, 'file')
-    intScore = interactivity();
-    save('interactData.mat', 'intScore');
+    intScore = interactivity(stype);
+    save(fname, 'intScore');
 else
     intScore = importdata(fname);
 end
@@ -32,7 +40,9 @@ for v = 1:numVids
     % Also extract the average Eyetrack value for this video, for later
     avgE(v,1) = mean(data.Eyetrack(subset));
     intr(v,1) = intScore.Interactivity(v);
-    rat(v,1) = mean(data.Response(subset));
+    if ~strcmp(stype, 'MW')
+        rat(v,1) = mean(data.Response(subset));
+    end
 end
 
 % Loop over subject to calculate independent correlation coefficients
@@ -55,7 +65,9 @@ var3 = getGraphLabel('response');
 % sigma = std(output(:,2));
 [output(1,1), pval1] = corr(avgE, intr, 'type', 'Pearson');
 [output(1,2), pval2] = corr(avgE, intr, 'type', 'Spearman');
-[output(1,3), pval3] = corr(rat, intr, 'type', 'Spearman');
+if ~strcmp(stype, 'MW')
+    [output(1,3), pval3] = corr(rat, intr, 'type', 'Spearman');
+end
 
 % Calculate p values by performing a t-test against 0
 % Use atanh() as a Fischer r-to-z transform 
@@ -68,8 +80,10 @@ fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,2), pval2);
 fprintf(1, '\tPearson''s r = %0.2f , p = %0.3f\n', output(1,1), pval1);
 fprintf(1, 'Percent variance explained by this relationship:\n');
 fprintf(1, '\tr%c = %0.2f%%\n', 178, 100*(output(:,2) .^2));
-fprintf(1, 'Correlation between average %s and %s:\n', var3, var2);
-fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,3), pval3);
+if ~strcmp(stype, 'MW')
+    fprintf(1, 'Correlation between average %s and %s:\n', var3, var2);
+    fprintf(1, '\tSpearman''s \x03C1 = %0.2f , p = %0.3f\n', output(1,3), pval3);
+end
 fprintf(1, '\n');
 
 % Plots
@@ -90,9 +104,11 @@ figure();
     ylabel(sprintf('%s, averaged across subjects', var1));
     title(sprintf('Correlation = %0.2f, p = %0.4f', c2, p2));
 
-figure();
-    % Scatterplot of rating data
-    scatter(intr, rat);
-    xlabel(var2);
-    ylabel(sprintf('%s, averaged across subjects', var3));
-    title(sprintf('\x03C1 = %0.2f, p = %0.4f', output(1,3), pval3));
+if ~strcmp(stype, 'MW')
+    figure();
+        % Scatterplot of rating data
+        scatter(intr, rat);
+        xlabel(var2);
+        ylabel(sprintf('%s, averaged across subjects', var3));
+        title(sprintf('\x03C1 = %0.2f, p = %0.4f', output(1,3), pval3));
+end

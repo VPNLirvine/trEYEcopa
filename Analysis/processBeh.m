@@ -19,6 +19,8 @@ for i = 1:numRows
     else
         error('Cannot determine whether data in row %i was a flipped video or not!', i)
     end
+    % Also strip out file extension
+    [~,dat.StimName(i),] = fileparts(dat.StimName(i));
 end
 
 end

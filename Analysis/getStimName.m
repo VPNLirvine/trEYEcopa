@@ -11,15 +11,17 @@ if ~sum(y)
     assert(sum(y) > 0, 'No message re video name found!');
     stimName = list{y};
     stimName = erase(stimName, chktxt);
-    stimName = erase(stimName, '.MOV');
+    [~,stimName,~] = fileparts(stimName); % strip out file extension
 else
     assert(sum(y) > 0, 'No message re video name found!');
     stimName = list{y};
     stimName = erase(stimName, chktxt);
-    stimName = erase(stimName, '.MOV');
+    [~,stimName,~] = fileparts(stimName); % strip out file extension etc
     % This still has the video coordinates in the message, so remove them
     x = sscanf(stimName, '%i %i %s');
-    stimName = char(x(3:end))'; % skip 1 and 2, the coordinates.
+    if ~isempty(x)
+        stimName = char(x(3:end))'; % skip 1 and 2, the coordinates.
+    end
 end
 
 end % function

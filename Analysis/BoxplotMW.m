@@ -44,8 +44,9 @@ for sub = 1:numSubs
         subplot(nRows,numPerRow,sub);
     end
     efSz = mean(data.Eyetrack(subDat & strcmp(data.Category, 'social'))) - mean(data.Eyetrack(subDat & strcmp(data.Category, 'mechanical')));
+    efSz = efSz / std(data.Eyetrack,0,'omitmissing'); % Cohen's D = difference in group means / pooled SD
     boxplot(data.Eyetrack(subDat), data.Category(subDat), 'GroupOrder',conds);
-        title(sprintf(' %s, diff = %0.2f', strrep(subID,'_','\_'), efSz));
+        title(sprintf(' %s, Cohen = %0.2f', strrep(subID,'_','\_'), efSz));
         xticklabels(conds);
         ylim(ylimvec);
         ylabel(axistxt);
