@@ -39,6 +39,7 @@ pths.beh = fullfile(pths.base, 'beh'); % behavioral data e.g. RTs
 pths.pos = fullfile(pths.analysis, 'Position'); % adjusted position data
 pths.map = fullfile(pths.analysis, 'motionMaps'); % stim motion heatmaps
 pths.mot = fullfile(pths.analysis, 'motionData'); % optic flow values
+pths.int = fullfile(pths.analysis, 'interactData'); % interactivity vectors
 
 pths.fixcheck = fullfile(pths.base, 'fixation_checks'); % calibration
 end

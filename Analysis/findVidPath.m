@@ -3,7 +3,8 @@ function [fpath, varargout] = findVidPath(movName)
 pths = specifyPaths('..');
 
 % Ensure we have a file extension attached
-if ~strcmpi(movName(end-3:end), '.mov')
+[~,~,ext] = fileparts(movName);
+if ~strcmpi(ext, '.mov')
     movName = [movName '.mov'];
 end
 

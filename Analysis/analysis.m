@@ -8,7 +8,7 @@ else
     % By default, use percent time spent fixating
     metricName = 'scaledfixation';
 end
-dflag = false;
+dflag = false; % is data provided?
 if nargin > 1
     data = varargin{2};
     dflag = true;
@@ -120,14 +120,11 @@ if choice == 1 % Correlation analysis
         subset = strcmp(subID, data.Subject);
         eyeCol(s) = mean(data.Eyetrack(subset), 'all', 'omitnan');
     end
-        
-    data = getCorrelation2(data, metricName); % gaze vs motion
+    
     if ~mwflag
         % Calculate correlations and generate some visualizations
         % None of these involve AQ, so do them before the upcoming loop
         eye2rating = getCorrelations(data, metricName); % gaze vs rating
-        
-        data = getCorrelation3(data, metricName); % gaze vs interactivity
 
         % Get the average video rating per subject (not collected for MW)
         respCol = zeros([numSubs, 1]); % preallocate as column
@@ -138,6 +135,17 @@ if choice == 1 % Correlation analysis
         end
 
     end
+
+    % These also correlate DV with rating, IF it's not MW data
+    data = getCorrelation2(data, metricName); % gaze vs motion
+    if intExists(mwflag, metricName)
+        if mwflag
+            % drop mechanical videos
+            data = dropMech(data);
+        end
+        data = getCorrelation3(data, metricName); % gaze vs interactivity
+    end
+
     for a = 1:3 % AQ subscales
         % Loop over the three AQ subscales
         % Ensure they're sorted the same as the other data

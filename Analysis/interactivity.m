@@ -5,20 +5,41 @@ function output = interactivity(varargin)
 % This is a stimulus parameter that does not vary by subject.
 
 % Get position data for requested video(s)
-% If input is empty, then grab all videos
+% If input is empty or a stimulus code (e.g. 'TC'), then grab all videos
 if nargin > 0
-    stimName = varargin{1};
-    assert(ischar(stimName) || isstring(stimName), 'Input must be a video name!');
-    % strip out extension and/or path:
-    [~, stimName, ~] = fileparts(stimName);
-    posData = getPosition(stimName);
+    input = varargin{1};
+    flag = nameOrType(input);
+    switch flag
+        case 'name'
+            stimName = input;
+            % strip out extension and/or path:
+            [~, stimName, ~] = fileparts(stimName);
+            posData = getPosition(stimName);
+        case 'type'
+            posData = getPosition(input);
+    end
 else
     posData = getPosition(); % no input is different than empty input...
 end
 
+% Whether to return vectors or values
+if nargin > 1
+    valid2 = {'vec', 'val'};
+    outType = varargin{2};
+    assert(any(strcmp(valid2, outType)), 'Second input must be either ''vec'' or ''val''');
+else
+    outType = 'val'; % default to a single value
+end
+
 % Initialize output
-numVids = height(posData);
-output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'cell'}, 'VariableNames', {'StimName', 'Interactivity'});
+numVids = length(posData);
+if strcmp(outType, 'val')
+    % Use double
+    output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'double'}, 'VariableNames', {'StimName', 'Interactivity'});
+elseif strcmp(outType, 'vec')
+    % Use cell
+    output = table('Size', [numVids, 2], 'VariableTypes', {'cell', 'cell'}, 'VariableNames', {'StimName', 'Interactivity'});
+end
 
 % Now loop over all videos in posData
 for v = 1:numVids
@@ -43,8 +64,9 @@ for v = 1:numVids
     % threshold = 500;
     threshold = deg2pix(5);
     
-    % initialize the tally for this video 
+    % initialize the tallies for this video 
     interactivity = zeros(1, length(posDat(1).X));
+    use = zeros(1,numChars);
     
     % Check which characters actually move
     for i = 1:numChars
@@ -79,10 +101,16 @@ for v = 1:numVids
         end
     end
 
-    % Final calculation is a proportion: sum non-zero over duration
+    % Set outputs
     output.StimName{v} = stimName;
-    % output.Interactivity(v) = nnz(interactivity)/length(interactivity);
-    output.Interactivity{v} = interactivity;
+    if strcmp(outType, 'val')
+        % Final calculation is a proportion: sum non-zero over duration
+        output.Interactivity(v) = nnz(interactivity)/length(interactivity);
+    elseif strcmp(outType, 'vec')
+        % No calculation, just output the entire binary vector.
+        % This is useful for generating time-based predictors.
+        output.Interactivity{v} = interactivity;
+    end
 
 end % for video
 
