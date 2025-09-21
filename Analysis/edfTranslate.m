@@ -30,7 +30,7 @@ for i = 1:2:numRecs
     enevent = enevent(end);
     
     % Fill in header info
-    output(t).Header.rec = data.RECORDINGS(t);
+    output(t).Header.rec = data.RECORDINGS(i);
     output(t).Header.starttime = events.sttime(stevent);
     output(t).Header.endtime = events.sttime(enevent);
     output(t).Header.duration = output(t).Header.endtime - output(t).Header.starttime;
