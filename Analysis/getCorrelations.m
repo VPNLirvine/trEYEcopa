@@ -39,7 +39,16 @@ fprintf(1, '\n');
 
 % Give the distribution of coefficients
 figure();
-histogram(output(:,2), -1:.1:1); % plot the Spearman ones by default
+plt = histogram(output(:,2), -1:.1:1); % plot the Spearman ones by default
 xlabel(sprintf('Spearman''s \x03C1'));
 xlim([-1 1]);
-title(sprintf('Coefficients for %s : %s', var1, var2));
+xticks(-1:.2:1);
+% title(sprintf('Coefficients for %s : %s', var1, var2));
+title('All subjects');
+
+ax = gca;
+set(ax, 'Box', 'off');
+set(ax, 'FontSize', 14);
+set(ax, 'LineWidth', 1.5);
+set(ax.Children, 'FaceAlpha', 1)
+set(plt, 'LineWidth', 1.5);

@@ -14,9 +14,17 @@ switch metricName
         yl = [0 1];
         dist = 'Expect a binomial distribution';
     case 'response'
-        txt = 'Understandability rating';
+        txt = 'Clarity rating';
         yl = [0 6]; % fixed response limit 1-5
         dist = 'Uniform distribution is ideal';
+    case 'interact'
+        txt = 'Social Interactivity Level';
+        yl = [0 1];
+        dist = 'Expect a normal distribution';
+    case 'motion'
+        txt = 'Video Motion Energy';
+        yl = [0 6e5]; % ¯\_(ツ)_/¯
+        dist = 'Expect a normal distribution';
     case 'coherence'
         txt = 'Average scanpath similarity to group';
         yl = [0 1.1];

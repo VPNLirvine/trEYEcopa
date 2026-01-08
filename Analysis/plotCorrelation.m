@@ -56,11 +56,16 @@ for s = 1:numSubs
                 x(1:datl,i) = dat;
             end
         end
-        boxplot(x, 1:5); % which ignores nans thankfully
+        plt = boxplot(x, 1:5); % which ignores nans thankfully
         xlabel(var2);
         ylabel(var1);
-        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
+        title([strrep(subID, '_', ' '), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
         ylim(yl); % ylimit varies by metric
+        ax = gca;
+        set(ax, 'Box', 'off');
+        set(ax, 'FontSize', 13);
+        set(ax, 'LineWidth', 1.5);
+        set(plt, 'LineWidth', 1.5);
     % subplot(2,numSubs, s+numSubs)
     set(0,'CurrentFigure',fig2);
     if ok
@@ -70,14 +75,18 @@ for s = 1:numSubs
     end
     % But also add some scatterplots so you can see ALL your data
     % Helps give a better sense of where numbers are coming from
-        scatter(data.Response(subset), data.Eyetrack(subset));
+        scatter(data.Response(subset), data.Eyetrack(subset), 'LineWidth', 2);
         xlabel(var2);
         ylabel(var1);
-        title([strrep(subID, '_', '\_'), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
+        title([strrep(subID, '_', ' '), sprintf(', \x03C1 = %0.2f', eye2rating(s,2))]);
         ylim(yl); % varies by metric
         xlim(yl2); % fixed bc it's response 1-5
         xticks([1 2 3 4 5])
         % lsline
+        ax = gca;
+        set(ax, 'Box', 'off');
+        set(ax, 'FontSize', 13);
+        set(ax, 'LineWidth', 1.5);
 end
 
 % Also generate an overall plot (i.e. not by subject)
@@ -93,11 +102,15 @@ for i = 1:5
         x(1:datl,i) = dat;
     end
 end
-boxplot(x, 1:5); % which ignores nans thankfully
+plt = boxplot(x, 1:5, 'Colors', 'k', 'Symbol', '+k'); % which ignores nans thankfully
 xlabel(var2);
 ylabel(var1);
 title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, eye2rating(s,2)));
 ylim(yl); % ylimit varies by metric
-
+ax = gca;
+set(ax, 'Box', 'off');
+set(ax, 'FontSize', 13);
+set(ax, 'LineWidth', 1.5);
+set(plt, 'LineWidth', 1.5);
 warning('on','stats:boxplot:BadObjectType'); % toggle
 end
