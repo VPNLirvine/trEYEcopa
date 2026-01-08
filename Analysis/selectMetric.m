@@ -82,7 +82,8 @@ switch metricName
         data = edfDat.Fixations.time(edfDat.Fixations.eye == i & edfDat.Fixations.entime <= recDur & edfDat.Fixations.sttime >= recOffset);
         % data = [selectMetric(edfDat, 'firstfix', varargin) data]; % re-insert first fixation as well??
         data = [data selectMetric(edfDat, 'lastfix', varargin{:})]; % include the cut-off final fixation
-        output = fixOutliers(data);
+        % output = fixOutliers(data);
+        output = data;
     case 'totalfix'
         data = selectMetric(edfDat, 'fixations', varargin{:});
         output = sum(data);
@@ -108,19 +109,20 @@ switch metricName
         end
     case 'lastfix'
         % Please don't analyze this by itself
-        data = edfDat.Fixations.sttime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime <= recDur & edfDat.Fixations.entime >= recDur);
+        data = edfDat.Fixations.sttime(edfDat.Fixations.eye == i & edfDat.Fixations.sttime >= recOffset & edfDat.Fixations.entime > recDur);
         if isempty(data)
             output = [];
         else
             % I selected the START TIME of the fixation, not the duration.
             % The end time could be ANY time after the stim ends,
-            % but we need to ignore that part,
-            % and just get the portion from its start to the video end.
+            % but we need to ignore the actual end time,
+            % and just get the duration from fix onset to stim end.
             % Since Fixations.sttime is relative to recording onset,
-            % we need to subtract recOffset as well.
-            % The result is the duration of the final fixation,
-            % minus any time it lasted after the video ended.
-            output = (stimEnd - stimStart) - data(end) - recOffset;
+            % while stimEnd is in absolute time units,
+            % we add recStart to sttime to get absolute onset time,
+            % then subtract that from the stimulus end time.
+            % The result is duration from fixation start to stimulus end.
+            output = stimEnd - (data + recStart);
         end
     case 'duration'
         output = getStimDuration(edfDat);
