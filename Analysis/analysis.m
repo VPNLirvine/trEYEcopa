@@ -138,6 +138,10 @@ if choice == 1 % Correlation analysis
 
     % These also correlate DV with rating, IF it's not MW data
     data = getCorrelation2(data, metricName); % gaze vs motion
+    if mwflag
+        % Correlate motion w gaze, split by condition
+        getCorrByCond(data, metricName);
+    end
     if intExists(mwflag, metricName)
         if mwflag
             % drop mechanical videos

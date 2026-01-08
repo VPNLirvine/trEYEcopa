@@ -1,4 +1,4 @@
-function reportMotionStats(stype)
+function motion = reportMotionStats(stype)
 % Check for stored motion data
 fname = [stype, '_motionData.mat'];
 fpath = fullfile(pwd, 'motionData', fname);
@@ -10,14 +10,15 @@ end
 
 switch stype
     case 'MW'
-        % Assign category labels to each video
-        % ...find them from stim csv?
-        socInds = [];
-        mecInds = [];
-        motion.Category(socInds) = 'social';
-        motion.Category(mecInds) = 'mechanical';
-        % Import video duration
-        load('MWstimParams.mat');
+        % Fetch category labels for each video
+        stimList = readtable('MWConditionList.csv');
+        % Establish mapping between motion table and label table
+        stimList = sortrows(stimList, 1); % Assumes both have stimName as 1
+        motion = sortrows(motion, 1);
+        socInds = strcmp(stimList.CONDITION, 'social');
+        mecInds = strcmp(stimList.CONDITION, 'mechanical');
+        % Write category labels into motion table
+        motion.Condition = stimList.CONDITION;
         
         % Sum the motion energy per video
         for i = 1:height(motion)
@@ -25,20 +26,22 @@ switch stype
             motion.Rate(i) = motion.total(i) / motion.Duration{i};
         end
         % Perform a t-test between categories
-        [h,p,ci,stats] = ttest2(motion.totalMotion(s),motion.totalMotion(m));
+        [h,p,ci,stats] = ttest2(motion.total(socInds),motion.total(mecInds));
         % Report the statistics
         t = {'is not', 'is'};
-        fprintf(1, 'There %s a significant difference between categories\n', t{h+1})
-        fprintf(1, 't(%i) = %0.2f, p = %0.3f\n', stats.df, stats.tstat, p(1));
-        fprintf(1, 'Social = %0.1f (SD = %0.1f), ', mean(motion.Rate(socInds)) / deg2pix(1), std(motion.Rate(socInds)) / deg2pix(1));
-        fprintf(1, 'Mechanical = %0.1f (SD = %0.1f)', mean(motion.Rate(mecInds)) / deg2pix(1), std(motion.Rate(mecInds)) / deg2pix(1));
-
+        fprintf(1, '\nConsidering motion energy:\n');
+        fprintf(1, '\tThere %s a significant difference between conditions\n', t{h+1})
+        fprintf(1, '\tt(%i) = %0.2f, p = %0.3f\n', stats.df, stats.tstat, p(1));
+        fprintf(1, '\tSocial = %0.1f (SD = %0.1f), ', mean(motion.Rate(socInds)) / deg2pix(1), std(motion.Rate(socInds)) / deg2pix(1));
+        fprintf(1, '\tMechanical = %0.1f (SD = %0.1f)', mean(motion.Rate(mecInds)) / deg2pix(1), std(motion.Rate(mecInds)) / deg2pix(1));
+        fprintf(1, '\n');
     case 'TC'
         % Report correlations between Motion, Interactivity, and Duration
         intScore = importdata('interactData/TC_interactData.mat'); % get dynamically
-        % Motion is sorted alpha, int is not. Adjust:
-        intScore = sortrows(intScore);
-        motion.Duration = cell2mat(motion.Duration);
+        % Ensure both are sorted the same way
+        intScore = sortrows(intScore, 1);
+        motion = sortRows(motion, 1);
+        motion.Duration = cell2mat(motion.Duration); 
         for i = 1:height(motion)
             motion.total(i) = sum(motion.MotionEnergy{i});
             motion.Rate(i) = motion.total(i) / motion.Duration(i);
