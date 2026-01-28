@@ -6,7 +6,7 @@ if nargin > 0
     metricName = varargin{1};
 else
     % By default, use percent time spent fixating
-    metricName = 'scaledfixation';
+    metricName = 'sfix';
 end
 dflag = false; % is data provided?
 if nargin > 1

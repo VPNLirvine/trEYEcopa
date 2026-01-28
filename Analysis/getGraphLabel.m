@@ -49,7 +49,7 @@ switch metricName
         txt = 'Total fixation time in ms';
         yl = [1.5e4 2.1e4];
         dist = 'Expect an RT-like distribution';
-    case 'scaledfixation'
+    case 'sfix'
         txt = 'Percent time spent fixating';
         yl = [0 1.1];
         dist = 'Expect an RT-like distribution';

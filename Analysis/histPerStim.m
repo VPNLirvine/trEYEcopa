@@ -3,7 +3,7 @@ addpath('..'); % to allow specifyPaths to run
 pths = specifyPaths('..');
 outputPath = pths.MWdat;
 edfList = dir(fullfile(outputPath, '*.edf'));
-metricName = 'scaledfixation';
+metricName = 'sfix';
 [axistxt, xl] = getGraphLabel(metricName);
 yl = length(edfList) * (0.5 * xl(2)); % estimate a frequency
 % Aggregate data

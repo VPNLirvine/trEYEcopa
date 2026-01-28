@@ -1,4 +1,4 @@
-metricName = 'scaledfixation';
+metricName = 'sfix';
 data = getTCData(metricName);
 [var1, yl] = getGraphLabel(metricName);
 histogram(data.Eyetrack);

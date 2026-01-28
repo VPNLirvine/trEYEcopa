@@ -10,7 +10,7 @@ if nargin > 0
 else
     % What metric to analyze - see selectMetric
     % By default, use percent time spent fixating
-    metricName = 'scaledfixation';
+    metricName = 'sfix';
 end
 fprintf(1, 'Using metric %s\n\n', metricName);
 
