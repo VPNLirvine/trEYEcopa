@@ -105,7 +105,7 @@ end
 plt = boxplot(x, 1:5, 'Colors', 'k', 'Symbol', '+k'); % which ignores nans thankfully
 xlabel(var2);
 ylabel(var1);
-title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, eye2rating(s,2)));
+title(sprintf('Across %i subjects, \x03C1 = %0.2f', numSubs, mean(eye2rating(:,2))));
 ylim(yl); % ylimit varies by metric
 ax = gca;
 set(ax, 'Box', 'off');
