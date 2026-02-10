@@ -64,6 +64,8 @@ function watchData(movName, gaze, prediction)
             % h2.MarkerFaceAlpha = .2;
         end
         h1 = scatter(gaze(1,i), gaze(2,i), (10*.7)^2, 'o', 'MarkerFaceColor', 'r');
+        ax.XTick = [];
+        ax.YTick = [];
         hold off;
     titxt = strrep(movName, '_', '\_');
     % Now animate in a new loop
