@@ -277,7 +277,8 @@ if choice == 1 % Correlation analysis
                 % find regression function y = mx + b, with intercept
                 y = regress(zCorr, [ones(size(aq)), aq]);
                 % define plot values at each x by using xlim bounds
-                rlx = yl3(1):yl3(2);
+                % but add a buffer so the line doesn't touch the edges
+                rlx = yl3(1)+1:yl3(2)-1;
                 rly = y(2) * rlx + y(1);
                 % add line to scatter
                 hold on
