@@ -55,6 +55,9 @@ output.AttentionDetail = sum(questions{:, strcmp(scoreAQ.Subscale, 'Attention to
 % because some subscales are anti-correlated...
 output.AQ = output.SocialSkills + output.Communication + output.AttentionDetail;
 
+% Subnum is sometimes shuffled? Ensure output is sorted:
+output = sortrows(output);
+
 warning(q1.state, 'MATLAB:table:ModifiedAndSavedVarnames');
 warning(q2.state, 'MATLAB:textio:io:UnableToGuessFormat');
 end

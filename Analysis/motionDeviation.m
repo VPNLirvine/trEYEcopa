@@ -8,7 +8,8 @@ function motionMap = motionDeviation(stimName)
 % given by Roux, Passerieux, & Ramus (2013).
 
 pths = specifyPaths('..');
-fname = strrep(stimName, '.mov', '.mat');
+[~,fname,~] = fileparts(stimName); % strip extension and replace with .mat
+fname = [fname, '.mat'];
 fpath = fullfile(pths.map, fname);
 
 %% EXTRACT DATA TO BE COMPARED

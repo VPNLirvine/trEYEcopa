@@ -12,8 +12,9 @@ distanceToScreen = 26; % in inches. This one may vary a bit.
 % SOH CAH TOA: we don't have the hypotenuse, so use tangent.
 % tan(theta) = opposite / adjacent
 % solving for opposite, o = adj * tangent(theta)
+% But with biologically plausible geometry:
+segmentInInches = 2 * distanceToScreen * tand(numDegrees/2);
 
-segmentInInches = distanceToScreen * tand(numDegrees);
 
 % Finally, convert from inches to pixels.
 % The ratio of segment length to monitor size is equal, regardless of units

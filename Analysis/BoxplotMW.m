@@ -50,7 +50,11 @@ for sub = 1:numSubs
         xticklabels(conds);
         ylim(ylimvec);
         ylabel(axistxt);
+    CoD(sub) = efSz;
 end
+
+fprintf(1, '\nDistribution of Cohen''s Ds across subjects:\n')
+fprintf(1, 'Range: %0.3f to %0.3f, Mean: %0.3f, SD: %0.3f\n', min(CoD, [], 'all'), max(CoD, [], 'all'), mean(CoD, 'all'), std(CoD, 0, 'all'));
 
 %% Split by stimulus, grouped by condition
 % close all

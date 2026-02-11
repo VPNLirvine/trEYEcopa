@@ -4,7 +4,7 @@ function [output, varargout] = selectMetric(edfDat, metricName, varargin)
 % Given a metric name like 'totfixation', calculate and return that metric
 % Options are as follows:
 %   'totalfix' - Total fixation time per trial
-%   'scaledfixation' - Percentage of video time spent fixating
+%   'sfix' - Percentage of video time spent fixating
 %   'firstfix' - Duration of the initial fixation - like an RT to the video
 %   'duration' - Duration of the video in sec (a QC metric)
 %   'meanfix' - Average fixation duration within a trial
@@ -92,7 +92,7 @@ switch metricName
         % so if it correlates strongly with anything,
         % you've likely got a bug in your pipeline.
         output = recOffset;
-    case 'scaledfixation'
+    case 'sfix'
         data = selectMetric(edfDat, 'totalfix', varargin{:});
         output = data / duration;
     case 'firstfix'

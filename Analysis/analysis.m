@@ -6,7 +6,7 @@ if nargin > 0
     metricName = varargin{1};
 else
     % By default, use percent time spent fixating
-    metricName = 'scaledfixation';
+    metricName = 'sfix';
 end
 dflag = false; % is data provided?
 if nargin > 1
@@ -138,6 +138,10 @@ if choice == 1 % Correlation analysis
 
     % These also correlate DV with rating, IF it's not MW data
     data = getCorrelation2(data, metricName); % gaze vs motion
+    if mwflag
+        % Correlate motion w gaze, split by condition
+        getCorrByCond(data, metricName);
+    end
     if intExists(mwflag, metricName)
         if mwflag
             % drop mechanical videos
@@ -177,12 +181,17 @@ if choice == 1 % Correlation analysis
             
             % Plot
             figure();
-            scatter(aq, eyeCol);
+            plt = scatter(aq, eyeCol, 'LineWidth', 2);
                 title(sprintf('Across %i subjects, strength of relationship \x03C1 = %0.2f, p = %0.4f', numSubs, aq2eye(2,1), aq2eye(2,2)));
                 xlabel(var3);
                 ylabel(['Average ' var1]);
                 ylim(yl);
                 xlim(yl3);
+                ax = gca;
+                set(ax, 'Box', 'off');
+                set(ax, 'FontSize', 14);
+                set(ax, 'LineWidth', 1.5);
+                set(plt, 'LineWidth', 2);
                 
             % Report the correlation score
             fprintf(1, '\n\nCorrelation between %s and average %s within subject:\n', var3, var1)
@@ -192,15 +201,25 @@ if choice == 1 % Correlation analysis
             % Histograms
             figure();
             subplot(1,2,1);
-                histogram(data.Eyetrack);
+                plt = histogram(data.Eyetrack);
                 xlabel(var1);
                 title(distTxt);
                 xlim(yl);
+                ax = gca;
+                set(ax, 'Box', 'off');
+                set(ax, 'FontSize', 13);
+                set(ax, 'LineWidth', 1.5);
+                set(plt, 'LineWidth', 2);
             subplot(1,2,2)
-                histogram(aq, 'BinEdges', 0:5:50);
+                plt = histogram(aq, 'BinEdges', 0:5:50);
                 xlabel(var3);
                 title(distTxt3);
                 xlim(yl3);
+                ax = gca;
+                set(ax, 'Box', 'off');
+                set(ax, 'FontSize', 13);
+                set(ax, 'LineWidth', 1.5);
+                set(plt, 'LineWidth', 2);
                 % Add lines indicating the expected distribution(s)
                 % overlayAQ(gca); % skip this 
         if ~mwflag
@@ -213,12 +232,17 @@ if choice == 1 % Correlation analysis
 
             % Plot that
             figure();
-                scatter(aq, respCol);
+                plt = scatter(aq, respCol, 'LineWidth', 2);
                 xlim(yl3);
                 ylim(yl2);
                 xlabel(var3);
                 ylabel(['Average ', var2]);
                 title(sprintf('Across %i subjects, \x03C1 = %0.2f, p = %0.4f', numSubs, aq2rating(1,1), aq2rating(1,2)));
+                ax = gca;
+                set(ax, 'Box', 'off');
+                set(ax, 'FontSize', 13);
+                set(ax, 'LineWidth', 1.5);
+                set(plt, 'LineWidth', 2);
 
             % Now Fischer z-transform your main correlation coefficients
             % zCorr = zscore(eye2rating(:,2));
@@ -229,12 +253,37 @@ if choice == 1 % Correlation analysis
             [secondCorr, secondP] = corr(aq, zCorr, 'Type', 'Spearman', 'rows', 'complete');
             figure();
                 % scatter(aq, zCorr, 'filled');
-                scatterhist(aq, zCorr, 'NBins', 10, 'Marker', '.', 'MarkerSize', 18, 'Direction', 'out');
+                plt = scatterhist(aq, zCorr, 'NBins', 10, 'Marker', '.', 'Color', 'k', 'MarkerSize', 18, 'Direction', 'out');
                 xlabel(var3);
-                ylabel('Within-Subject Spearman correlation');
-                title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f, p = %0.4f', var3, var1, var2, secondCorr, secondP));
+                % ylabel('Within-Subject Spearman correlation');
+                ylabel([var1 ' : ' var2]);
+                % title(sprintf('Impact of %s on %s''s relation with %s\n\x03C1 = %0.2f, p = %0.4f', var3, var1, var2, secondCorr, secondP));
+                title(sprintf('\x03C1 = %0.2f, p = %0.4f', secondCorr, secondP));
                 xlim(yl3);
                 ylim([-1 1]);
+                ax = gca;
+                set(ax, 'Box', 'off');
+                set(ax, 'FontSize', 13);
+                set(ax, 'LineWidth', 1.5);
+                set(plt, 'LineWidth', 2);
+                % Address histograms
+                set(plt(2).Children, 'FaceColor', [.64 .08 .18]);
+                set(plt(2).Children, 'FaceAlpha', 1);
+                set(plt(2).Children, 'LineWidth', 1.5);
+                set(plt(3).Children, 'FaceColor', [.00 .45 .74]);
+                set(plt(3).Children, 'FaceAlpha', 1);
+                set(plt(3).Children, 'LineWidth', 1.5);
+                % Add regression line to scatter plot:
+                % find regression function y = mx + b, with intercept
+                y = regress(zCorr, [ones(size(aq)), aq]);
+                % define plot values at each x by using xlim bounds
+                % but add a buffer so the line doesn't touch the edges
+                rlx = yl3(1)+1:yl3(2)-1;
+                rly = y(2) * rlx + y(1);
+                % add line to scatter
+                hold on
+                    plot(rlx, rly, '-', 'LineWidth', 2);
+                hold off
         
             fprintf(1, 'Correlation between %s and (within-subject correlation between %s and %s):\n', var3, var1, var2)
             fprintf(1, '\t\x03C1 = %0.2f, p = %0.4f\n', secondCorr, secondP);
@@ -248,14 +297,26 @@ if choice == 1 % Correlation analysis
         % Histograms of gaze and clarity
         figure();
         subplot(1,2,1);
-            histogram(data.Eyetrack);
+            plt = histogram(data.Eyetrack);
             xlabel(var1);
             title(distTxt);
             xlim(yl);
+            ax = gca;
+            set(ax, 'Box', 'off');
+            set(ax, 'FontSize', 13);
+            set(ax, 'LineWidth', 1.5);
+            set(plt, 'FaceColor', [.00 .45 .74]);
+            set(plt, 'LineWidth', 1.5);
         subplot(1,2,2)
-            histogram(data.Response);
+            plt = histogram(data.Response);
             xlabel(var2);
             title(distTxt2);
+            ax = gca;
+            set(ax, 'Box', 'off');
+            set(ax, 'FontSize', 13);
+            set(ax, 'LineWidth', 1.5);
+            set(plt, 'FaceColor', [.00 .45 .74]);
+            set(plt, 'LineWidth', 1.5);
     end
 elseif choice == 2 % Do a mean comparison across groups
     
