@@ -18,21 +18,24 @@ which is free but requires registration on their forum.
 Some analyses make use of functions from Matlab's `Image Processing Toolbox`.
 We also use [this False-Discovery Rate function](https://www.mathworks.com/matlabcentral/fileexchange/27418-fdr_bh) from the Matlab File Exchange.
 
-## Stimuli
+## Setup
+### Stimuli
 This experiment uses a modified version of the [TriangleCOPA](https://github.com/asgordon/TriangleCOPA) stimulus set from Maslan, Roemmele, and Gordon (2015).
 We also employed stimuli from Martin & Weisberg (2003) "Neural foundations for understanding social and mechanical concepts".
-Stimuli as we used them are available on [OSF](https://osf.io/z6ysr/).
 
-## Setup
-Ensure the stimuli are organized into the proper folders:
+Stimuli as we used them are available on [OSF](https://osf.io/z6ysr/).
+There should be two folders, `TriCOPA` and `MartinWeisberg`. Place both in `trEYEcopa/stims`. If properly set up:
 
 `/stims/MartinWeisberg/` should have 16 videos.
 
 `/stims/TriCOPA/` should have subfolders `flipped` and `normal`, each with 100 videos.
 Flipped videos have the prefix `f_`, while normal does not. e.g. `flipped/f_Q13_6642_ignore.mov`
 
-If you are analyzing our data, place the `beh` folder in root,
-but `derivatives` and `source` nested under a folder named `data`. So:
+### Data
+If you wish to analyze our data, the files are available on OSF [here](https://osf.io/ym7uq).
+There should be two folders: `beh` and `data`.
+Download and place them in the root trEYEcopa folder, i.e. at the same level as `specifyPaths.m`.
+If properly set up, you should be able to find the following files at these locations:
 
 `/beh/TC_01_task-TriCOPA_date-xxx.txt`
 
@@ -42,7 +45,7 @@ but `derivatives` and `source` nested under a folder named `data`. So:
 
 ## Use
 ### Experiment
-To run the experiment, open MATLAB and call `Main_EyeLink`.
+To run the experiment, open MATLAB and call `Main_EyeLink()`.
 A box will pop up asking for
 
 1. a two-digit subject number (e.g. 01), and
@@ -53,11 +56,11 @@ Output will be automatically sorted into `beh` and `data`.
 ### Analysis
 To analyze the data:
 
-- cd into `Analysis`
-- run `addpath('..');` so that it can access the `specifyPaths` function in root, then
+- cd into `/Analysis/`
+- run `addpath('..');` so that Matlab can access the `specifyPaths` function in root, then
 - run `analysis('metricName');`
 
-A list of available metric names is present in the header of `Analysis/selectMetric`.
+A list of available metric names is present in the header of `/Analysis/selectMetric`.
 Our primary metrics were:
 
 - `sfix` for "scaled fixation" i.e. the proportion of time fixated,
@@ -65,10 +68,10 @@ Our primary metrics were:
 - `deviance` or proportion of time gaze deviated from visual motion.
 
 
-By default, `analysis` will invoke either `getTCData` or `getMWData`
-to extract data from the EDF files in `data/source`.
+By default, `analysis()` will invoke either `getTCData()` or `getMWData()`
+to extract data from the EDF files in `/data/source/`.
 If you have that data already loaded into memory (i.e. as a table),
-then you can feed it into `analysis` as a second argument.
+then you can feed it into `analysis()` as a second argument.
 For example, if you have already run
 `totDF = getTCData('tot');` to get the Time on Target data, then you could run
-`analysis('tot', totDF);` instead of waiting for `analysis` to run `getTCData` again.
+`analysis('tot', totDF);` instead of waiting for `analysis()` to run `getTCData()` again.
