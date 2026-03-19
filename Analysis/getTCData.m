@@ -40,7 +40,7 @@ function data = getTCData(metricName, taskFlag, subList)
     
     % Initialize an empty dataframe
     % Requires specifying the data type ahead of time
-    useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec'}));
+    useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec', 'resolution'}));
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
     if useCell
         % Let the Eyetrack field take a cell with a 2D matrix
