@@ -17,6 +17,8 @@ function [output, varargout] = selectMetric(edfDat, metricName, varargin)
 %   'blinkrate' - Number of blinks / duration of video (in Hz)
 %   'deviance' - Instantaneous deviation of gaze from a predicted path
 %   'similarity' - Correlation b/w predicted and actual scanpath
+%   'resolution' - pixels per degree over time, as pulled from the tracker.
+%   (rows for resolution are X ppd, Y ppd, and time in msec).
 
 % Determine how many eyes were used
 % values of n: 0 = left, 1 = right.
@@ -76,6 +78,22 @@ recDur = stimEnd - recStart;
 
 
 switch metricName
+    case 'resolution'
+        % Instantaneous angular resolution at the point of gaze, in px/deg
+        % This is constantly fluctuating, as it depends on distance
+        % The tracker calculates it for us based on head position sensors
+        % X and Y resolution are calculated separately
+        xdat = edfDat.Samples.rx;
+        ydat = edfDat.Samples.ry;
+
+        % Output in a similar format to `gaze` metric for easy syncing:
+        % Only consider timepoints where the stimulus was visible
+        stimPeriod = edfDat.Samples.time >= stimStart & edfDat.Samples.time < stimEnd;
+        
+        xdat = xdat(stimPeriod);
+        ydat = ydat(stimPeriod);
+        tdat = double(edfDat.Samples.time(stimPeriod)) - stimStart;
+        output = [xdat; ydat; tdat];
     case 'fixations'
         % Hidden metric that exports a vector of fixations
         % This helps standardize the outlier rejection etc across metrics
