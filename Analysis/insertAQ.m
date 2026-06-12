@@ -2,6 +2,14 @@ function data = insertAQ(data)
 % given Data, add the AQ subscales back in
 aq = getAQ(specifyPaths('..'));
 
+% SubIDs indicate which experiment was run,
+% But the AQ table only says 'TC'.
+% TC_01 == MW_01. Compensate if this is MW data.
+stype = detectStimType(data); % should be either 'TC' or 'MW'
+if strcmp(stype, 'MW')
+    aq.SubID = replace(aq.SubID, 'TC','MW');
+end
+
 subList = unique(data.Subject);
 numSubs = length(subList);
 A1 = zeros(height(data),1);
