@@ -16,7 +16,9 @@ else
 end
 
 % Insert important data
+fprintf(1, 'Inserting AQ scores\n');
 data = insertAQ(data);
+fprintf(1, 'Inserting stimulus parameters\n');
 data = insertStimParams(data);
 
 % Export, but avoid overwriting existing files without confirmation
@@ -31,7 +33,7 @@ if exist(fout, 'file')
     doSave = strcmp(choice, 'Yes');
 end
 if doSave
-    % save(fout, 'data');
+    fprintf(1, "Exporting to file %s\n", fout);
     writetable(data, fout);
 else
     fprintf(1, "Canceled save to file %s\n", fout);
