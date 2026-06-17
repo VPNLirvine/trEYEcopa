@@ -41,7 +41,7 @@ for v = 1:numVids
     % Insert motion energy and duration from the same table
     vidName = motion.StimName{v};
     subset = strcmp(data.StimName, vidName);
-    data.Motion(subset) = sum(motion.MotionEnergy{v});
+    data.Motion(subset) = sum(motion.MotionEnergy{v}) / motion.Duration{v};
     data.Duration(subset) = motion.Duration{v};
 
     % Don't trust that interactivity is in the same order as motion
