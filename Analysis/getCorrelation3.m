@@ -57,7 +57,7 @@ output = [];
 
 % Get the names of what you're correlating
 var1 = getGraphLabel(metricName);
-var2 = 'Social Interactivity Level';
+var2 = getGraphLabel('interact');
 var3 = getGraphLabel('response');
 
 % Analyze the distribution of correlation scores
