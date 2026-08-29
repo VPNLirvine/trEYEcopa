@@ -82,7 +82,7 @@ for subject = 1:numSubs
         % Ignore the mechanical videos for time on target
         % Then please only ever analyze as a correlation
         isMec = skipThisVideo(stimName, 'MW');
-        if strcmp(metricName, 'tot') && isMec
+        if any(contains({'tot', 'movert'}, metricName)) && isMec
             continue
         end
         

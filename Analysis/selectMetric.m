@@ -273,6 +273,10 @@ switch metricName
         % Percentage of video time spent looking at characters
         output = timeOnTarget(edfDat, metricName, varargin{:});
 
+    case 'movert'
+        % Movement RT
+        % Tells you how long it takes participant to first fixate chars
+        output = timeOnTarget(edfDat, metricName, varargin{:});
     case 'blinkrate'
         % Pretty straightforward.
         % Duration is in msec, so 1000x gives you the rate in Hz

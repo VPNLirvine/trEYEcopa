@@ -75,6 +75,7 @@ if strcmp(metricName, 'tot')
     for i = 1:numChars
         gazeOn(i,:) = p(i).gazeOn;
     end
+    gazeOn(strcmp({posDat.Name}, 'door'),:) = []; % exclude the TriCOPA door
     onTarget = sum(gazeOn,1);
     % onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
     output = nnz(onTarget) / length(onTarget);
@@ -88,6 +89,39 @@ if strcmp(metricName, 'tot')
 %     timeOnC3 = nnz(gazeOnC3) / length(gazeOnC3); % door
 %     timeOnC4 = nnz(gazeOnC4) / length(gazeOnC4); % small triangle
 %     output = [timeOnC1, timeOnC2, timeOnC3, timeOnC4];
+elseif strcmp(metricName, 'movert')
+    % reaction time to first movement
+    % compare gaze to the path of each character, 
+    % find the first time they intersect AFTER the character has moved,
+    % then report the shortest latency
+
+    p(strcmp({posDat.Name}, 'door')) = []; % exclude the TriCOPA door
+    % p(i).C(3,:) is timestamps
+    % p(i).gazeOn(:) is boolean
+    latencyList = zeros(length(p), 1);
+    for i = 1:length(p)
+        % Find out when the character first moves
+        initX = p(i).C(1,1);
+        initY = p(i).C(2,1);
+        motionX = find(p(i).C(1,:) ~= initX, 1);
+        motionY = find(p(i).C(2,:) ~= initY, 1);
+        firstMotionInd = min([motionX, motionY]);
+        % If the character never moved, this will be empty
+        % Grab the maximum index instead
+        if isempty(firstMotionInd)
+            firstMotionInd = length(p(i).gazeOn);
+        end
+        firstMotionTime = p(i).C(3, firstMotionInd);
+        % Set all gazeOn values before that equal to 0
+        p(i).gazeOn(1:firstMotionInd-1) = false;
+        % extract the time gaze first meets the character
+        earliestFixation = p(i).C(3, find(p(i).gazeOn, 1));
+        % time between character motion and gaze meeting character
+        % If character was never fixated, earliestFixation will be empty
+        if isempty(earliestFixation) earliestFixation = inf; end
+        latencyList(i) = earliestFixation - firstMotionTime;
+    end
+    output = min(latencyList);
 else
     output = p; % output position data struct, i.e. NOT a summary metric.
 end
