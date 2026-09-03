@@ -6,14 +6,11 @@ function data = getCorrByCond(data, metricName)
 % We get the average eyetrack value per video (ie across subjects),
 % then split by condition, and correlate with motion energy.
 
-conds{1} = 'social';
-conds{2} = 'mechanical';
-inds{1} = strcmp(data.Category, conds{1});
-inds{2} = strcmp(data.Category, conds{2});
+conds = unique(data.Category);
 fprintf(1, '\n');
-for i = 1:length(inds)
+for i = 1:length(conds)
     % One condition at a time
-    subset = inds{i};
+    subset = strcmp(data.Category, conds(i));
     dat = data(subset,:);
     vidList = unique(dat.StimName);
     avgE = zeros(length(vidList), 1);
