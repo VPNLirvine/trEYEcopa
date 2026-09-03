@@ -41,16 +41,16 @@ function data = getTCData(metricName, taskFlag, subList)
     % Initialize an oversized dataframe, to be pruned at the end
     % Requires specifying the data type ahead of time
     useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec', 'resolution'}));
-    dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
+    dheader = {'Subject', 'Eyetrack', 'StimName', 'Response', 'RT', 'Flipped'};
     if strcmp(metricName, 'fixddt')
         % Special case with an extra column
-        dheader = {'Subject', 'Eyetrack', 'Quadrant', 'Response', 'RT', 'Flipped'};
-        dtypes = {'string', 'double', 'double', 'double', 'double', 'logical'};
+        dheader = {'Subject', 'Eyetrack', 'Quadrant', 'StimName', 'Response', 'RT', 'Flipped'};
+        dtypes = {'string', 'double', 'double', 'string', 'double', 'double', 'logical'};
     elseif useCell
         % Let the Eyetrack field take a cell with a 2D matrix
-        dtypes = {'string', 'cell', 'double', 'double', 'logical'};
+        dtypes = {'string', 'cell', 'string', 'double', 'double', 'logical'};
     else
-        dtypes = {'string', 'double', 'double', 'double', 'logical'};
+        dtypes = {'string', 'double', 'string', 'double', 'double', 'logical'};
     end
     numStims = height(params);
     numInitRows = numSubs * numStims;
