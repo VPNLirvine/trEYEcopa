@@ -19,6 +19,7 @@ function [output, varargout] = selectMetric(edfDat, metricName, varargin)
 %   'similarity' - Correlation b/w predicted and actual scanpath
 %   'resolution' - pixels per degree over time, as pulled from the tracker.
 %   (rows for resolution are X ppd, Y ppd, and time in msec).
+%   'fixddt'    - gives the number of fixations in each of N windows
 
 % Determine how many eyes were used
 % values of n: 0 = left, 1 = right.
@@ -397,6 +398,24 @@ switch metricName
         predGaze = motionDeviation(gaze, stimName);
 
         output = corr2(gaze(1:2,:), predGaze);
+    case 'fixddt'
+        % For assessing changes in the number of fixations over time
+        % Gets a tally of the number of fixations, within some window
+        % Exports a set of tallies, one for each window
+
+        % First, define temporal windows to bin fixations into
+        % Could theoretically define opts.numWindows to make this variable
+        numWindows = 4; % instead of a variable count with fixed dur
+        quadrants = duration * (0:numWindows)/numWindows;
+        output = zeros([numWindows, 2]); % init
+        for i = 1:numWindows
+            % Subset to only those fixations that happened within the window
+            windowsttime = quadrants(i);
+            windowentime = quadrants(i+1);
+            data = edfDat.Fixations.sttime > windowsttime & edfDat.Fixations.sttime <= windowentime;
+            output(i,1) = sum(data); % count the number of fixation durations present
+            output(i,2) = i; % to make generating a new column easier
+        end
     otherwise
         error('Unknown metric name %s! aborting', metricName);
 end
