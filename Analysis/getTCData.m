@@ -3,7 +3,7 @@ function data = getTCData(metricName, taskFlag, subList)
 % Input 1: metric name, as used in selectMetric. e.g. 'tot', 'blinkrate'
 % Input 2: task type. Options are 'nar' for narrative or 'tri' for all 100
 % Input 3: list of subjects
-
+    
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
@@ -38,23 +38,34 @@ function data = getTCData(metricName, taskFlag, subList)
     % Get some stimulus parameters that are relevant for synchronization
     params = importdata('TCstimParams.mat', 'stimParams');
     
-    % Initialize an empty dataframe
+    % Initialize an oversized dataframe, to be pruned at the end
     % Requires specifying the data type ahead of time
     useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec', 'resolution'}));
     dheader = {'Subject', 'Eyetrack', 'Response', 'RT', 'Flipped'};
-    if useCell
+    if strcmp(metricName, 'fixddt')
+        % Special case with an extra column
+        dheader = {'Subject', 'Eyetrack', 'Quadrant', 'Response', 'RT', 'Flipped'};
+        dtypes = {'string', 'double', 'double', 'double', 'double', 'logical'};
+    elseif useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'double', 'double', 'logical'};
     else
         dtypes = {'string', 'double', 'double', 'double', 'logical'};
     end
-    data = table('Size', [0 length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
+    numStims = height(params);
+    numInitRows = numSubs * numStims;
+    if strcmp(metricName, 'fixddt')
+        numWindows = 4;
+        numInitRows = numInitRows * numWindows;
+    end
+    data = table('Size', [numInitRows length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
     
     % Suppress a warning about the way I fill the table
     warning('off', 'MATLAB:table:RowsAddedExistingVars');
     
     % Put data for all subjects into one big dataframe
     fprintf(1, 'Importing data for %i subjects.\n\n', numSubs);
+    i = 0;
     for subject = 1:numSubs
         % Get subject ID
         edfName = edfList(subject).name;
@@ -86,18 +97,16 @@ function data = getTCData(metricName, taskFlag, subList)
         fpath = fullfile(outputPath, edfName);
         edf = osfImport(fpath);
         eyetrack = []; % init per sub
-        badList = [];
         
         % Give feedback on progress
         fprintf(1, 'Processing trial 000')
-
         for t = 1:numTrials
             fprintf(1, '\b\b\b%03.f', t);
             if isempty(edf(t).Saccades) || behav.Response(t) == -1
                 % Either eyetracking data is missing, or no response
                 % Don't attempt to extract data that isn't there
                 % Remember to drop this trial from the behavioral data
-                badList = [badList, t];
+                continue
             else
                 opts.flip = logical(behav.Flipped(t));
                 % Subset the big stim table to just this trial's data
@@ -109,32 +118,35 @@ function data = getTCData(metricName, taskFlag, subList)
                 stimName = strcat(stimName, e);
                 opts.params = params(strcmp(params.StimName, stimName),:);
                 
-                if useCell
-                    eyetrack{t} = selectMetric(edf(t), metricName, opts);
-                    % Note above is cell, not double like below
+                % Get data
+                eyetrack = selectMetric(edf(t), metricName, opts);
+                i = i + 1;
+                if strcmp(metricName, 'fixddt')
+                    % Special case that expands to many rows per trial
+                    ind = i:i+3;
+                    i = i+3;
+                    data.Quadrant(ind) = eyetrack(:,2);
+                    eyetrack = eyetrack(:,1);
                 else
-                    eyetrack(t) = selectMetric(edf(t), metricName, opts);
+                    ind = i;
                 end
+                data.Subject(ind) = {subID};
+                data.Response(ind) = behav.Response(t);
+                data.RT(ind) = behav.RT(t);
+                data.Flipped(ind) = behav.Flipped(t);
+                data.StimName(ind) = behav.StimName(t);
+                if useCell
+                    data.Eyetrack(ind) = {eyetrack};
+                else
+                    data.Eyetrack(ind) = eyetrack;
+                end
+
             end
         end
         fprintf(1, '\n')
-        % Drop trials on the bad list
-        behav(badList, :) = [];
-        numTrials = height(behav);
-        eyetrack(badList) = [];
-        
-        % Now Trials is a huge struct of eyetracking data,
-        % And behav is a big table of response data.
-        % Extract the relevant bits and slice into the dataframe.
-        
-        newRange = size(data, 1)+1:size(data, 1)+numTrials;
-        data.Subject(newRange) = subID;
-        data.Eyetrack(newRange) = eyetrack;
-        data.Response(newRange) = behav.Response;
-        data.RT(newRange) = behav.RT;
-        data.Flipped(newRange) = behav.Flipped;
-        data.StimName(newRange) = behav.StimName;
         
     end % for subject, extracting data
+    % Drop any unused rows in the table, since we initialized with too many
+    data = rmmissing(data);
     warning('on', 'MATLAB:table:RowsAddedExistingVars');
 end % function
