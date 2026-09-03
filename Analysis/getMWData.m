@@ -42,13 +42,23 @@ params = importdata('MWstimParams.mat', 'stimParams');
     % Requires specifying the data type ahead of time
     dheader = {'Subject', 'Eyetrack', 'Category', 'StimName'};
     useCell = any(strcmp(metricName, {'heatmap','gaze'}));
-    if useCell
+    if strcmp(metricName, 'fixddt')
+        % Special case with an extra column
+        dheader = {'Subject', 'Eyetrack', 'Quadrant', 'Category', 'StimName'};
+        dtypes = {'string', 'double', 'double', 'string', 'string'};
+    elseif useCell
         % Let the Eyetrack field take a cell with a 2D matrix
         dtypes = {'string', 'cell', 'string', 'string'};
     else
         dtypes = {'string', 'double', 'string', 'string'};
     end
-    data = table('Size', [0 length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
+    numStims = height(params);
+    numInitRows = numSubs * numStims;
+    if strcmp(metricName, 'fixddt')
+        numWindows = 4;
+        numInitRows = numInitRows * numWindows;
+    end
+    data = table('Size', [numInitRows length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
     
     % Suppress a warning about the way I fill the table
     warning('off', 'MATLAB:table:RowsAddedExistingVars');
@@ -66,12 +76,11 @@ for subject = 1:numSubs
     Trials = osfImport(fpath);
     
     eyetrack = []; % init per sub
-    badList = [];
     for trial = 1:length(Trials)
         if isempty(Trials(trial).Saccades)
             % Eyetracking data is missing for some reason
             % Don't attempt to extract data that isn't there
-            badList = [badList, trial];
+            continue
         end
         
         stimName = getStimName(Trials(trial));
@@ -86,21 +95,31 @@ for subject = 1:numSubs
             continue
         end
         
-        i = i + 1;
+        % Get data
+        eyetrack = selectMetric(Trials(trial), metricName, opts);
 
-        if useCell
-            eyetrack{1} = selectMetric(Trials(trial), metricName, opts);
-            % Note above is cell, not double like below
-        else
-            eyetrack(1) = selectMetric(Trials(trial), metricName, opts);
-        end
         % Output data
-        data.Subject{i} = subID;
-        data.Eyetrack(i) = eyetrack;
-        data.Category(i) = condList.CONDITION(strcmp(stimName, condList.NAME));
-        data.StimName{i} = stimName;
+        i = i + 1;
+        if strcmp(metricName, 'fixddt')
+            % Special case that expands to many rows per trial
+            ind = i:i+3;
+            i = i+3;
+            data.Quadrant(ind) = eyetrack(:,2);
+            eyetrack = eyetrack(:,1);
+        else
+            ind = i;
+        end
+        data.Subject(ind) = {subID};
+        data.StimName(ind) = {stimName};
+        if useCell
+            data.Eyetrack(ind) = {eyetrack};
+        else
+            data.Eyetrack(ind) = eyetrack;
+        end
+        data.Category(ind) = condList.CONDITION(strcmp(stimName, condList.NAME));
     end
 end
+data = rmmissing(data);
 warning('on', 'MATLAB:table:RowsAddedExistingVars');
 % Calculate RFX anova
 % anovan(data.Eyetrack, {data.Category, data.Subject}, 'varnames', {'Condition', 'SubID'}, 'random', [2]);
