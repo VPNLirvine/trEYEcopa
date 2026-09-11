@@ -41,9 +41,10 @@ function data = getTCData(metricName, subList)
     end
     numStims = height(params);
     numInitRows = numSubs * numStims;
+    opts.numWindows = 1; % dflt
     if strcmp(metricName, 'fixddt')
-        numWindows = 4;
-        numInitRows = numInitRows * numWindows;
+        opts.numWindows = 4;
+        numInitRows = numInitRows * opts.numWindows;
     end
     data = table('Size', [numInitRows length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
     

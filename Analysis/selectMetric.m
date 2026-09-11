@@ -401,11 +401,11 @@ switch metricName
     case 'fixddt'
         % For assessing changes in the number of fixations over time
         % Gets a tally of the number of fixations, within some window
-        % Exports a set of tallies, one for each window
+        % Exports a set of fixation rates, one for each window
 
         % First, define temporal windows to bin fixations into
-        % Could theoretically define opts.numWindows to make this variable
-        numWindows = 4; % instead of a variable count with fixed dur
+        % default is 4 windows, hence "quadrants"
+        numWindows = opts.numWindows; 
         quadrants = duration * (0:numWindows)/numWindows;
         output = zeros([numWindows, 2]); % init
         for i = 1:numWindows
