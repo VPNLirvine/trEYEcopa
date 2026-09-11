@@ -1,18 +1,22 @@
-function data = insertStimParams(data)
+function data = insertStimParams(data, stype, metricName)
 % Given a stack of data from e.g. getTCData,
 % insert a column with the stimulus parameters,
 % i.e. video duration, motion energy, "social interactivity"
 
-% Determine which parameters to load: MW or TC
-stype = detectStimType(data); % should be either 'TC' or 'MW'
-pths = specifyPaths('..');
-if strcmp(stype, 'TC')
-    motfname = fullfile(pths.mot, 'TC_motionData.mat');
-    intfname = fullfile(pths.int, 'TC_interactData.mat');
-elseif strcmp(stype, 'MW')
-    motfname = fullfile(pths.mot, 'MW_motionData.mat');
-    intfname = fullfile(pths.int, 'MW_interactData.mat');
+% Parse inputs
+if nargin > 2
+    splitFlag = strcmp(metricName, 'fixddt');
+else
+    splitFlag = false;
 end
+
+% Determine which parameters to load: MW or TC
+if nargin < 2
+    stype = detectStimType(data); % should be either 'TC' or 'MW'
+end
+pths = specifyPaths('..');
+motfname = fullfile(pths.mot, append(stype, '_motionData.mat'));
+intfname = fullfile(pths.int, append(stype, '_interactData.mat'));
 % Get the motion data
 if ~exist(motfname, 'file')
     % This exports to file, which should match fname.

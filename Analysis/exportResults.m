@@ -19,10 +19,11 @@ end
 fprintf(1, 'Inserting AQ scores\n');
 data = insertAQ(data);
 fprintf(1, 'Inserting stimulus parameters\n');
-data = insertStimParams(data);
+stype = detectStimType(data);
+data = insertStimParams(data, stype, fname);
 
 % Export, but avoid overwriting existing files without confirmation
-fout = fullfile("Results", strcat(fname, ".csv"));
+fout = fullfile("Results", strcat(stype, '_', fname, ".csv"));
 doSave = true;
 if exist(fout, 'file')
     choice = questdlg( ...
