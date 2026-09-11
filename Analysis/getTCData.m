@@ -1,25 +1,12 @@
-function data = getTCData(metricName, taskFlag, subList)
+function data = getTCData(metricName, subList)
 % Returns a table of data for all subjects with eyetracking, trial num, etc
 % Input 1: metric name, as used in selectMetric. e.g. 'tot', 'blinkrate'
-% Input 2: task type. Options are 'nar' for narrative or 'tri' for all 100
-% Input 3: list of subjects
+% Input 2: list of subjects
     
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
-    if nargin < 2
-        % Default to the original method
-        taskFlag = 'tri';
-    end
-    % Check which task you want data for - original TriCOPA, or narrative
-    if strcmp(taskFlag, 'nar')
-        outputPath = pths.NARdat;
-    elseif strcmp(taskFlag, 'tri')
-        outputPath = pths.TCdat;
-    else
-        error('Incorrect task flag! Options are ''tri'' or ''nar''');
-    end
-
+    outputPath = pths.TCdat;
     fileList = dir(outputPath);
         % String-insensitive compare, in case file extension is uppercase
         fnames = {fileList.name};
