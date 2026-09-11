@@ -91,37 +91,45 @@ if strcmp(metricName, 'tot')
 %     output = [timeOnC1, timeOnC2, timeOnC3, timeOnC4];
 elseif strcmp(metricName, 'movert')
     % reaction time to first movement
-    % compare gaze to the path of each character, 
+    % Find the first character that moves,
+    % compare gaze to the path of that character, 
     % find the first time they intersect AFTER the character has moved,
-    % then report the shortest latency
+    % then report the latency.
 
     p(strcmp({posDat.Name}, 'door')) = []; % exclude the TriCOPA door
     % p(i).C(3,:) is timestamps
     % p(i).gazeOn(:) is boolean
-    latencyList = zeros(length(p), 1);
+    firstMotionInd = zeros(length(p), 1);
+    
     for i = 1:length(p)
         % Find out when the character first moves
         initX = p(i).C(1,1);
         initY = p(i).C(2,1);
         motionX = find(p(i).C(1,:) ~= initX, 1);
         motionY = find(p(i).C(2,:) ~= initY, 1);
-        firstMotionInd = min([motionX, motionY]);
+        temp = min([motionX, motionY]);
         % If the character never moved, this will be empty
         % Grab the maximum index instead
-        if isempty(firstMotionInd)
-            firstMotionInd = length(p(i).gazeOn);
+        if isempty(temp)
+            firstMotionInd(i) = length(p(i).gazeOn);
+        else
+            firstMotionInd(i) = temp;
         end
-        firstMotionTime = p(i).C(3, firstMotionInd);
-        % Set all gazeOn values before that equal to 0
-        p(i).gazeOn(1:firstMotionInd-1) = false;
-        % extract the time gaze first meets the character
-        earliestFixation = p(i).C(3, find(p(i).gazeOn, 1));
-        % time between character motion and gaze meeting character
-        % If character was never fixated, earliestFixation will be empty
-        if isempty(earliestFixation) earliestFixation = inf; end
-        latencyList(i) = earliestFixation - firstMotionTime;
     end
-    output = min(latencyList);
+    % Which character moved first?
+    firstCharInd = find(firstMotionInd == min(firstMotionInd), 1);
+    firstMotionInd = firstMotionInd(firstCharInd);
+    p = p(firstCharInd); % drop the other characters
+    firstMotionTime = p.C(3, firstMotionInd);
+    % Set all gazeOn values before that equal to 0
+    p.gazeOn(1:firstMotionInd-1) = false;
+    % extract the time gaze first meets the character
+    earliestFixation = p.C(3, find(p.gazeOn, 1));
+    % time between character motion and gaze meeting character
+    % If character was never fixated, earliestFixation will be empty
+    if isempty(earliestFixation) earliestFixation = inf; end
+    output = earliestFixation - firstMotionTime;
+
 else
     output = p; % output position data struct, i.e. NOT a summary metric.
 end
