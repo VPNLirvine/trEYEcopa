@@ -1,8 +1,29 @@
-function data = getTCData(metricName, subList)
+function data = getTCData(metricName, options)
 % Returns a table of data for all subjects with eyetracking, trial num, etc
 % Input 1: metric name, as used in selectMetric. e.g. 'tot', 'blinkrate'
-% Input 2: list of subjects
-    
+% (Optional) subList: list of subject numbers to get data for.
+% (Optional) numWindows: subdivides each trial into N evenly-sized temporal
+% windows, and calculates the DV for each window independently
+% Optional inputs are specified as name-value pairs OR as e.g. numWindows=1
+
+arguments
+    metricName {mustBeText}
+    options.subList {mustBeNumeric} = []
+    options.numWindows (1,1) {mustBeNumeric} = 1
+end
+% Set flags
+useWindows = false;
+if options.numWindows > 1
+    % validate against a list of compatible metrics
+    if ~any(strcmp(metricName, {'fixddt'}))
+        warning('No code exists to subdivide metric %s into %i windows: defaulting to 1', metricName, options.numWindows);
+        options.numWindows = 1;
+    else
+        useWindows = true;
+    end
+end
+useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec', 'resolution'}));
+
     % Find the location of our data
     addpath('..'); % Allow specifyPaths to work
     pths = specifyPaths('..');
@@ -13,9 +34,9 @@ function data = getTCData(metricName, subList)
         subset = cellfun(@(x)endsWith(lower(x), '.edf'), fnames, 'UniformOutput', false);
         subset = cell2mat(subset);
         edfList = fileList(subset); clear fileList
-    if nargin > 2
+    if ~isempty(options.subList)
         % subset edfList to just the subjects asked for
-        subIDs = arrayfun(@(x) sprintf('TC_%02.f', x), subList, 'UniformOutput', false);
+        subIDs = arrayfun(@(x) sprintf('TC_%02.f', x), options.subList, 'UniformOutput', false);
         subset = contains({edfList.name}, subIDs);
         edfList = edfList(subset);
     end
@@ -27,9 +48,9 @@ function data = getTCData(metricName, subList)
     
     % Initialize an oversized dataframe, to be pruned at the end
     % Requires specifying the data type ahead of time
-    useCell = any(strcmp(metricName, {'heatmap','gaze', 'track', 'devvec', 'resolution'}));
+    
     dheader = {'Subject', 'Eyetrack', 'StimName', 'Response', 'RT', 'Flipped'};
-    if strcmp(metricName, 'fixddt')
+    if useWindows
         % Special case with an extra column
         dheader = {'Subject', 'Eyetrack', 'Quadrant', 'StimName', 'Response', 'RT', 'Flipped'};
         dtypes = {'string', 'double', 'double', 'string', 'double', 'double', 'logical'};
@@ -41,11 +62,8 @@ function data = getTCData(metricName, subList)
     end
     numStims = height(params);
     numInitRows = numSubs * numStims;
-    opts.numWindows = 1; % dflt
-    if strcmp(metricName, 'fixddt')
-        opts.numWindows = 4;
-        numInitRows = numInitRows * opts.numWindows;
-    end
+    opts.numWindows = options.numWindows;
+    numInitRows = numInitRows * opts.numWindows; % default is 1 window
     data = table('Size', [numInitRows length(dheader)],'VariableNames', dheader, 'VariableTypes', dtypes);
     
     % Suppress a warning about the way I fill the table
@@ -109,10 +127,10 @@ function data = getTCData(metricName, subList)
                 % Get data
                 eyetrack = selectMetric(edf(t), metricName, opts);
                 i = i + 1;
-                if strcmp(metricName, 'fixddt')
+                if useWindows
                     % Special case that expands to many rows per trial
-                    ind = i:i+3;
-                    i = i+3;
+                    ind = i:i+(opts.numWindows-1);
+                    i = i+(opts.numWindows-1);
                     data.Quadrant(ind) = eyetrack(:,2);
                     eyetrack = eyetrack(:,1);
                 else
