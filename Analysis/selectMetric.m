@@ -413,7 +413,7 @@ switch metricName
             windowsttime = quadrants(i);
             windowentime = quadrants(i+1);
             data = edfDat.Fixations.sttime > windowsttime & edfDat.Fixations.sttime <= windowentime;
-            output(i,1) = sum(data); % count the number of fixation durations present
+            output(i,1) = sum(data) / (duration/1000/numWindows); % count the number of fixation durations present
             output(i,2) = i; % to make generating a new column easier
         end
     otherwise
