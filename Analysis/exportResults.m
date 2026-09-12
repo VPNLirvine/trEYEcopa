@@ -12,7 +12,7 @@ assert(istable(data), "First input must be a table variable, i.e. class(varname)
 if nargin < 2
     fname = inputname(1);
 else
-    assert(isstring(fname) || ischar(fname), "Second input must be a file name (sans extension), e.g. ''MWtot''")
+    assert(isstring(fname) || ischar(fname), "Second input must be a file name (sans extension), e.g. ''tot''")
 end
 
 % Insert important data
@@ -20,7 +20,7 @@ fprintf(1, 'Inserting AQ scores\n');
 data = insertAQ(data);
 fprintf(1, 'Inserting stimulus parameters\n');
 stype = detectStimType(data);
-data = insertStimParams(data, stype, fname);
+data = insertStimParams(data, stype);
 
 % Export, but avoid overwriting existing files without confirmation
 fout = fullfile("Results", strcat(stype, '_', fname, ".csv"));
