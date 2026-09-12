@@ -15,7 +15,7 @@ end
 useWindows = false;
 if options.numWindows > 1
     % validate against a list of compatible metrics
-    if ~any(strcmp(metricName, {'fixddt'}))
+    if ~any(strcmp(metricName, {'fixddt', 'tot'}))
         warning('No code exists to subdivide metric %s into %i windows: defaulting to 1', metricName, options.numWindows);
         options.numWindows = 1;
     else

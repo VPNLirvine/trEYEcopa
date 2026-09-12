@@ -5,9 +5,12 @@ function output = timeOnTarget(edfDat, metricName, varargin)
 % So we DON'T want to load in frames or positions of anything extraneous
 
 % Parse opts
+split = false;
 if nargin > 2 && ~isempty(varargin{:})
     opts = varargin{1};
     flipFlag = opts.flip;
+    numWindows = opts.numWindows;
+    if numWindows > 1, split = true; end
 end
 
 % We can extract the stim name from edfDat
@@ -78,7 +81,19 @@ if strcmp(metricName, 'tot')
     gazeOn(strcmp({posDat.Name}, 'door'),:) = []; % exclude the TriCOPA door
     onTarget = sum(gazeOn,1);
     % onTarget = gazeOnC1 + gazeOnC2 + gazeOnC4; % C3 is the door, so ignore
-    output = nnz(onTarget) / length(onTarget);
+
+    if split
+        output = zeros(numWindows, 2);
+        quadrants = round(length(onTarget) * (0:numWindows)/numWindows);
+        for i = 1:numWindows
+            st = quadrants(i)+1;
+            en = quadrants(i+1);
+            output(i,1) = nnz(onTarget(st:en)) / length(onTarget(st:en));
+            output(i,2) = i;
+        end
+    else
+        output = nnz(onTarget) / length(onTarget);
+    end
 % elseif strcmp(metricName, 'track')
 %     % Percentage of time on individual characters (including door)
 %     % These may sum to >100% if gaze is near two characters at once
