@@ -41,3 +41,4 @@ test*
 /Analysis/posDatOpenCV/
 /Analysis/masks/
 /Analysis/motionData/
+/Analysis/interactData/
