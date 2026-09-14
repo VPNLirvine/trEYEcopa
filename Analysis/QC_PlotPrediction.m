@@ -4,7 +4,7 @@ function QC_PlotPrediction(stimID, eyeData)
 % From there, fine-tune parameters like low-pass cutoff.
 
 if nargin < 2
-    eyeData = getTCData('gaze');
+    eyeData = getData('gaze', 'TC');
 end
 stimList = unique(eyeData.StimName);
 

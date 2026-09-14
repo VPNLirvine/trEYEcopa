@@ -13,8 +13,8 @@ function gazeDat = regressMotion(gazeDat, motion)
 pths = specifyPaths('..');
 % Load data to compare, if not provided
 if nargin < 1
-    gazeDat = getTCData('gaze');
     stype = 'TC';
+    gazeDat = getData('gaze', stype);
 else
     % Determine which kind of gaze data was sent
     stype = detectStimType(gazeDat);
