@@ -52,8 +52,12 @@ for v = 1:numVids
             % Get the motion subset
             motVec = motion.MotionEnergy{v}(sttime:entime);
             % Get the interactivity subset
-            % intVec = intScore.Interactivity{intSub}(intsttime:intentime);
-            intVec = intScore.Interactivity{intSub}(sttime:entime);
+            if skipThisVideo(vidName, stype)
+                % If, for example, it's the mechanical condition for M&W
+                intVec = NaN;
+            else
+                intVec = intScore.Interactivity{intSub}(sttime:entime);
+            end
             % Insert values
             subset = strcmp(data.StimName, vidName) & data.Quadrant == j;
             data.Interactivity(subset) = sum(intVec) / length(intVec);
