@@ -406,7 +406,7 @@ switch metricName
         % First, define temporal windows to bin fixations into
         % default is 4 windows, hence "quadrants"
         numWindows = opts.numWindows; 
-        quadrants = duration * (0:numWindows)/numWindows;
+        quadrants = (duration * (0:numWindows)/numWindows) + double(recOffset);
         output = zeros([numWindows, 2]); % init
         for i = 1:numWindows
             % Subset to only those fixations that happened within the window
