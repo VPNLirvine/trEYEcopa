@@ -26,7 +26,7 @@ switch stype
             motion.Rate(i) = motion.total(i) / motion.Duration{i};
         end
         % Perform a t-test between categories
-        [h,p,ci,stats] = ttest2(motion.total(socInds),motion.total(mecInds));
+        [h,p,ci,stats] = ttest2(motion.Rate(socInds),motion.Rate(mecInds));
         % Report the statistics
         t = {'is not', 'is'};
         fprintf(1, '\nConsidering motion energy:\n');
@@ -46,9 +46,9 @@ switch stype
             motion.total(i) = sum(motion.MotionEnergy{i});
             motion.Rate(i) = motion.total(i) / motion.Duration(i);
         end
-        [c1,p1] = corr(motion.total, motion.Duration, 'Type', 'Spearman');
+        [c1,p1] = corr(motion.Rate, motion.Duration, 'Type', 'Spearman');
         [c2,p2] = corr(intScore.Interactivity, motion.Duration, 'Type', 'Spearman');
-        [c3,p3] = corr(motion.total, intScore.Interactivity, 'Type', 'Spearman');
+        [c3,p3] = corr(motion.Rate, intScore.Interactivity, 'Type', 'Spearman');
         var1 = getGraphLabel('motion');
         var2 = getGraphLabel('duration');
         var3 = getGraphLabel('interact');

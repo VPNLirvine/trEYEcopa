@@ -7,7 +7,7 @@ function output = getAvgDeviance(dat)
 
 if nargin < 1
     % Get all subs all trials
-    dat = getTCData('deviance');
+    dat = getData('deviance', 'TC');
 end
 
 % Get a list of stims (though out of order)

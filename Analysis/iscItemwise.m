@@ -3,7 +3,7 @@ function iscItemwise()
 % Instead of a subjectwise analysis, analyze within each video
 % Look for video-based trends that could influence subject-level data
 
-data = doISC(getTCData('heatmap'));
+data = doISC(getData('heatmap', 'TC'));
 stimList = unique(data.StimName);
 numVids = length(stimList);
 

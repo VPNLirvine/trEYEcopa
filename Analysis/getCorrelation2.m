@@ -32,12 +32,13 @@ numVids = height(motion);
 for v = 1:numVids
     vidName = motion.StimName{v};
     subset = strcmp(data.StimName, vidName);
-    data.Motion(subset) = sum(motion.MotionEnergy{v});
+    data.MotionSum(subset) = sum(motion.MotionEnergy{v});
     data.Duration(subset) = motion.Duration{v};
+    data.Motion(subset) = data.MotionSum(subset) ./ data.Duration(subset);
 
     % Also extract the average Eyetrack value for this video, for later
     avgE(v,1) = mean(data.Eyetrack(subset));
-    mot(v,1) = sum(motion.MotionEnergy{v});
+    mot(v,1) = sum(motion.MotionEnergy{v}) / motion.Duration{v};
     if ~strcmp(stype, 'MW')
         rat(v,1) = mean(data.Response(subset));
     end
@@ -54,7 +55,7 @@ output = [];
 
 % Get the names of what you're correlating
 var1 = getGraphLabel(metricName);
-var2 = 'Video motion energy';
+var2 = getGraphLabel('motion');
 var3 = getGraphLabel('response');
 
 [output(1,1), pval1] = corr(avgE, mot, 'type', 'Pearson', 'rows', 'complete');

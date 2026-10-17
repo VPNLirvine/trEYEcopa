@@ -39,7 +39,7 @@ if strcmp(stimType, 'TC')
     % But ideally, edit getTCPosition to output in struct form
     for i = 1:height(tmp)
         output(i).StimName = tmp.StimName{i};
-        output(i).Data = postab2struct(tmp);
+        output(i).Data = postab2struct(tmp(i,:));
     end
 else
     % Extract with this alternate method

@@ -1,6 +1,6 @@
 function [flow] = findMotionEnergy(vidPath, varargin)
 % For a given video, estimate the amount of motion per frame
-% Uses a Farneback optical flow algorithm
+% Uses a Horn-Schunck optical flow algorithm
 
 if nargin > 1
     mtype = varargin{1};

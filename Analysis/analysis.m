@@ -17,36 +17,29 @@ end
 % The exact test depends on which stimulus set we're looking at
 % So force a choice:
 choice = menu('Which data do you want to analyze?','TriCOPA','Martin & Weisberg');
+choices = {'TC', 'MW'};
+stype = choices{choice};
+
+fprintf(1, 'Using metric %s for %s data\n\n', metricName, stype);
+if strcmp(metricName, 'ISC')
+    if ~dflag; data = doISC(getData('heatmap', stype)); end
+    fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
+    fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
+elseif strcmp(metricName, 'coherence')
+    if ~dflag; [~, data] = doGazePath(getData('gaze', stype)); end
+    % Compress the timecourse down to a single number
+    for i = 1:height(data)
+        data.Eyetrack{i} = mean(data.Eyetrack{i}(1,:), 'omitnan');
+    end
+    % Now that they're not vectors, turn the column into a single mat
+    data.Eyetrack = cell2mat(data.Eyetrack);
+else
+    if ~dflag; data = getData(metricName, stype); end
+end
 
 if choice == 1
-    % TriCOPA
-    fprintf(1, 'Using metric %s\n\n', metricName);
-    if strcmp(metricName, 'ISC')
-        if ~dflag; data = doISC(getTCData('heatmap')); end
-        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
-        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
-    elseif strcmp(metricName, 'coherence')
-        if ~dflag; [~, data] = doGazePath(getTCData('gaze')); end
-        % Compress the timecourse down to a single number
-        for i = 1:height(data)
-            data.Eyetrack{i} = mean(data.Eyetrack{i}(1,:), 'omitnan');
-        end
-        % Now that they're not vectors, turn the column into a single mat
-        data.Eyetrack = cell2mat(data.Eyetrack);
-    else
-        if ~dflag; data = getTCData(metricName); end
-    end
-
     mwflag = 0;
 elseif choice == 2
-    % Martin & Weisberg
-    if strcmp(metricName, 'ISC')
-        if ~dflag; data = doISC(getMWData('heatmap')); end
-        fprintf(1, 'Mean ISC = %0.2f%%\n', 100 * mean(data.Eyetrack));
-        fprintf(1, 'Median ISC = %0.2f%%\n', 100 * median(data.Eyetrack));
-    else
-        if ~dflag; data = getMWData(metricName); end
-    end
     mwflag = 1;
     choice = menu('Which analysis method do you want for this Martin & Weisberg data?','correlation', 't-test');
 end

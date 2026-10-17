@@ -1,5 +1,5 @@
 metricName = 'sfix';
-data = getTCData(metricName);
+data = getData(metricName, 'TC');
 [var1, yl] = getGraphLabel(metricName);
 histogram(data.Eyetrack);
         xlabel(var1);

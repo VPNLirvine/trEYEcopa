@@ -22,7 +22,7 @@ switch metricName
         yl = [0 1];
         dist = 'Expect a normal distribution';
     case 'motion'
-        txt = 'Video Motion Energy';
+        txt = 'Video Motion Energy (px/sec)';
         yl = [0 6e5]; % ¯\_(ツ)_/¯
         dist = 'Expect a normal distribution';
     case 'coherence'
