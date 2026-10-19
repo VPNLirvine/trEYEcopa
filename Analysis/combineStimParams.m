@@ -7,14 +7,14 @@ p = specifyPaths('..');
 f1 = fullfile(p.mot, [stype, '_motionData.mat']);
 f2 = fullfile(p.int, [stype, '_interactData.mat']);
 load(f1, 'motion');
-load(f2, 'intScore');
+load(f2, 'intTable');
 stimParams = motion;
 for v = 1:height(stimParams)
     stimParams.Motion(v) = sum(stimParams.MotionEnergy{v});
     vidName = stimParams.StimName{v};
-    vl = strcmp(intScore.StimName, vidName);
+    vl = strcmp(intTable.StimName, vidName);
     if any(vl)
-        stimParams.Interactivity(v) = intScore.Interactivity(vl);
+        stimParams.Interactivity(v) = intTable.Interactivity(vl);
     else
         stimParams.Interactivity(v) = nan;
     end
