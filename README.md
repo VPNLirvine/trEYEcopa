@@ -54,11 +54,34 @@ A box will pop up asking for
 Output will be automatically sorted into `beh` and `data`.
 
 ### Analysis
-To analyze the data:
+We developed two analysis pipelines for this data.
+The primary analysis is a mixed-effects regression performed in R;
+we also have a (deprecated) moderation analysis performed in MATLAB.
+Both require processing the data from EDF format to .csv or .mat, which is only implemented in MATLAB.
 
+#### Processing Data
+- Open Matlab
 - cd into `/Analysis/`
 - run `addpath('..');` so that Matlab can access the `specifyPaths` function in root, then
-- run `analysis('metricName');`
+- run `init()` to extract all key metrics we analyzed in the paper.
+
+Be patient - this could take over an hour to complete.
+Once it's done, you're ready to calculate statistics, either in R or in MATLAB:
+
+#### R analysis
+These are more like scripts than functions - there's a block of code for each metric.
+
+- step though `analyzeRegress.R` to get the results for everything but fixation rate
+- step through `analyzeWindows.R` to get the results for fixation rate, which loads a different file
+- run `analyzeType.R` to see the differences in motion and interactivity between TC and MW.
+
+#### MATLAB analysis
+This is handled flexibly by a single function, but requires feeding in each metric separately.
+
+For each metric of interest:
+
+- load `Results/filename.mat` (or run `varname = getData('metricName');` for new metrics)
+- run `analysis('metricName', varname);`
 
 A list of available metric names is present in the header of `/Analysis/selectMetric`.
 Our primary metrics were:
@@ -67,11 +90,7 @@ Our primary metrics were:
 - `tot` for "time on target" i.e. proportion of time tracking characters, and
 - `deviance` or proportion of time gaze deviated from visual motion.
 
-
-By default, `analysis()` will invoke either `getTCData()` or `getMWData()`
-to extract data from the EDF files in `/data/source/`.
-If you have that data already loaded into memory (i.e. as a table),
-then you can feed it into `analysis()` as a second argument.
-For example, if you have already run
-`totDF = getTCData('tot');` to get the Time on Target data, then you could run
-`analysis('tot', totDF);` instead of waiting for `analysis()` to run `getTCData()` again.
+Be aware that you CAN simply run `analysis('metricName')`, 
+which will invoke `getData()` to extract data from the EDF files in `/data/source/`.
+But if you have run `init`, those results are already saved to disk, so it behooves you to load them
+and feed them into `analysis` as a second argument.
