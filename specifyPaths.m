@@ -17,6 +17,7 @@ else
 end
 
 pths.analysis = fullfile(pths.base, 'Analysis');
+    pths.results = fullfile(pths.analysis, 'Results'); % metrics like ToT
 pths.data = fullfile(pths.base, 'data', 'source');
     pths.MWdat = fullfile(pths.data, 'MW');
     pths.TCdat = fullfile(pths.data, 'TC');

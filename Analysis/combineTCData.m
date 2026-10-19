@@ -6,7 +6,7 @@ fpath = fullfile(p.analysis, 'Results');
 load(fullfile(fpath,'TC_movert.mat'), 'movert');
 load(fullfile(fpath,'TC_deviance.mat'), 'deviance');
 load(fullfile(fpath,'TC_isc.mat'), 'isc');
-load(fullfile(fpath,'TC_scaledfixation.mat'), 'sfix');
+load(fullfile(fpath,'TC_sfix.mat'), 'sfix');
 load(fullfile(fpath,'TC_tot.mat'), 'tot');
 
 % Set one as the reference table
