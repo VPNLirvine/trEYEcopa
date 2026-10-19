@@ -40,7 +40,7 @@ switch stype
         intScore = importdata('interactData/TC_interactData.mat'); % get dynamically
         % Ensure both are sorted the same way
         intScore = sortrows(intScore, 1);
-        motion = sortRows(motion, 1);
+        motion = sortrows(motion, 1);
         motion.Duration = cell2mat(motion.Duration); 
         for i = 1:height(motion)
             motion.total(i) = sum(motion.MotionEnergy{i});
